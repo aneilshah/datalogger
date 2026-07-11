@@ -17,7 +17,7 @@ WiFiServer server(80);  // Set web server port number to 80
 // -------------------------
 // Pages 
 // -------------------------
-static const uint8_t PAGE_PUMP    = 0;
+static const uint8_t PAGE_LOGGER  = 0;
 static const uint8_t PAGE_SYSTEMS = 1;
 static const uint8_t PAGE_CHARTS  = 2;
 static const uint8_t PAGE_CONN    = 3;
@@ -235,8 +235,8 @@ static const char HTML_HEAD_STYLE[] PROGMEM =
 
 "</style>"
 "</head><body class=\"";
-static const char PUMP_TABLE_OPEN[] PROGMEM =
-"<table><tr><th>PUMP INFO</th><th>VALUE</th></tr>";
+static const char LOGGER_TABLE_OPEN[] PROGMEM =
+"<table><tr><th>LOGGER INFO</th><th>VALUE</th></tr>";
 
 static const char SYSTEM_TABLE_OPEN[] PROGMEM =
 "<table><tr><th>SYSTEM DATA</th><th>VALUE</th></tr>";
@@ -347,13 +347,13 @@ static bool readRequestLine(WiFiClient &client, char *buf, size_t buflen, uint32
 }
 
 // Extract "p=" page parameter from path (supports /data?p=... and /export?p=...)
-// Defaults to Pump.
+// Defaults to Logger.
 static uint8_t parsePageParam(const char *path, size_t pathLen) {
   const char *q = (const char*)memchr(path, '?', pathLen);
-  if (!q) return PAGE_PUMP;
+  if (!q) return PAGE_LOGGER;
 
   const char *p = strstr(q, "p=");
-  if (!p) return PAGE_PUMP;
+  if (!p) return PAGE_LOGGER;
   p += 2;
 
   if (strncmp(p, "systems", 7) == 0) return PAGE_SYSTEMS;
@@ -362,17 +362,17 @@ static uint8_t parsePageParam(const char *path, size_t pathLen) {
   if (strncmp(p, "util", 5) == 0)    return PAGE_UTIL;
   if (strncmp(p, "wifi", 4) == 0)    return PAGE_WIFI; 
 
-  return PAGE_PUMP;
+  return PAGE_LOGGER;
 }
 
 // Navigation Buttons 
-// PUMP / SYS / CON / UTIL / WIFI / CHART / EXPORT* / REFERSH*)
+// LOGGER / SYS / CON / UTIL / WIFI / CHART / EXPORT* / REFERSH*)
 static void renderNavButtons(WiFiClient &client, uint8_t active) {
   client.println(F("<div class=\"nav\">"));
 
   client.print(F("<button class=\"navbtn "));
-  client.print(active == PAGE_PUMP ? "active" : "white");
-  client.println(F("\" onclick=\"setPage('pump')\">PUMP</button>"));
+  client.print(active == PAGE_LOGGER ? "active" : "white");
+  client.println(F("\" onclick=\"setPage('logger')\">LOGGER</button>"));
 
   client.print(F("<button class=\"navbtn "));
   client.print(active == PAGE_SYSTEMS ? "active" : "white");
@@ -402,8 +402,8 @@ static void renderNavButtons(WiFiClient &client, uint8_t active) {
 // -------------------------
 // Renderers (dynamic /data)
 // -------------------------
-static void renderPumpTable(WiFiClient &client) {
-  client.print((const __FlashStringHelper*)PUMP_TABLE_OPEN);
+static void renderLoggerTable(WiFiClient &client) {
+  client.print((const __FlashStringHelper*)LOGGER_TABLE_OPEN);
 
   const bool noNewDataYetToday = (CYCLE_TODAY == 0);
   const bool showNA = (gYesterdayWasZero && noNewDataYetToday);
@@ -520,7 +520,7 @@ static void renderPumpTable(WiFiClient &client) {
   else                    printRow(client, F("Total Monitor Time"), String(monDay, 2) + "d");
 
   client.print((const __FlashStringHelper*)HTML_TABLE_CLOSE);
-  renderNavButtons(client, PAGE_PUMP);
+  renderNavButtons(client, PAGE_LOGGER);
 }
 
 static void renderSystemTable(WiFiClient &client) {
@@ -578,9 +578,8 @@ static void renderChartsPage(WiFiClient &client) {
 
   client.println(F("<h3>Charts</h3>"));
   // Charts
-  renderGallonsPerDayChart(client);
-  renderCurrentWaveChart(client);
-  renderPumpEvent24hChart(client);
+  renderLoggerChart(client);
+
 
   // Nav Buttons
   renderNavButtons(client, PAGE_CHARTS);
@@ -593,8 +592,8 @@ static void renderData(WiFiClient &client, uint8_t page) {
     case PAGE_CONN:    renderConnTable(client);    break;
     case PAGE_UTIL:    renderUtilTable(client);   break;
     case PAGE_WIFI:    renderWifiTable(client);    break;
-    case PAGE_PUMP:
-    default:           renderPumpTable(client);    break;
+    case PAGE_LOGGER:
+    default:           renderLoggerTable(client);    break;
   }
 }
 
@@ -645,7 +644,7 @@ void webServer() {
   bool isData = false;
   bool isExport = false;
   bool isJson = false;
-  uint8_t page = PAGE_PUMP;
+  uint8_t page = PAGE_LOGGER;
 
   if (path && path[0] == '/') {
     const char *sp = strchr(path, ' ');

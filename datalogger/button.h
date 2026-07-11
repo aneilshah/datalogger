@@ -1,3 +1,3 @@
 #pragma once
 
-void processButton();
+void processButton(uint32_t hold);

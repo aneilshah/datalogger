@@ -2,7 +2,6 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <esp_sleep.h>
-#include <Wire.h>
 
 // My Libraries
 #include "event.h"
@@ -170,14 +169,14 @@ void loop() {
   loopCount++;
   LOOP_COUNT++;
 
+  // Do this in low power mode
   if (!wifiRadioOn()) {
-    lowPowerModeInit();
     esp_sleep_enable_timer_wakeup(ADAPTIVE_DELAY * 1000);   // 98 ms
     esp_light_sleep_start();
-    fullPowerMode();
-    Wire.begin();
+    wakeUp();
   }
 
+  // Do this in full power mode
   else {
     delay(ADAPTIVE_DELAY);  // avg code run time is ~2 ms
   }
@@ -314,9 +313,6 @@ void loop1DayMidnight() {
   Serial.println();
   Serial.println("*** RUNNING 1 DAY LOOP - MIDNIGHT");
 
-  // send daily email
-  textStatus();
-
 }
 
 //------------------------------------------------------------------------
@@ -344,8 +340,25 @@ void readDigital() {
 
 void readDigitalButton() {
   static uint8_t oldBtn = 1;
-  BTN_VAL = digitalRead(BTN_PIN);     // Read New Button Status
-  if (oldBtn == 1 && BTN_VAL == 0) processButton();
+  static uint32_t holdTime = 0;
+
+  BTN_VAL = !digitalRead(BTN_PIN);     // Read New Button Status
+  if (BTN_VAL) 
+  {
+    holdTime++;
+  }
+  else holdTime = 0;
+  processButton(holdTime);
+  return;
+
+  ////////////////////////////////////////////////////
+
+  if (oldBtn == 1 && BTN_VAL == 0) {
+    processButton(holdTime);
+    holdTime = 0;
+  }
+  else if (oldBtn == 1 && BTN_VAL == 1) holdTime++;
+  else holdTime = 0;
   oldBtn = BTN_VAL;                   // Save Status
 }
 
@@ -377,47 +390,6 @@ void processTestEvent() {
     Serial.println();
     testEvent.setSec(73);
   }
-}
-
-void testEmail() {
-  //email.sendEmail("aneilshah@yahoo.com", "Sump Pump Status", "This will be data...\nSomeday");
-  //email.sendEmail("7343555141@vtext.com", "Sump Pump", "Cycles: 5\nGallons Pumped: 600");
-}
-
-void textStatus() {
-  float deltaMin = Pump.getAvgCycleMin();
-  if (deltaMin < 0.1) deltaMin = 5.0;  // default to 5 mins if there is no data
-  int cph = 60 / deltaMin;
-  int cpd = 60 * 25 / deltaMin;
-  int GPM = 48;  // Delete this after fixing
-  int gallonsPerHour = 60 * GPM / deltaMin;   // WRONG - FIX THIS
-  uint32_t gallonsPerDay = 60 * 24 * GPM / deltaMin;  // WRONG - FIX THIS
-
-  String body = "Cycles: " + String(Pump.getPumpEventCount()) + "\n";
-
-  float monMin = float(LOOP_COUNT / 60.0 / LOOPS_PER_SEC);
-  float monDay = float(LOOP_COUNT / 3600.0 / 24 / LOOPS_PER_SEC);
-  if (monDay < 1) {
-    body += "Monitor Time: " + String(monMin) + "m\n";
-  } else {
-    body += "Monitor Time: " + String(monDay) + "d\n";
-  }
-
-  float pumpOnMin = float(Pump.getPumpOnTimeLoops() / 60.0 / LOOPS_PER_SEC);
-  float pumpOnHour = float(Pump.getPumpOnTimeLoops() / 3600.0 / LOOPS_PER_SEC);
-  if (pumpOnHour < 1) {
-    body += "Pump Time: " + String(pumpOnMin) + "m\n";
-  } else {
-    body += "Pump Time: " + String(pumpOnHour) + "h\n";
-  }
-  body += "Current: " + Pump.getPumpCurText() + "\n";
-  body += "Avg Cycle: " + String(Pump.getAvgCycleMin()) + "m\n";
-  body += "StDev: " + String(Pump.getStDevCycleMin()) + "m\n";
-  body += "CPD: " + String(cpd) + " / " + String(gallonsPerDay) + " Gal\n";
-  body += "TS: " + String(getTimestamp()) + "\n";
-
-  //email.sendEmail("aneilshah@yahoo.com", "Sump Pump Status", body);
-  //email.sendEmail("7343555141@vtext.com", "Pump", "\n"+body);
 }
 
 void testDataStore() {

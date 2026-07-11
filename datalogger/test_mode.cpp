@@ -88,8 +88,8 @@ void simulateLogger() {
     else if (testLogCyc % 20 == 10) ledOff();
   }
   else {
-    if (testLogCyc % 5 == 0) ledOn();
-    else if (testLogCyc % 5 == 1) ledOff();
+    if (testLogCyc % 10 == 0) ledOn();
+    else if (testLogCyc % 10 == 1) ledOff();
   }
 }
 

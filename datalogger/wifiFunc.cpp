@@ -18,7 +18,7 @@ extern const char* CONN_STATUS;
 extern WiFiServer server;
 
 static bool serverStarted = false;
-uint8_t wifiRadioState = 0;
+uint8_t wifiRadioState = WIFI_RADIO_OFF;
 
 bool wifiLinkUp() {
   return WiFi.status() == WL_CONNECTED &&
@@ -335,7 +335,7 @@ bool connectDhcpThenStaticHost(const char* ssid, const char* password) {
 
 void connectWifi() {
 
-  wifiRadioState = 1;
+  wifiRadioState = WIFI_RADIO_ON;
   char details[64];
   snprintf(details, sizeof(details), "Network: %s", WIFI_SSID);
   displayPopupScreen("CONNECTING...", details);
@@ -364,14 +364,14 @@ void connectWifi() {
 }
 
 void disconnectWifi() {
-  wifiRadioState = 0;
+  wifiRadioState = WIFI_RADIO_OFF;
   CONN_STATUS = "NOT_CONNECTED";
   WiFi.disconnect(true);   // Disconnect and stop reconnect attempts
   WiFi.mode(WIFI_OFF);     // Turn off the Wi-Fi radio
 }
 
 bool wifiRadioOn() {
-  return wifiRadioState == 1;
+  return (wifiRadioState == WIFI_RADIO_ON);
 }
 
 bool ensureServerStarted() {

@@ -4,6 +4,7 @@
 #include "global.h"
 #include "oled.h"
 #include "ntp.h"
+#include "power.h"
 #include "pumpData.h"
 #include "pumpFunc.h"
 #include "wifiFunc.h"
@@ -19,12 +20,13 @@
 SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED);  // addr , freq , i2c group , resolution , rst
 
 // OLED State
-unsigned int OLED_MODE;
+static uint8_t oledMode = OLED_OFF;
 static char PopupText[32] = "";
 static char PopupDetails[64] = "";
-uint32_t PopupTimer = 0;
-uint32_t MainTimer = 0;
-uint32_t MainTimeout = OLED_MODE_NO_TIMEOUT;
+static uint32_t popupTimer = 0;
+static uint8_t powerTimer = 10;
+static uint32_t mainTimer = 0;
+static uint32_t mainTimeout = OLED_MODE_NO_TIMEOUT;
 
 #define MIN_MODE_CYCLE_TIME (5 * LOOPS_PER_SEC)
 
@@ -45,7 +47,7 @@ void VextOFF(void)  //Vext default OFF
 
 void initDisplay() {
   display.init();
-  OLED_MODE = OLED_OFF;
+  oledMode = OLED_OFF;
   VextON();
 }
 
@@ -65,7 +67,7 @@ void displayText() {
 
   horOffset = (cnt / (60 * LOOPS_PER_SEC)) % 10;  // Every 60 seconds, span = 10 pixels  
 
-  if (OLED_MODE == OLED_MAIN) {
+  if (oledMode == OLED_MAIN) {
     display.clear();
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.setFont(ArialMT_Plain_10);
@@ -75,13 +77,11 @@ void displayText() {
     else           snprintf(line0, sizeof(line0), "SHAH LOG %s", APP_VERSION);
     display.drawString(horOffset, vertOffsetMain, line0);
 
-    // Line 1: Last Cycle
-    float lastCycle = Pump.getDeltaMin();
-    if (lastCycle <= 0.1f) {
-      snprintf(line1, sizeof(line1), "Last Cycle: --");
-    } else {
-      snprintf(line1, sizeof(line1), "Last Cycle: %.1fm", lastCycle);
-    }
+    // Line 1: Wifi
+    if (wifiRadioOn())
+      snprintf(line1, sizeof(line1), "WIFI: %s", CONN_STATUS);
+    else
+      snprintf(line1, sizeof(line1), "WIFI: RADIO OFF");
     display.drawString(horOffset, 10 + vertOffsetMain, line1);
 
     // Line 2: CPH / CPD
@@ -126,14 +126,11 @@ void displayText() {
       snprintf(line4, sizeof(line4), "<RESERVED 1>");
     }
     else if (LOOP_COUNT % TotalTime < 2 * TimePerStageLoops) {
-      // WiFi status
-      if (wifiRadioOn())
-        snprintf(line4, sizeof(line4), "WIFI: %s", CONN_STATUS);
-      else
-        snprintf(line4, sizeof(line4), "WIFI: RADIO OFF");
+      snprintf(line4, sizeof(line4), "<RESERVED 2>");
     }
     else {
-      snprintf(line4, sizeof(line4), "<RESERVED 2>");
+      snprintf(line4, sizeof(line4), "<RESERVED 3>");
+      
     }
 
     display.drawString(horOffset, 40 + vertOffsetMain, line4);
@@ -152,67 +149,97 @@ void displayText() {
     display.display();
 
     // Update timers and change state as needed
-    if (MainTimer > 0) MainTimer--;
-    if (MainTimeout != OLED_MODE_NO_TIMEOUT && MainTimer == 0) {
-      OLED_MODE = OLED_MINIMIZED;  
+    if (mainTimer > 0) mainTimer--;
+    if (mainTimeout != OLED_MODE_NO_TIMEOUT && mainTimer == 0) {
+      oledMode = OLED_MINIMIZED;  
     }
   }
 
-else if (OLED_MODE == OLED_MINIMIZED) {
-  float deltaMin = Pump.getAvgCycleMin();
-  if (deltaMin < 0.1f) deltaMin = 5.0f;
+  else if (oledMode == OLED_MINIMIZED) {
+    float deltaMin = Pump.getAvgCycleMin();
+    if (deltaMin < 0.1f) deltaMin = 5.0f;
 
-  uint32_t gallonsPerDay = (uint32_t)(5 * 60 * 24 / deltaMin);
+    uint32_t gallonsPerDay = (uint32_t)(5 * 60 * 24 / deltaMin);
 
-  char cycMin[10];
-  snprintf(cycMin, sizeof(cycMin), "%.1f", deltaMin);
+    char cycMin[10];
+    snprintf(cycMin, sizeof(cycMin), "%.1f", deltaMin);
 
-  const unsigned int CYCLE_COUNT = 8;
-  unsigned int mode = (cnt / MIN_MODE_CYCLE_TIME) % CYCLE_COUNT;
+    const unsigned int CYCLE_COUNT = 8;
+    unsigned int mode = (cnt / MIN_MODE_CYCLE_TIME) % CYCLE_COUNT;
 
-  display.clear();
-  display.setTextAlignment(TEXT_ALIGN_LEFT);
-  display.setFont(ArialMT_Plain_10);
+    display.clear();
+    display.setTextAlignment(TEXT_ALIGN_LEFT);
+    display.setFont(ArialMT_Plain_10);
 
-  if (mode == 0) {
-    if (TEST_MODE) snprintf(line0, sizeof(line0), "*TEST MODE* %s", APP_VERSION);
-    else           snprintf(line0, sizeof(line0), "DATA APP %s", APP_VERSION);
-    display.drawString(horOffset, vertOffset, line0);
-  }
-  else if (mode == 1) {
-    snprintf(line2, sizeof(line2), "ON: %u%c [%u%c]",
-            (unsigned)(cnt / LOOPS_PER_SEC), 's',
-            (unsigned)(cnt / 864000), 'd');
-    display.drawString(horOffset, vertOffset, line2);
-  }
-  else if (mode == 2) {
-    snprintf(line2, sizeof(line2), "CYC: %sm %ld GPD", cycMin, gallonsPerDay);
-    display.drawString(horOffset, vertOffset, line2);
-  }
-  else if (mode == 3) {
-    snprintf(line2, sizeof(line2), "CLOCK: %s", getClock());
-    display.drawString(horOffset, vertOffset, line2);
-  }
-  else if (mode == 4) {
-    snprintf(line2, sizeof(line2), "DATE: %s", getDate());
-    display.drawString(horOffset, vertOffset, line2);
-  }
-  else if (mode == 5) {
-    snprintf(line2, sizeof(line2), "YEAR: %s", getYearStr());
-    display.drawString(horOffset, vertOffset, line2);
-  }
-  else if (mode == 6) {
-    snprintf(line2, sizeof(line2), "Wifi: %s", CONN_STATUS);
-    display.drawString(horOffset, vertOffset, line2);
-  }
-  else {
-    display.drawString(horOffset, vertOffset, "Press TOP Button");
+    if (mode == 0) {
+      if (TEST_MODE) snprintf(line0, sizeof(line0), "*TEST MODE* %s", APP_VERSION);
+      else           snprintf(line0, sizeof(line0), "DATA APP %s", APP_VERSION);
+      display.drawString(horOffset, vertOffset, line0);
+    }
+    else if (mode == 1) {
+      snprintf(line2, sizeof(line2), "ON: %u%c [%u%c]",
+              (unsigned)(cnt / LOOPS_PER_SEC), 's',
+              (unsigned)(cnt / 864000), 'd');
+      display.drawString(horOffset, vertOffset, line2);
+    }
+    else if (mode == 2) {
+      snprintf(line2, sizeof(line2), "CYC: %sm %ld GPD", cycMin, gallonsPerDay);
+      display.drawString(horOffset, vertOffset, line2);
+    }
+    else if (mode == 3) {
+      snprintf(line2, sizeof(line2), "CLOCK: %s", getClock());
+      display.drawString(horOffset, vertOffset, line2);
+    }
+    else if (mode == 4) {
+      snprintf(line2, sizeof(line2), "DATE: %s", getDate());
+      display.drawString(horOffset, vertOffset, line2);
+    }
+    else if (mode == 5) {
+      snprintf(line2, sizeof(line2), "YEAR: %s", getYearStr());
+      display.drawString(horOffset, vertOffset, line2);
+    }
+    else if (mode == 6) {
+      snprintf(line2, sizeof(line2), "Wifi: %s", CONN_STATUS);
+      display.drawString(horOffset, vertOffset, line2);
+    }
+    else {
+      display.drawString(horOffset, vertOffset, "Press TOP Button");
+    }
+
+    if (cnt % (120 * LOOPS_PER_SEC) == 0) vertOffset = random(0, 50);
+
+    display.display();
   }
 
-  if (cnt % (120 * LOOPS_PER_SEC) == 0) vertOffset = random(0, 50);
+  else if (oledMode == OLED_LOW_POWER) {
+    display.clear();
+    display.setTextAlignment(TEXT_ALIGN_LEFT);
+    display.setFont(ArialMT_Plain_10);
 
-  display.display();
-}
+    // Status Bar
+    snprintf(line2, sizeof(line2), "LOW POWER in... %u", powerTimer);
+    display.drawString(horOffset, 20 + vertOffset, line2);
+    display.display();
+    powerTimer--;
+    if (powerTimer == 0) {
+      lowPowerModeInit();
+    }
+  } 
+
+  else if (oledMode == OLED_HALF_POWER) {
+    display.clear();
+    display.setTextAlignment(TEXT_ALIGN_LEFT);
+    display.setFont(ArialMT_Plain_10);
+
+    // Status Bar
+    snprintf(line2, sizeof(line2), "HALF POWER in... %u", powerTimer);
+    display.drawString(horOffset, 20 + vertOffset, line2);
+    display.display();
+    powerTimer--;
+    if (powerTimer == 0) {
+      oledMain();
+    }
+  } 
 
   cnt++;  // shared counter for all modes
 }
@@ -224,13 +251,13 @@ void displayPopupScreen(const char* text, const char* details) {
   strncpy(PopupDetails, details, sizeof(PopupDetails) - 1);
   PopupDetails[sizeof(PopupDetails) - 1] = '\0';
 
-  PopupTimer = 0;
-  OLED_MODE = OLED_POPUP;
+  popupTimer = 0;
+  oledMode = OLED_POPUP;
   updatePopupScreen();
 }
 
 void updatePopupScreen() {
-  if (OLED_MODE == OLED_POPUP) {
+  if (oledMode == OLED_POPUP) {
     display.clear();
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.setFont(ArialMT_Plain_16);
@@ -241,7 +268,7 @@ void updatePopupScreen() {
     // write the buffer to the display
     display.display();
 
-    PopupTimer++;
+    popupTimer++;
   }
 }
 
@@ -251,17 +278,17 @@ void newPopupScreen(const char* text, const char* details) {
 }
 
 void oledMain(uint32_t duration) {
-  OLED_MODE = OLED_MAIN;
-  MainTimer = duration;
-  MainTimeout = duration;
+  oledMode = OLED_MAIN;
+  mainTimer = duration;
+  mainTimeout = duration;
 }
 
 void oledMinimized() {
-  OLED_MODE = OLED_MINIMIZED;
+  oledMode = OLED_MINIMIZED;
 }
 
 void oledBlank() {
-  OLED_MODE = OLED_OFF;
+  oledMode = OLED_OFF;
 }
 
 void oledOff() {
@@ -270,4 +297,19 @@ void oledOff() {
 
 void oledOn() {
   display.displayOn();
+}
+
+void oledLowPower() {
+  oledMode = OLED_LOW_POWER;
+  powerTimer = OLED_POWER_TIMEOUT;
+}
+
+void oledHalfPower() {
+  oledMode = OLED_HALF_POWER;
+  powerTimer = OLED_POWER_TIMEOUT;
+}
+
+
+uint8_t getOledMode() {
+  return oledMode;
 }

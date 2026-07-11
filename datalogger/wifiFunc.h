@@ -1,5 +1,14 @@
 #pragma once
 
+#define EDGE_HOST_ID 186
+#define TEST_SERVER_HOST_ID 192
+// #define SUBNET_ID 50
+#define USE_STATIC_IP 0
+
+// WIFI MODES
+#define WIFI_RADIO_ON 1
+#define WIFI_RADIO_OFF 0
+
 void scanWifi();
 void connectWifi();
 void disconnectWifi();
@@ -17,9 +26,6 @@ bool dnsReady();
 bool wifiLinkReady();
 bool wifiRadioOn();
 
-#define EDGE_HOST_ID 186
-#define TEST_SERVER_HOST_ID 192
-// #define SUBNET_ID 50
-#define USE_STATIC_IP 0
+
 
 

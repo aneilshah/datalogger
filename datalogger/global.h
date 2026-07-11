@@ -34,8 +34,6 @@ extern const char APP_VERSION[];     // (don’t put PROGMEM on the extern)
 #define SENSOR_AMP_PER_VOLT 10
 #define LOOPS_PER_SEC 10
 
-// OLED MAIN MENU MODE
-#define MAIN_TIMEOUT_SEC (900 * LOOPS_PER_SEC)  // 15 min
 
 // PIN MAPPINGS
 #define ADC1_PIN 35
