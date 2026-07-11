@@ -130,7 +130,7 @@ void displayText() {
     }
     else {
       snprintf(line4, sizeof(line4), "<RESERVED 3>");
-      
+
     }
 
     display.drawString(horOffset, 40 + vertOffsetMain, line4);
@@ -244,7 +244,7 @@ void displayText() {
   cnt++;  // shared counter for all modes
 }
 
-void displayPopupScreen(const char* text, const char* details) {
+void displayPopupScreen(const char* text, const char* details, uint16_t timeout, uint8_t next) {
   strncpy(PopupText, text, sizeof(PopupText) - 1);
   PopupText[sizeof(PopupText) - 1] = '\0';
 
@@ -272,8 +272,8 @@ void updatePopupScreen() {
   }
 }
 
-void newPopupScreen(const char* text, const char* details) {
-  displayPopupScreen(text,details);
+void newPopupScreen(const char* text, const char* details, uint16_t timeout, uint8_t next) {
+  displayPopupScreen(text, details, timeout, next);
   updatePopupScreen();
 }
 

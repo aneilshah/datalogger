@@ -1,4 +1,4 @@
-// Included Library Files
+// Arduino Library Files
 #include <Arduino.h>
 #include <WiFi.h>
 #include <esp_sleep.h>
@@ -6,24 +6,29 @@
 // My Libraries
 #include "event.h"
 
-// My Files
+// Global Include
 #include "global.h"
+
+// My Drivers
 #include "button.h"
-#include "datastore.h"
-#include "diag.h"
-#include "ledFunc.h"
 #include "ntp.h"
 #include "nvm.h"
 #include "oled.h"
 #include "ota.h"
 #include "power.h"
-#include "pumpData.h"
-#include "pumpFunc.h"
 #include "ramlog.h"
 #include "server.h"
+#include "wifiFunc.h"
+
+// Project Files
+#include "datastore.h"
+#include "diag.h"
+#include "ledFunc.h"
+#include "logger.h"
+#include "pumpData.h"
+#include "pumpFunc.h"
 #include "testcode.h"
 #include "test_mode.h"
-#include "wifiFunc.h"
 
 // Version Info
 const char APP_VERSION[] PROGMEM = "V0.0A";
@@ -141,6 +146,7 @@ void setup() {
 
   // Init Pump
   initPump();
+  initLogger();
 
   // Store Startup Time
   START_TIME = (millis() / 1000); 

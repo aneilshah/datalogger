@@ -16,8 +16,8 @@
 
 void initDisplay();
 void displayText();
-void displayPopupScreen(const char* text, const char* details);
-void newPopupScreen(const char* text, const char* details);
+void displayPopupScreen(const char* text, const char* details, uint16_t timeout = 0, uint8_t next = OLED_MAIN);
+void newPopupScreen(const char* text, const char* details, uint16_t timeout = 0, uint8_t next = OLED_MAIN);
 void updatePopupScreen();
 void oledMain(uint32_t duration = MAIN_TIMEOUT_SEC);
 void oledMinimized();
