@@ -7,6 +7,8 @@ void newPopupScreen(const char* text, const char* details);
 void updatePopupScreen();
 void oledMain(uint32_t duration);
 void oledMinimized();
+void oledBlank();
+void oledOn();
 void oledOff();
 
 #define OLED_OFF 0

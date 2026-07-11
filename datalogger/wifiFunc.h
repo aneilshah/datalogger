@@ -1,7 +1,8 @@
 #pragma once
 
 void scanWifi();
-void connectPumpWifi();
+void connectWifi();
+void disconnectWifi();
 bool ensureServerStarted();
 bool waitForWifiStable(uint32_t stableMs = 1500, uint32_t timeoutMs = 20000);
 bool wifiOK();
@@ -14,6 +15,7 @@ void updateWifiDiagState();
 // Helpers
 bool dnsReady();
 bool wifiLinkReady();
+bool wifiRadioOn();
 
 #define EDGE_HOST_ID 186
 #define TEST_SERVER_HOST_ID 192

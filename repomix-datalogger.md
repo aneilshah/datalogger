@@ -36,59 +36,45 @@ The content is organized as follows:
 ```
 .gitignore
 .repomixignore
-docs/DOC_REDESIGN.md
-flash-prod.ps1
-flash-test.ps1
-Pump_Monitor/charts.cpp
-Pump_Monitor/charts.h
-Pump_Monitor/datastore.cpp
-Pump_Monitor/datastore.h
-Pump_Monitor/diag.cpp
-Pump_Monitor/diag.h
-Pump_Monitor/eventData.cpp
-Pump_Monitor/eventData.h
-Pump_Monitor/export.cpp
-Pump_Monitor/export.h
-Pump_Monitor/firebase.cpp
-Pump_Monitor/firebase.h
-Pump_Monitor/firebaseClient.cpp
-Pump_Monitor/firebaseClient.h
-Pump_Monitor/global.h
-Pump_Monitor/history.cpp
-Pump_Monitor/history.h
-Pump_Monitor/ledFunc.cpp
-Pump_Monitor/ledFunc.h
-Pump_Monitor/ntp.cpp
-Pump_Monitor/ntp.h
-Pump_Monitor/nvm.cpp
-Pump_Monitor/nvm.h
-Pump_Monitor/oled.cpp
-Pump_Monitor/oled.h
-Pump_Monitor/ota.cpp
-Pump_Monitor/ota.h
-Pump_Monitor/Pump_Monitor.ino
-Pump_Monitor/pump365.h
-Pump_Monitor/pumpData.cpp
-Pump_Monitor/pumpData.h
-Pump_Monitor/pumpFBRepo.cpp
-Pump_Monitor/pumpFBRepo.h
-Pump_Monitor/pumpFunc.cpp
-Pump_Monitor/pumpFunc.h
-Pump_Monitor/ramlog.cpp
-Pump_Monitor/ramLog.h
-Pump_Monitor/server.cpp
-Pump_Monitor/server.h
-Pump_Monitor/test_mode.cpp
-Pump_Monitor/test_mode.h
-Pump_Monitor/testcode.cpp
-Pump_Monitor/testcode.h
-Pump_Monitor/utils.cpp
-Pump_Monitor/utils.h
-Pump_Monitor/weather.cpp
-Pump_Monitor/weather.h
-Pump_Monitor/wifiFunc.cpp
-Pump_Monitor/wifiFunc.h
-README-pump.md
+datalogger/charts.cpp
+datalogger/charts.h
+datalogger/datalogger.ino
+datalogger/datastore.cpp
+datalogger/datastore.h
+datalogger/diag.h
+datalogger/eventData.cpp
+datalogger/eventData.h
+datalogger/export.cpp
+datalogger/export.h
+datalogger/global.h
+datalogger/ledFunc.cpp
+datalogger/ledFunc.h
+datalogger/ntp.cpp
+datalogger/ntp.h
+datalogger/nvm.cpp
+datalogger/nvm.h
+datalogger/oled.cpp
+datalogger/oled.h
+datalogger/ota.cpp
+datalogger/ota.h
+datalogger/pump365.h
+datalogger/pumpData.cpp
+datalogger/pumpData.h
+datalogger/pumpFunc.cpp
+datalogger/pumpFunc.h
+datalogger/ramlog.cpp
+datalogger/ramLog.h
+datalogger/server.cpp
+datalogger/server.h
+datalogger/test_mode.cpp
+datalogger/test_mode.h
+datalogger/testcode.cpp
+datalogger/testcode.h
+datalogger/utils.cpp
+datalogger/utils.h
+datalogger/wifiFunc.cpp
+datalogger/wifiFunc.h
+README-datalogger.md
 repomix.config.json
 ```
 
@@ -189,3842 +175,7 @@ secrets.h
 repomix-pump.md
 ```
 
-## File: docs/DOC_REDESIGN.md
-```markdown
-# Documentation Redesign Proposal
-
-## 🧱 The 3-Layer Documentation Model
-
-You actually want **three different documents**, not one.
-
-------------------------------------------------------------------------
-
-## 1️⃣ Feature / Product README (what it does)
-
-👉 "Do I care about this?"
-
-Short, scannable, zero friction.
-
-### Contents
-
--   What the system is
--   Feature list (charts, history, UI, etc.)
--   Screens / Web UI pages
--   Why it exists
-
-### Tone
-
--   Clear
--   Minimal
--   Slightly "marketing", but still technical
-
-------------------------------------------------------------------------
-
-## 2️⃣ Architecture Doc (how it is structured)
-
-👉 "How is this system organized?"
-
-This is what most people think README should be --- but it's actually
-separate.
-
-### Contents
-
--   System topology
--   Modules
--   Data flow
--   Boundaries (NVM / Firebase / UI)
--   What lives where and why
-
-### Tone
-
--   Structured
--   Diagram-driven
--   Not too deep into logic
-
-------------------------------------------------------------------------
-
-## 3️⃣ Engineering Doc (how it behaves)
-
-👉 "How does this actually work?"
-
-This is your furnace-style document.
-
-### Contents
-
--   Lifecycle
--   Block logic
--   Reboot handling
--   NVM semantics
--   Firebase behavior
--   Failure handling
--   Edge cases
-
-### Tone
-
--   Verbose
--   Narrative
--   Explains reasoning
-
-------------------------------------------------------------------------
-
-## 🔥 Why this is the right split
-
-Because each document answers a different question:
-
-  Question                    Doc
-  --------------------------- --------------
-  What does this system do?   README
-  How is it structured?       ARCHITECTURE
-  How does it behave?         ENGINEERING
-
-Trying to combine them results in an unreadable mess.
-
-------------------------------------------------------------------------
-
-## 🧠 What you're noticing (and why it matters)
-
-You observed:
-
-> "architecture view shows topology and what lives where and why"
-
-That's exactly right.
-
-Right now, the furnace README is actually:
-
--   Architecture\
--   Engineering\
--   Historical evolution
-
-All mixed together.
-
-That's why it: - feels rich - captures intent - but is hard to scan and
-maintain
-
-------------------------------------------------------------------------
-
-## ✅ Recommended File Layout
-
-    README.md              ← features + overview  
-    ARCHITECTURE.md       ← topology + system layout  
-    ENGINEERING.md        ← lifecycle + behavior (furnace style)  
-    DESIGN_LOG.md         ← optional (raw thinking / evolution)  
-
-------------------------------------------------------------------------
-
-## 🧩 Concrete Example (Pump)
-
-### README.md
-
--   Feature list:
-    -   365-day history
-    -   24-hour detail
-    -   3 charts
-    -   web UI pages
--   System overview (simple flow)
--   Why Firebase is treated differently
-
-------------------------------------------------------------------------
-
-### ARCHITECTURE.md
-
--   Components:
-    -   Pump detection
-    -   Aggregation
-    -   NVM
-    -   Firebase
-    -   UI
--   Data flow diagram
--   Where state lives
--   System boundaries
-
-------------------------------------------------------------------------
-
-### ENGINEERING.md
-
--   4-hour block logic
--   firstBlock semantics
--   NVM restore rules
--   Firebase retry model
--   Failure handling
--   Timing behavior
-
-👉 This is where furnace-style documentation belongs
-
-------------------------------------------------------------------------
-
-## 💡 Key Insight
-
-You don't need to make furnace cleaner.
-
-You need to move furnace into the correct layer.
-
-Once each concern is separated: - readability improves - maintainability
-improves - intent is preserved
-
-And the system becomes easier to reason about.
-```
-
-## File: Pump_Monitor/charts.h
-```c
-#pragma once
-
-#include <WiFi.h>
-
-void renderGallonsPerDayChart(WiFiClient &client);
-void renderCurrentWaveChart(WiFiClient &client);
-void renderPumpEvent24hChart(WiFiClient &client);
-```
-
-## File: Pump_Monitor/eventData.cpp
-```cpp
-#include "eventData.h"
-
-#include <string.h>
-#include <time.h>
-
-#include "ntp.h"
-
-namespace {
-
-class EventData {
-public:
-  static const int MAX_EVENTS = 250;
-  static const uint32_t WINDOW_MINUTES = 24U * 60U;
-
-  EventData() {
-    clear();
-  }
-
-  void clear() {
-    memset(eventMinute_, 0, sizeof(eventMinute_));
-    head_ = 0;
-    count_ = 0;
-  }
-
-  bool addNow() {
-    if (!validClockNow()) return false;
-
-    const uint32_t minute2026 = getMinutesSince2026Now();
-    if (minute2026 == 0) return false;
-
-    addMinute(minute2026);
-    return true;
-  }
-
-  void addMinute(uint32_t minute2026) {
-    // De-dupe: ignore repeated events in same minute
-    if (count_ > 0) {
-      uint32_t newestMinute = 0;
-      if (get(count_ - 1, newestMinute) && newestMinute == minute2026) {
-        purgeOld(minute2026);
-        return;
-      }
-    }
-
-    eventMinute_[head_] = minute2026;
-    head_ = (head_ + 1) % MAX_EVENTS;
-
-    if (count_ < MAX_EVENTS) {
-      count_++;
-    }
-
-    purgeOld(minute2026);
-  }
-
-  void purgeOld(uint32_t nowMinute2026) {
-    while (count_ > 0) {
-      const int idx = oldestIndex();
-      const uint32_t eventMinute = eventMinute_[idx];
-
-      // Guard bad clock jumps
-      if (eventMinute > nowMinute2026) {
-        break;
-      }
-
-      const uint32_t ageMinutes = nowMinute2026 - eventMinute;
-      if (ageMinutes <= WINDOW_MINUTES) {
-        break;
-      }
-
-      count_--;
-    }
-  }
-
-  int count() const {
-    return count_;
-  }
-
-  bool empty() const {
-    return count_ == 0;
-  }
-
-  bool get(int logicalIndex, uint32_t& outMinute2026) const {
-    if (logicalIndex < 0 || logicalIndex >= count_) return false;
-
-    outMinute2026 = eventMinute_[physicalIndex(logicalIndex)];
-    return true;
-  }
-
-  static bool validClockNow() {
-    return validClock() && getCurrentEpoch() > 0;
-  }
-
-  static uint32_t getMinutesSince2026Now() {
-    const uint32_t nowEpoch = getCurrentEpoch();
-    if (nowEpoch == 0) return 0;
-
-    struct tm baseTm;
-    memset(&baseTm, 0, sizeof(baseTm));
-    baseTm.tm_year = 2026 - 1900;
-    baseTm.tm_mon = 0;
-    baseTm.tm_mday = 1;
-
-    const time_t baseEpoch = mktime(&baseTm);
-    if (baseEpoch <= 0) return 0;
-    if (nowEpoch <= (uint32_t)baseEpoch) return 0;
-
-    return (nowEpoch - (uint32_t)baseEpoch) / 60U;
-  }
-
-private:
-  uint32_t eventMinute_[MAX_EVENTS];
-  int head_;
-  int count_;
-
-  int oldestIndex() const {
-    return (head_ - count_ + MAX_EVENTS) % MAX_EVENTS;
-  }
-
-  int physicalIndex(int logicalIndex) const {
-    return (oldestIndex() + logicalIndex) % MAX_EVENTS;
-  }
-};
-
-static EventData gEventData;
-
-} // namespace
-
-// ---- Public API ----
-
-void eventDataInit() {
-  gEventData.clear();
-}
-
-void eventDataClear() {
-  gEventData.clear();
-}
-
-bool eventDataAddNow() {
-  return gEventData.addNow();
-}
-
-void eventDataAddMinute(uint32_t minute2026) {
-  gEventData.addMinute(minute2026);
-}
-
-int eventDataCount() {
-  return gEventData.count();
-}
-
-bool eventDataEmpty() {
-  return gEventData.empty();
-}
-
-bool eventDataGetMinute(int index, uint32_t& outMinute2026) {
-  return gEventData.get(index, outMinute2026);
-}
-
-bool eventDataValidClock() {
-  return EventData::validClockNow();
-}
-
-uint32_t eventDataGetMinutesSince2026() {
-  return EventData::getMinutesSince2026Now();
-}
-
-void eventDataPurgeNow() {
-  uint32_t now = EventData::getMinutesSince2026Now();
-  if (now == 0) return;
-
-  gEventData.purgeOld(now);
-}
-```
-
-## File: Pump_Monitor/eventData.h
-```c
-#pragma once
-
-#include <stdint.h>
-
-// Lifecycle
-void eventDataInit();
-void eventDataClear();
-
-// Add events
-bool eventDataAddNow();
-void eventDataAddMinute(uint32_t minute2026);
-void eventDataPurgeNow();
-
-
-// Info
-int eventDataCount();
-bool eventDataEmpty();
-
-// Access (0 = oldest, count-1 = newest)
-bool eventDataGetMinute(int index, uint32_t& outMinute2026);
-
-// Helpers
-bool eventDataValidClock();
-uint32_t eventDataGetMinutesSince2026();
-```
-
-## File: Pump_Monitor/history.h
-```c
-#pragma once
-
-#include <Arduino.h>
-#include <time.h>
-
-class Pump365Data;
-
-// Boot-time history loader / rebuilder.
-// Loads historical daily summaries from Firebase and appends them
-// oldest -> newest into Pump365Data.
-//
-// Design goals:
-// - one owner for progress / timing / completion state
-// - one public API used by setup / loop / UI diagnostics
-
-// External integration
-void historyLoaderBegin(Pump365Data& data);
-void historyLoaderTick();
-void historyLoaderReset();
-void historyLoaderDelay(unsigned long delayMs);
-const char* historyLoaderProgressText();
-
-// Status helpers
-bool historyLoaderIsEnabled();
-bool historyLoaderIsInProgress();
-bool historyLoaderIsComplete();
-int  historyLoaderLoadedCount();
-int  historyLoaderTargetCount();
-const char* historyLoaderCurrentKey();
-const char* historyLoaderGetStatusText();
-
-// Other Helpers
-const char* getEarliestHistoryKey();
-
-// Anchor / key helpers
-void startHistoryAnchorNow();
-void setHistoryAnchorEpoch(time_t epoch);
-time_t getHistoryAnchorEpoch();
-
-void makeDayKeyFromEpoch(time_t epoch, char* out, size_t outLen);
-void makeHistoricalDayKey(int daysAgo, char* out, size_t outLen);
-
-// Debug helpers
-void printDailyHistory();
-void printHistoricalDayKeys(int count = 10);
-void runHistoricalDayKeyTest(int count = 5);
-```
-
-## File: Pump_Monitor/pump365.h
-```c
-#pragma once
-#include <Arduino.h>
-#include <string.h>
-
-struct PumpDailyRecord {
-  int cyclesPerDay;
-  int gallonsPerDay;
-  float rainMm;
-};
-
-class Pump365Data {
-public:
-  static const int DAILY_DAYS = 365;
-
-  void begin() {
-    clearDailyHistory();
-  }
-
-  void clearDailyHistory() {
-    memset(_dailyCyclesPerDay, 0, sizeof(_dailyCyclesPerDay));
-    memset(_dailyGallonsPerDay, 0, sizeof(_dailyGallonsPerDay));
-    for (int i = 0; i < DAILY_DAYS; i++) _dailyRainMm[i] = 0.0f;
-    _dailyHead = -1;
-    _dailyValidCount = 0;
-  }
-
-  int dailyValidCount() const {
-    return _dailyValidCount;
-  }
-
-  void recordDailySummary(int cyclesPerDay, int gallonsPerDay, float rainMm) {
-    _dailyHead = (_dailyHead + 1) % DAILY_DAYS;
-    _dailyCyclesPerDay[_dailyHead]  = sanitizeInt(cyclesPerDay);
-    _dailyGallonsPerDay[_dailyHead] = sanitizeInt(gallonsPerDay);
-    _dailyRainMm[_dailyHead]        = sanitizeRain(rainMm);
-
-    if (_dailyValidCount < DAILY_DAYS) {
-      _dailyValidCount++;
-    }
-  }
-
-  bool getDailyRecordAgo(int daysAgo, PumpDailyRecord& out) const {
-    if (_dailyHead < 0) return false;
-    if (daysAgo < 0 || daysAgo >= _dailyValidCount) return false;
-
-    const int idx = dailyIndexFromDaysAgo(daysAgo);
-    out.cyclesPerDay  = _dailyCyclesPerDay[idx];
-    out.gallonsPerDay = _dailyGallonsPerDay[idx];
-    out.rainMm        = _dailyRainMm[idx];
-    return true;
-  }
-
-  bool getDailyRecordAgo(int daysAgo, int& outCycles, int& outGallons, float& outRainMm) const {
-    if (_dailyHead < 0) return false;
-    if (daysAgo < 0 || daysAgo >= _dailyValidCount) return false;
-
-    const int idx = dailyIndexFromDaysAgo(daysAgo);
-    outCycles  = _dailyCyclesPerDay[idx];
-    outGallons = _dailyGallonsPerDay[idx];
-    outRainMm  = _dailyRainMm[idx];
-    return true;
-  }
-
-  bool appendOlderDailyRecord(int cyclesPerDay, int gallonsPerDay, float rainMm) {
-    if (_dailyValidCount >= DAILY_DAYS) return false;
-
-    if (_dailyHead < 0) {
-      _dailyHead = 0;
-      _dailyCyclesPerDay[_dailyHead]  = sanitizeInt(cyclesPerDay);
-      _dailyGallonsPerDay[_dailyHead] = sanitizeInt(gallonsPerDay);
-      _dailyRainMm[_dailyHead]        = sanitizeRain(rainMm);
-      _dailyValidCount = 1;
-      return true;
-    }
-
-    int oldestValidIdx = (_dailyHead - (_dailyValidCount - 1)) % DAILY_DAYS;
-    if (oldestValidIdx < 0) oldestValidIdx += DAILY_DAYS;
-
-    int newOldestIdx = (oldestValidIdx - 1) % DAILY_DAYS;
-    if (newOldestIdx < 0) newOldestIdx += DAILY_DAYS;
-
-    _dailyCyclesPerDay[newOldestIdx]  = sanitizeInt(cyclesPerDay);
-    _dailyGallonsPerDay[newOldestIdx] = sanitizeInt(gallonsPerDay);
-    _dailyRainMm[newOldestIdx]        = sanitizeRain(rainMm);
-    _dailyValidCount++;
-    return true;
-  }
-
-  bool appendOlderMissingDailyRecord() {
-    return appendOlderDailyRecord(-1, -1, -1.0f);
-  }
-
-  bool getDailySample(int offsetOldestDay, PumpDailyRecord& out) const {
-    if (_dailyHead < 0) return false;
-    if (offsetOldestDay < 0 || offsetOldestDay >= _dailyValidCount) return false;
-
-    int oldestValidIdx = (_dailyHead - (_dailyValidCount - 1)) % DAILY_DAYS;
-    if (oldestValidIdx < 0) oldestValidIdx += DAILY_DAYS;
-
-    int idx = (oldestValidIdx + offsetOldestDay) % DAILY_DAYS;
-
-    out.cyclesPerDay  = _dailyCyclesPerDay[idx];
-    out.gallonsPerDay = _dailyGallonsPerDay[idx];
-    out.rainMm        = _dailyRainMm[idx];
-    return true;
-  }
-
-private:
-  int   _dailyCyclesPerDay[DAILY_DAYS];
-  int   _dailyGallonsPerDay[DAILY_DAYS];
-  float _dailyRainMm[DAILY_DAYS];
-
-  int _dailyHead = -1;
-  int _dailyValidCount = 0;
-
-  static int sanitizeInt(int v) {
-    return (v < 0) ? -1 : v;
-  }
-
-  static float sanitizeRain(float v) {
-    return (v < 0.0f) ? -1.0f : v;
-  }
-
-  int dailyIndexFromDaysAgo(int daysAgo) const {
-    int idx = (_dailyHead - daysAgo) % DAILY_DAYS;
-    if (idx < 0) idx += DAILY_DAYS;
-    return idx;
-  }
-};
-```
-
-## File: Pump_Monitor/server.h
-```c
-#pragma once
-void webServer();
-```
-
-## File: Pump_Monitor/test_mode.h
-```c
-#pragma once
-
-int getTestModeADC();
-void simulatePump();
-void initPumpSim();
-```
-
-## File: repomix.config.json
-```json
-{
-  "$schema": "https://repomix.com/schemas/latest/schema.json",
-  "input": {
-    "maxFileSize": 52428800
-  },
-  "output": {
-    "filePath": "repomix-pump.md",
-    "style": "markdown",
-    "parsableStyle": false,
-    "fileSummary": true,
-    "directoryStructure": true,
-    "files": true,
-    "removeComments": false,
-    "removeEmptyLines": false,
-    "compress": false,
-    "topFilesLength": 5,
-    "showLineNumbers": false,
-    "truncateBase64": false,
-    "copyToClipboard": false,
-    "includeFullDirectoryStructure": false,
-    "tokenCountTree": false,
-    "git": {
-      "sortByChanges": true,
-      "sortByChangesMaxCommits": 100,
-      "includeDiffs": false,
-      "includeLogs": false,
-      "includeLogsCount": 50
-    }
-  },
-  "include": [],
-  "ignore": {
-    "useGitignore": true,
-    "useDotIgnore": true,
-    "useDefaultPatterns": true,
-    "customPatterns": []
-  },
-  "security": {
-    "enableSecurityCheck": true
-  },
-  "tokenCount": {
-    "encoding": "o200k_base"
-  }
-}
-```
-
-## File: Pump_Monitor/datastore.cpp
-```cpp
-#include "datastore.h"
-
-// ################################################################################################
-// CLASS DataStoreInt
-// ################################################################################################
-
-DataStoreInt::DataStoreInt(int size, String units) {
-  if (size <= DATASTORE_MAX) _maxCount = size;
-  else _maxCount = DATASTORE_MAX;
-  _units = units;
-  reset();
-}
-
-DataStoreInt::DataStoreInt() {
-  _units = "";
-  _maxCount = DATASTORE_MAX;
-  reset();
-}
-
-float DataStoreInt::avg() {
-  uint32_t sum = 0;
-
-  for (int i = 0; i < _dataCount; i++) {
-    sum += _data[i];
-  }
-
-  float result = 0.0;
-  if (_dataCount) result = float(sum / _dataCount);
-  return result;
-}
-
-int DataStoreInt::getData(int i) const {
-  if (i < 0 || i >= _dataCount) return 0;
-  return _data[i];
-}
-
-float DataStoreInt::stdev() {
-  float devSum = 0;
-  float delta = 0;
-  const float Avg = avg();
-
-  for (int i = 0; i < _dataCount; i++) {
-    delta = float(_data[i] - Avg);
-    devSum += delta * delta;
-  }
-
-  float result = 0.0;
-  if (_dataCount) result = float(sqrt(devSum / _dataCount));
-  return result;
-}
-
-void DataStoreInt::reset() {
-  _dataCount = 0;
-  _totalCount = 0;
-  for (int i = 0; i < _maxCount; i++) _data[i] = 0;
-}
-
-void DataStoreInt::init(int size, String units) {
-  if (size <= DATASTORE_MAX) _maxCount = size;
-  else _maxCount = DATASTORE_MAX;
-  _units = units;
-}
-
-long DataStoreInt::getTotalCount() {return _totalCount;}
-
-void DataStoreInt::addData(int x) {
-  for (int i = _maxCount - 1; i > 0; i--) _data[i] = _data[i - 1]; 
-  _data[0] = x;
-  if (_dataCount < _maxCount) _dataCount++;
-  _totalCount++;
-}
-
-String DataStoreInt::dataText() {
-  float Avg = avg();
-  float Stdev = stdev();
-  String str = "";
-  int Max = _dataCount;
-  if (Max > DATASTORE_MAX) Max = DATASTORE_MAX;
-
-  str += "n:" + String(_dataCount) + " | ";
-  for (int i = 0; i < Max; i++) {
-    str += String(_data[i]) + " ";
-  }
-  if (_dataCount > 0) str += _units;
-  str += " | AVG:" + String(avg());
-  str += " | StDev:" + String(stdev());
-
-  return str;
-}
-
-String DataStoreInt::htmlText() {
-  float Avg = avg();
-  float Stdev = stdev();
-  String str = "";
-  int Max = _dataCount;
-  if (Max > DATASTORE_MAX) Max = DATASTORE_MAX;
-
-  str += "n:" + String(_dataCount) + " | ";
-  for (int i = 0; i < Max; i++) {
-    str += String(_data[i]) + "&ensp;";
-  }
-  if (_dataCount > 0) str += _units;
-  str += " | AVG:" + String(avg());
-  str += " | StDev:" + String(stdev());
-
-  return str;
-}
-
-// ################################################################################################
-// CLASS DataStoreFloat
-// ################################################################################################
-
-DataStoreFloat::DataStoreFloat(int size, int prec, String units) {
-  if (size <= DATASTORE_MAX) _maxCount = size;
-  else _maxCount = DATASTORE_MAX;
-  _prec = prec;
-  _units = units;
-  reset();
-}
-
-DataStoreFloat::DataStoreFloat() {
-  _units = "";
-  _maxCount = DATASTORE_MAX;
-  _prec = 1;
-  reset();
-}
-
-float DataStoreFloat::avg() {
-  float sum = 0;
-
-  for (int i = 0; i < _dataCount; i++) {
-    sum += _data[i];
-  }
-
-  float result = 0.0;
-  if (_dataCount) result = float(sum / _dataCount);
-  return result;
-}
-
-float DataStoreFloat::stdev() {
-  float devSum = 0;
-  float delta = 0;
-  const float Avg = avg();
-
-  for (int i = 0; i < _dataCount; i++) {
-    delta = float(_data[i] - Avg);
-    devSum += delta * delta;
-  }
-
-  float result = 0.0;
-  if (_dataCount) result = float(sqrt(devSum / _dataCount));
-  return result;
-}
-
-void DataStoreFloat::reset() {
-  _dataCount = 0;
-  _totalCount = 0;
-  for (int i = 0; i < _maxCount; i++) _data[i] = 0.0;
-}
-
-void DataStoreFloat::addData(float x) {
-  for (int i = _maxCount - 1; i > 0; i--) _data[i] = _data[i - 1]; 
-  _data[0] = x;
-  if (_dataCount < _maxCount) _dataCount++;
-  _totalCount++;
-}
-
-void DataStoreFloat::init(int size, int prec, String units) {
-  if (size <= DATASTORE_MAX) _maxCount = size;
-  else _maxCount = DATASTORE_MAX;
-  _units = units;
-  _prec = prec;
-}
-
-long  DataStoreFloat::getTotalCount() {return _totalCount;}
-
-String DataStoreFloat::dataText() {
-  float Avg = avg();
-  float Stdev = stdev();
-  String str = "";
-  int Max = _dataCount;
-  if (Max > DATASTORE_MAX) Max = DATASTORE_MAX;
-
-  str += "n:" + String(_dataCount) + " | ";
-  for (int i = 0; i < Max; i++) {
-    str += String(_data[i],_prec) + " ";
-  }
-  if (_dataCount > 0) str += _units;
-  str += " | AVG:" + String(avg());
-  str += " | StDev:" + String(stdev());
-
-  return str;
-}
-
-
-// ################################################################################################
-// CLASS CurrentStoreInt
-// ################################################################################################
-
-CurrentStoreInt::CurrentStoreInt() {
-  _units = "";
-  _maxCount = CURRENTSTORE_MAX;
-  reset();
-}
-
-float CurrentStoreInt::avg() {
-  uint32_t sum = 0;
-
-  for (int i = 0; i < _dataCount; i++) {
-    sum += _data[i];
-  }
-
-  float result = 0.0;
-  if (_dataCount) result = float(sum / _dataCount);
-  return result;
-}
-
-float CurrentStoreInt::ssAvg(float tolPercent) { // Steady State average, tolPercent = 0.1 for 10%
-  if (_dataCount <= 0) return 0.0f;
-
-  // First-pass average (includes inrush/tail)
-  const float a0 = avg();
-  if (a0 <= 0.0f) return a0;  // avoid weirdness when idle/zero
-
-  // Keep only samples within +/- tolPercent of the first average
-  const float band = fabsf(a0) * tolPercent;
-
-  uint32_t sum = 0;
-  int n = 0;
-
-  for (int i = 0; i < _dataCount; i++) {
-    const float x = (float)_data[i];
-    if (fabsf(x - a0) <= band) {
-      sum += _data[i];
-      n++;
-    }
-  }
-
-  // If filter excluded everything (or almost everything), fall back to a0
-  if (n <= 0) return a0;
-
-  return (float)sum / (float)n;
-}
-
-void CurrentStoreInt::reset() {
-  _dataCount = 0;
-  lastDataText = dataText();
-  lastHtmlText = htmlText();
-  for (int i = 0; i < _maxCount; i++) _data[i] = 0;  // reset data
-}
-
-void CurrentStoreInt::addData(int x) {
-  for (int i = _maxCount - 1; i > 0; i--) _data[i] = _data[i - 1]; 
-  _data[0] = x;
-  if (_dataCount < _maxCount) _dataCount++;
-}
-
-String CurrentStoreInt::dataText() {
-  float Avg = avg();
-  String str = "";
-  int Max = _dataCount;
-  if (Max > CURRENTSTORE_MAX) Max = CURRENTSTORE_MAX;
-
-  str += "n:" + String(_dataCount) + " | ";
-  for (int i = 0; i < Max; i++) {
-    str += String(_data[i]) + " ";
-  }
-  if (_dataCount > 0) str += _units;
-  str += " | AVG:" + String(avg());
-
-  return str;
-}
-
-String CurrentStoreInt::htmlText() {
-  float Avg = avg();
-  String str = "";
-  int Max = _dataCount;
-  if (Max > CURRENTSTORE_MAX) Max = CURRENTSTORE_MAX;
-
-  str += "n:" + String(_dataCount) + " | ";
-  for (int i = 0; i < Max; i++) {
-    str += String(_data[i]) + "&ensp;";
-  }
-  if (_dataCount > 0) str += _units;
-  str += " | AVG:" + String(avg());
-
-  return str;
-}
-
-String CurrentStoreInt::getLastDataText() {return lastDataText;}
-String CurrentStoreInt::getLastHtmlText() {return lastHtmlText;}
-```
-
-## File: Pump_Monitor/diag.cpp
-```cpp
-#include "diag.h"
-#include <string.h>
-
-// ===== setters =====
-void Diag::setFirebaseState(const char* s) { strncpy(fbState, s, sizeof(fbState)); }
-void Diag::setFirebaseError(const char* s) { strncpy(fbError, s, sizeof(fbError)); }
-void Diag::setFirebaseTimeout(const char* s) { strncpy(fbTimeout, s, sizeof(fbTimeout)); }
-
-// ===== getters =====
-const char* Diag::getFirebaseState() { return fbState; }
-const char* Diag::getFirebaseError() { return fbError; }
-const char* Diag::getFirebaseTimeout() { return fbTimeout; }
-```
-
-## File: Pump_Monitor/oled.h
-```c
-#pragma once
-
-void initDisplay();
-void displayText();
-void displayPopupScreen(const char* text, const char* details);
-void newPopupScreen(const char* text, const char* details);
-void updatePopupScreen();
-void oledMain(uint32_t duration);
-void oledMinimized();
-void oledOff();
-
-#define OLED_OFF 0
-#define OLED_MAIN 1
-#define OLED_POPUP 2
-#define OLED_MINIMIZED 3
-
-#define OLED_MODE_NO_TIMEOUT 0
-```
-
-## File: Pump_Monitor/ota.h
-```c
-// OTA.h
-#pragma once
-
-#define OTA_OFF 0
-#define OTA_INIT 1
-#define OTA_ON 2
-#define OTA_FLASHING 3
-
-// OTA Handler
-void initOTA(const char* hostname);
-void handleOTA();
-bool otaInProgress();
-
-// OTA State
-unsigned int getOtaState();
-void reinitOta();
-void updateOTAState();
-```
-
-## File: Pump_Monitor/ramlog.cpp
-```cpp
-#include "ramlog.h"
-#include "global.h"
-
-extern char* getTimestamp();
-
-char gLogMsg[LOG_LINES][LOG_LEN] = {{0}};
-char gLogTs[LOG_LINES][TS_LEN] = {{0}};
-uint8_t gLogIndex = 0;
-uint8_t gLogCount = 0;
-
-void ramLog(const char* msg) {
-  const char* ts = getTimestamp();
-  if (!ts) ts = "?";
-
-  snprintf(gLogTs[gLogIndex], sizeof(gLogTs[gLogIndex]), "%s", ts);
-  snprintf(gLogMsg[gLogIndex], sizeof(gLogMsg[gLogIndex]), "%s", msg ? msg : "");
-
-  gLogIndex = (gLogIndex + 1) % LOG_LINES;
-  if (gLogCount < LOG_LINES) gLogCount++;
-}
-
-void ramLogf(const char* fmt, ...) {
-  char msg[64];
-
-  va_list args;
-  va_start(args, fmt);
-  vsnprintf(msg, sizeof(msg), fmt, args);
-  va_end(args);
-
-  const char* ts = getTimestamp();
-  if (!ts) ts = "?";
-
-  snprintf(gLogTs[gLogIndex], sizeof(gLogTs[gLogIndex]), "%s", ts);
-  snprintf(gLogMsg[gLogIndex], sizeof(gLogMsg[gLogIndex]), "%s", msg);
-
-  gLogIndex = (gLogIndex + 1) % LOG_LINES;
-  if (gLogCount < LOG_LINES) gLogCount++;
-}
-```
-
-## File: Pump_Monitor/ramLog.h
-```c
-#pragma once
-#include "Arduino.h"
-
-#define LOG_LINES 100
-#define LOG_LEN   50
-#define TS_LEN    20
-
-extern char gLogMsg[LOG_LINES][LOG_LEN];
-extern char gLogTs[LOG_LINES][TS_LEN];
-extern uint8_t gLogIndex;
-extern uint8_t gLogCount;
-
-void ramLog(const char* msg);
-void ramLogf(const char* fmt, ...);
-```
-
-## File: Pump_Monitor/test_mode.cpp
-```cpp
-// Libraries
-#include <event.h>
-
-// Local Files
-#include "global.h"
-
-int testModeADC = 0;
-int pumpCount = 0;
-Event pumpTestEvent;
-
-#define CYCLE_TIME 30
-#define PUMP_ON 1
-#define PUMP_OFF 0
-
-int getTestModeADC() {
-  return testModeADC;
-}
-
-void setTestModeADC(float current) {
-  testModeADC = int(current * COUNT_PER_AMP);
-}
-
-void initPumpSim() {
-  pumpTestEvent.setSec(CYCLE_TIME);
-}
-
-float getPumpCurrent(int count) {
-  int index = 77 - count;
-  float cur = 0.0f;
-  if (index < 7) {
-    cur = 10.0f + 14.0f * expf(-float(index) / 2.5f);
-  }
-  else if (index < 66) {
-    cur = 9.5f + (float)random(0,101) / 100.0f;
-  }
-  else { // index >= 66
-    float tailIndex = (float)(index - 66);      // 0..11
-    cur = 10.0f * (1.0f - tailIndex / 11.0f);   // 10 -> 0
-    if (cur < 0.0f) cur = 0.0f;
-  }
-  return cur;
-}
-
-void simulatePump() {
-  static int simPumpState = PUMP_OFF;
-
-  if (simPumpState == PUMP_OFF) {
-    // Look for Turn On Event
-    if (pumpTestEvent.check()) {
-      // Serial.println("Test Mode Pump Event: ");
-      simPumpState = PUMP_ON;
-      pumpCount = 77;
-    }
-    setTestModeADC(0);
-  }
-  
-  else if (simPumpState == PUMP_ON) {
-    // Look for Turn Off Event
-    if (pumpCount == 0) {
-      int nextEvent = random(CYCLE_TIME, CYCLE_TIME+10);
-      pumpTestEvent.setSec(nextEvent);
-      Serial.println("Set Next Test Mode Pump On Event: " + String(nextEvent) + " sec");
-      simPumpState = PUMP_OFF;
-      setTestModeADC(0.0f);   // drop to 0 immediately
-    }
-
-    else if (pumpCount > 0) {
-      setTestModeADC(getPumpCurrent(pumpCount));
-      pumpCount--;
-    }
-  }
-  
-  else {
-    Serial.println("Invalid Simluated Pump State");
-  }
-}
-```
-
-## File: Pump_Monitor/wifiFunc.h
-```c
-#pragma once
-
-void scanWifi();
-void connectPumpWifi();
-bool ensureServerStarted();
-bool waitForWifiStable(uint32_t stableMs = 1500, uint32_t timeoutMs = 20000);
-bool wifiOK();
-bool dnsOK();
-bool internetOK();
-bool internetOK443();
-void resetFirebase();
-bool timeValid();
-void updateWifiDiagState();
-
-// Helpers
-bool dnsReady();
-bool wifiLinkReady();
-
-#define EDGE_HOST_ID 184
-#define TEST_SERVER_HOST_ID 190
-// #define SUBNET_ID 50
-#define USE_STATIC_IP 0
-```
-
-## File: flash-prod.ps1
-```powershell
-# flash-prod.ps1
-
-# -----------------------------
-# Config
-# -----------------------------
-$ESPOTA = "C:\Users\aneil\AppData\Local\Arduino15\packages\Heltec-esp32\hardware\esp32\1.0.0\tools\espota.py"
-$IP     = "192.168.50.184"   # PROD device
-$PORT   = 3232
-
-# -----------------------------
-# Find latest real app binary
-# -----------------------------
-$bin = Get-ChildItem "$env:LOCALAPPDATA\arduino\sketches" -Recurse -Filter "Pump_Monitor.ino.bin" |
-       Sort-Object LastWriteTime -Descending |
-       Select-Object -First 1
-
-if (-not $bin) {
-    Write-Host "ERROR: No Pump_Monitor.ino.bin found." -ForegroundColor Red
-    Read-Host "Press Enter to close"
-    exit 1
-}
-
-# -----------------------------
-# Verify Size
-# -----------------------------
-
-# Guard against wrong file selection
-if ($bin.Length -lt 100000) {
-    Write-Host "ERROR: Selected file is too small to be app firmware:" -ForegroundColor Red
-    Write-Host $bin.FullName -ForegroundColor Red
-    Read-Host "Press Enter to close"
-    exit 1
-}
-
-# -----------------------------
-# Verify PROD MODE
-# -----------------------------
-
-$bytes = [System.IO.File]::ReadAllBytes($bin.FullName)
-$text  = [System.Text.Encoding]::ASCII.GetString($bytes)
-
-if ($text.Contains("PUMP_MONITOR")) {
-    Write-Host "Found PUMP_MONITOR binary"
-} 
-
-if ($text.Contains("PUMP_MONITOR|MODE=TEST")) {
-    Write-Host "ERROR: TEST build detected" -ForegroundColor Red
-    Read-Host "Press Enter to close"
-    exit 1
-}
-elseif ($text.Contains("PUMP_MONITOR|MODE=PROD")) {
-    Write-Host "Binary verified as PROD"
-}
-else {
-    Write-Host "ERROR: No build marker found" -ForegroundColor Red
-    Read-Host "Press Enter to close"
-    exit 1
-}
-# -----------------------------
-# Info
-# -----------------------------
-Write-Host "-----------------------------------"
-Write-Host "FLASHING PROD"
-Write-Host "Target IP: $IP"
-Write-Host "Binary:    $($bin.FullName)"
-Write-Host "Built:     $($bin.LastWriteTime)"
-Write-Host "Size:      $([math]::Round($bin.Length / 1024, 1)) KB"
-Write-Host "-----------------------------------"
-
-# -----------------------------
-# Safety confirmation
-# -----------------------------
-$confirm = Read-Host "CONFIRMING: Type YES to flash PROD"
-
-if ($confirm -ne "YES") {
-    Write-Host "Cancelled" -ForegroundColor Yellow
-    Read-Host "Press Enter to close"
-    exit 1
-}
-
-# -----------------------------
-# Run OTA
-# -----------------------------
-python "$ESPOTA" -i $IP -p $PORT -f "$($bin.FullName)"
-
-# -----------------------------
-# Result
-# -----------------------------
-if ($LASTEXITCODE -eq 0) {
-    Write-Host ""
-    Write-Host "SUCCESS: OTA to PROD complete" -ForegroundColor Green
-    exit 0
-} else {
-    Write-Host ""
-    Write-Host "FAIL: OTA to PROD failed" -ForegroundColor Red
-    Read-Host "Press Enter to close"
-    exit $LASTEXITCODE
-}
-```
-
-## File: flash-test.ps1
-```powershell
-# flash-test.ps1
-
-# -----------------------------
-# Config
-# -----------------------------
-$ESPOTA = "C:\Users\aneil\AppData\Local\Arduino15\packages\Heltec-esp32\hardware\esp32\1.0.0\tools\espota.py"
-$IP     = "192.168.50.190"   # TEST device
-$PORT   = 3232
-
-# -----------------------------
-# Find latest real app binary
-# -----------------------------
-$bin = Get-ChildItem "$env:LOCALAPPDATA\arduino\sketches" -Recurse -Filter "Pump_Monitor.ino.bin" |
-       Sort-Object LastWriteTime -Descending |
-       Select-Object -First 1
-
-if (-not $bin) {
-    Write-Host "ERROR: No Pump_Monitor.ino.bin found." -ForegroundColor Red
-    Read-Host "Press Enter to close"
-    exit 1
-}
-
-# -----------------------------
-# Verify Size
-# -----------------------------
-
-# Guard against wrong file selection
-if ($bin.Length -lt 100000) {
-    Write-Host "ERROR: Selected file is too small to be app firmware:" -ForegroundColor Red
-    Write-Host $bin.FullName -ForegroundColor Red
-    Read-Host "Press Enter to close"
-    exit 1
-}
-
-# -----------------------------
-# Verify TEST MODE
-# -----------------------------
-
-$bytes = [System.IO.File]::ReadAllBytes($bin.FullName)
-$text  = [System.Text.Encoding]::ASCII.GetString($bytes)
-
-if ($text.Contains("PUMP_MONITOR")) {
-    Write-Host "Found PUMP_MONITOR binary"
-} 
-
-if ($text.Contains("PUMP_MONITOR|MODE=PROD")) {
-    Write-Host "ERROR: PROD build detected" -ForegroundColor Red
-    Read-Host "Press Enter to close"
-    exit 1
-}
-elseif ($text.Contains("PUMP_MONITOR|MODE=TEST")) {
-    Write-Host "Binary verified as TEST"
-}
-else {
-    Write-Host "ERROR: No build marker found" -ForegroundColor Red
-    Read-Host "Press Enter to close"
-    exit 1
-}
-
-# -----------------------------
-# Info
-# -----------------------------
-Write-Host "-----------------------------------"
-Write-Host "FLASHING TEST"
-Write-Host "Target IP: $IP"
-Write-Host "Binary:    $($bin.FullName)"
-Write-Host "Built:     $($bin.LastWriteTime)"
-Write-Host "Size:      $([math]::Round($bin.Length / 1024, 1)) KB"
-Write-Host "-----------------------------------"
-
-# -----------------------------
-# Run OTA
-# -----------------------------
-python "$ESPOTA" -i $IP -p $PORT -f "$($bin.FullName)"
-
-# -----------------------------
-# Result
-# -----------------------------
-if ($LASTEXITCODE -eq 0) {
-    Write-Host ""
-    Write-Host "SUCCESS! OTA to TEST complete" -ForegroundColor Green
-    exit 0
-} else {
-    Write-Host ""
-    Write-Host "ERROR: OTA to TEST failed" -ForegroundColor Red
-    Read-Host "Press Enter to close"
-    exit $LASTEXITCODE
-}
-```
-
-## File: Pump_Monitor/diag.h
-```c
-#pragma once
-#include <Arduino.h>
-#include <Firebase_ESP_Client.h>
-#include "ntp.h"
-
-class Diag {
-public:
-  // Setters
-  void setSystemState(const char* value) { setValue(systemState, value); }
-  void setWifiState(const char* value) { setValue(wifiState, value); }
-  void setWifiRSSI(const char* value) { setValue(wifiRSSI, value); }
-  void setWifiIP(const char* value) { setValue(wifiIP, value); }
-  void setWifiBSSID(const char* value) { setValue(wifiBSSID, value); }
-  void setWifiDNS(const char* value) { setValue(wifiDNS, value); }
-  void setWifiGW(const char* value) { setValue(wifiGW, value); }
-  void setNTPState(const char* value) { setValue(ntpState, value); }
-  void setPowerOnReason(const char* value) { setValue(powerOnReason, value); }
-  void setHeapInfo(const char* value) { setValue(heapInfo, value); }
-  void setNvmInfo(const char* value) { setValueLong(nvmInfo, value); }
-  void setDiag1(const char* value) { setValue(diag1, value); }
-
-  void setFirebaseState(const char* s);
-  void setFirebaseError(const char* s);
-  void setFirebaseTimeout(const char* s);
-
-  // Getters
-  const char* getSystemState() const { return systemState; }
-  const char* getWifiState() const { return wifiState; }
-  const char* getWifiRSSI() const { return wifiRSSI; }
-  const char* getWifiIP() const { return wifiIP; }
-  const char* getWifiBSSID() const { return wifiBSSID; }
-  const char* getWifiDNS() const { return wifiDNS; }
-  const char* getWifiGW() const { return wifiGW; }
-  const char* getNTPState() const { return ntpState; }
-  const char* getFirebaseState();
-  const char* getFirebaseError();
-  const char* getFirebaseTimeout();
-
-  // Updaters
-  void updateDiagInfo() {
-    // NTP
-    if (!validClock()) {
-      setNTPState("NTP_WAIT");
-    } else {
-      setNTPState("NTP_OK");
-    }
-
-    // Heap
-    char buf[32];
-    snprintf(buf, sizeof(buf), "%u / %u",
-      ESP.getFreeHeap(),
-      ESP.getMinFreeHeap());
-
-    setHeapInfo(buf);
-  } 
-
-  Diag() {
-    setDefault(systemState);
-    setDefault(wifiState);
-    setDefault(wifiRSSI);
-    setDefault(wifiIP);
-    setDefault(wifiBSSID);
-    setDefault(wifiGW);
-    setDefault(wifiDNS);
-    setDefault(ntpState);
-    setDefault(powerOnReason);
-    setDefault(heapInfo);
-    setDefault(nvmInfo);
-    setDiag1("[unused]");
-}
-
-private:
-  static const uint16_t DIAG_BUF_SIZE = 32;
-  static const uint16_t DIAG_BUF_LONG = 160;
-
-  char systemState[DIAG_BUF_SIZE];
-  char wifiState[DIAG_BUF_SIZE];
-  char wifiRSSI[DIAG_BUF_SIZE];
-  char wifiIP[DIAG_BUF_SIZE];
-  char wifiBSSID[DIAG_BUF_SIZE];
-  char wifiGW[DIAG_BUF_SIZE];
-  char wifiDNS[DIAG_BUF_SIZE];
-  char ntpState[DIAG_BUF_SIZE];
-  char powerOnReason[DIAG_BUF_SIZE];
-  char heapInfo[DIAG_BUF_SIZE];
-  char diag1[DIAG_BUF_SIZE];
-  char nvmInfo[DIAG_BUF_LONG];
-
-  char fbState[DIAG_BUF_SIZE];
-  char fbError[64];
-  char fbTimeout[DIAG_BUF_SIZE];
-
-  void setValue(char* dest, const char* src) {
-    if (src) {
-        strncpy(dest, src, DIAG_BUF_SIZE - 1);
-        dest[DIAG_BUF_SIZE - 1] = '\0';
-    } else {
-        dest[0] = ' ';
-        dest[1] = '\0';
-    }
-  }
-
-  void setValueLong(char* dest, const char* src) {
-      if (src) {
-          strncpy(dest, src, DIAG_BUF_LONG - 1);
-          dest[DIAG_BUF_LONG - 1] = '\0';
-      } else {
-          dest[0] = ' ';
-          dest[1] = '\0';
-      }
-  }
-
-  void setDefault(char* dest) {
-      dest[0] = '\0';
-  }
-};
-
-extern Diag diagState;
-```
-
-## File: Pump_Monitor/export.h
-```c
-#pragma once
-
-#include <WiFi.h>
-
-// Main export entry point
-void renderExportCsv(WiFiClient &client);
-void renderExportJson(WiFiClient &client);
-void renderExportQueuedDailySummaryJson(WiFiClient &client);
-```
-
-## File: Pump_Monitor/ledFunc.cpp
-```cpp
-#include "global.h"
-#include "ledFunc.h"
-
-uint8_t LED_STATE = LED_OFF;
-
-void toggleLED() {
-  LED_STATE = !LED_STATE;
-  setLED();
-}
-
-void LEDOn() {
-  LED_STATE = LED_ON;
-  setLED();
-}
-
-void LEDOff() {
-  LED_STATE = LED_OFF;
-  setLED();
-}
-
-void setLED() {
-  digitalWrite(LED_PIN, LED_STATE);  // LED
-}
-```
-
-## File: Pump_Monitor/ntp.cpp
-```cpp
-#include <time.h>
-#include <sys/time.h>
-
-// Project Files
-#include "global.h"
-#include "diag.h"
-#include "ntp.h"
-
-//--------------------------------------------------------
-// NTP / Local Time Variables
-//--------------------------------------------------------
-
-unsigned int Month = 0;
-unsigned int Day = 0;
-unsigned int Year = 0;
-
-// US Eastern Time with automatic DST
-// Standard: EST (UTC-5)
-// Daylight: EDT (UTC-4)
-// DST starts: 2nd Sunday in March at 2:00
-// DST ends:   1st Sunday in November at 2:00
-static const char* TZ_INFO = "EST5EDT,M3.2.0/2,M11.1.0/2";
-
-//--------------------------------------------------------
-// Internal Helpers
-//--------------------------------------------------------
-
-static bool getLocalTm(struct tm* outTm) {
-  if (!outTm) return false;
-
-  time_t now = time(nullptr);
-  if (now <= 0) return false;
-
-  localtime_r(&now, outTm);
-  return true;
-}
-
-static bool getGmTm(struct tm* outTm) {
-  if (!outTm) return false;
-
-  time_t now = time(nullptr);
-  if (now <= 0) return false;
-
-  gmtime_r(&now, outTm);
-  return true;
-}
-
-//--------------------------------------------------------
-// NTP Functions
-//--------------------------------------------------------
-
-void setupNTP() {
-  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
-  setenv("TZ", TZ_INFO, 1);
-  tzset();
-}
-
-void updateNTP() {
-  // With configTzTime(), SNTP refresh happens in the background.
-  // We just refresh cached date fields when time is valid.
-  if (validClock()) {
-    updateDate();
-  }
-}
-
-const char* getClock() {
-  static char buf[9];  // "HH:MM:SS" + null
-  struct tm tmv;
-
-  if (!getLocalTm(&tmv)) {
-    snprintf(buf, sizeof(buf), "--:--:--");
-    return buf;
-  }
-
-  snprintf(buf, sizeof(buf), "%02d:%02d:%02d",
-           tmv.tm_hour,
-           tmv.tm_min,
-           tmv.tm_sec);
-  return buf;
-}
-
-void updateDate() {
-  struct tm tmv;
-  if (!getLocalTm(&tmv)) return;
-
-  Month = (unsigned int)(tmv.tm_mon + 1);
-  Day   = (unsigned int)tmv.tm_mday;
-  Year  = (unsigned int)(tmv.tm_year + 1900);
-}
-
-const char* getDate() {
-  static char ts[16];
-  snprintf(ts, sizeof(ts), "%s.%s.%s",
-           getYearStr(), getMonthStr(), getDayStr());
-  return ts;
-}
-
-const char* getTimestamp() {
-  // Format 2026.03.16T18:47:57
-  static char ts[24];
-  snprintf(ts, sizeof(ts), "%s.%s.%sT%s:%s:%s",
-           getYearStr(), getMonthStr(), getDayStr(),
-           getHourStr(), getMinStr(), getSecStr());
-  return ts;
-}
-
-const char* getTimelog() {
-  // Format 2026_03_16T18_47_57
-  static char ts[24];
-  snprintf(ts, sizeof(ts), "%s_%s_%sT%s_%s_%s",
-           getYearStr(), getMonthStr(), getDayStr(),
-           getHourStr(), getMinStr(), getSecStr());
-  return ts;
-}
-
-const char* getHourStr() {
-  static char hh[3];
-  struct tm tmv;
-
-  if (!getLocalTm(&tmv)) {
-    snprintf(hh, sizeof(hh), "00");
-    return hh;
-  }
-
-  snprintf(hh, sizeof(hh), "%02d", tmv.tm_hour);
-  return hh;
-}
-
-const char* getMinStr() {
-  static char mm[3];
-  struct tm tmv;
-
-  if (!getLocalTm(&tmv)) {
-    snprintf(mm, sizeof(mm), "00");
-    return mm;
-  }
-
-  snprintf(mm, sizeof(mm), "%02d", tmv.tm_min);
-  return mm;
-}
-
-const char* getSecStr() {
-  static char ss[3];
-  struct tm tmv;
-
-  if (!getLocalTm(&tmv)) {
-    snprintf(ss, sizeof(ss), "00");
-    return ss;
-  }
-
-  snprintf(ss, sizeof(ss), "%02d", tmv.tm_sec);
-  return ss;
-}
-
-const char* getYearStr() {
-  static char yyyy[6];
-  struct tm tmv;
-
-  if (!getLocalTm(&tmv)) {
-    snprintf(yyyy, sizeof(yyyy), "0000");
-    return yyyy;
-  }
-
-  snprintf(yyyy, sizeof(yyyy), "%04d", tmv.tm_year + 1900);
-  return yyyy;
-}
-
-const char* getMonthStr() {
-  static char mm[3];
-  struct tm tmv;
-
-  if (!getLocalTm(&tmv)) {
-    snprintf(mm, sizeof(mm), "00");
-    return mm;
-  }
-
-  snprintf(mm, sizeof(mm), "%02d", tmv.tm_mon + 1);
-  return mm;
-}
-
-const char* getDayStr() {
-  static char dd[3];
-  struct tm tmv;
-
-  if (!getLocalTm(&tmv)) {
-    snprintf(dd, sizeof(dd), "00");
-    return dd;
-  }
-
-  snprintf(dd, sizeof(dd), "%02d", tmv.tm_mday);
-  return dd;
-}
-
-unsigned int getHourInt() {
-  struct tm tmv;
-  if (!getLocalTm(&tmv)) return 0;
-  return (unsigned int)tmv.tm_hour;
-}
-
-unsigned int getMinInt() {
-  struct tm tmv;
-  if (!getLocalTm(&tmv)) return 0;
-  return (unsigned int)tmv.tm_min;
-}
-
-unsigned int getSecInt() {
-  struct tm tmv;
-  if (!getLocalTm(&tmv)) return 0;
-  return (unsigned int)tmv.tm_sec;
-}
-
-unsigned int getDayInt() {
-  struct tm tmv;
-  if (!getLocalTm(&tmv)) return 0;
-  return (unsigned int)tmv.tm_mday;
-}
-
-unsigned int getMonthInt() {
-  struct tm tmv;
-  if (!getLocalTm(&tmv)) return 0;
-  return (unsigned int)(tmv.tm_mon + 1);
-}
-
-unsigned int getYearInt() {
-  struct tm tmv;
-  if (!getLocalTm(&tmv)) return 0;
-  return (unsigned int)(tmv.tm_year + 1900);
-}
-
-// NOTE: getDateKeyInt currently returns MMDD (no year).
-// Safe for current system due to daily reset + validity filtering.
-// Can be upgraded to YYYYMMDD in future without changing callers.
-unsigned int getDateKeyInt() {
-  return 100*getMonthInt() + getDayInt();
-}
-
-bool validClock() {
-  time_t now = time(nullptr);
-  return (now > 1767225600 && now < 2556144000); // 2026 - 2050
-}
-
-// UNIQUE TO PUMP - MERGE LATER
-
-void getCurrentDayKey(char* buf, size_t len) {
-  snprintf(buf, len, "%s_%s_%s",
-           getYearStr(),
-           getMonthStr(),
-           getDayStr());
-}
-
-uint32_t getCurrentEpoch() {
-  time_t now = time(nullptr);
-  if (now <= 1000000000) {  // crude "time not set" guard (~2001)
-    return 0;
-  }
-  return (uint32_t)now;
-}
-
-//-----------------------------------------------
-// Validation Helpers
-//-----------------------------------------------
-
-bool isTimezoneApplied() {
-  time_t now = time(nullptr);
-
-  // If time isn't valid yet, don't evaluate
-  if (now <= 1000000000) return true;
-
-  struct tm localTm, gmTm;
-  localtime_r(&now, &localTm);
-  gmtime_r(&now, &gmTm);
-
-  int diffHours = localTm.tm_hour - gmTm.tm_hour;
-
-  // Normalize to [-12, +12]
-  if (diffHours > 12) diffHours -= 24;
-  if (diffHours < -12) diffHours += 24;
-
-  // Eastern should be:
-  // -5 hours (EST) or -4 hours (EDT)
-  return (diffHours == -5 || diffHours == -4);
-}
-
-void ensureTimeHealthy() {
-  if (!validClock()) return;
-
-  if (!isTimezoneApplied()) {
-    Serial.println("⚠️ Timezone not applied — fixing");
-
-    setenv("TZ", TZ_INFO, 1);
-    tzset();
-    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
-  }
-}
-```
-
-## File: README-pump.md
-```markdown
-# Sump Pump Monitor (ESP32 + OLED + WiFi + Firebase)
-
-An ESP32-based sump pump monitor with OLED status screens, WiFi
-connectivity, NTP time sync, and Firebase reporting.
-
-This system tracks pump cycles, runtime, current waveform, estimated
-gallons, daily totals, and last-cycle energy metrics. It also includes a
-built-in web UI, structured Firebase retry mechanism, optional OTA
-firmware update support, and NVS-backed crash recovery for in-progress
-daily data.
-
-> Gallon values are model-derived estimates. Without a flow meter, they
-> should be treated as trend indicators rather than precise
-> measurements.
-
-------------------------------------------------------------------------
-
-## Features
-
--   OLED UI (Heltec SSD1306)
--   WiFi STA with DHCP → static-IP reconnect model
--   NTP time synchronization (fixed UTC offset, no DST)
--   Firebase RTDB integration (daily summary / Weather)
--   Daily Summary Queue with hourly retry
--   NVS-backed 4-hour bucket persistence (crash/update recovery)
--   Boot statistics persistence (reboot counter + timestamps)
--   Optional ArduinoOTA firmware update support
--   Pump cycle timing + statistics
--   Last-cycle current waveform capture
--   Last-cycle energy proxy (Amp-seconds)
--   365-day daily totals history buffer (reloaded on reboot)
--   Embedded Web UI (Multi Function Pages / Export / Charts)
--   CSV / JSON exports
--   Weather Tracking
--   Pixel Shifting to save OLED screen from burn in (learned the hard way)
--   Watchdog Timer
--   Serial Logger / RAM Logger (for Prod) / Firebase Logger
--   Test Mode for simulating pump events and data storage / recovery
--   Adaptive loop delay tuning
-
-------------------------------------------------------------------------
-
-## Hardware
-
-Typical setup:
-
--   ESP32 (Heltec or compatible)
--   SSD1306 128×64 OLED
--   Current sensor (ADC input)
--   LED indicator
--   touch/button input
-
-GPIO and configuration constants are defined in `global.h`.
-
-------------------------------------------------------------------------
-
-## System Overview (Conceptual Flow)
-
-Pump Current Signal\
-↓\
-Cycle Detection\
-↓\
-Runtime Accumulation\
-↓\
-4-Hour Block Aggregation\
-↓\
-NVM Checkpoint\
-↓\
-Reboot? → Restore + Continue\
-↓\
-Daily Summary (23:00)\
-↓\
-Firebase Write (if safe)\
-↓\
-365-Day History → Web UI
-
-------------------------------------------------------------------------
-
-## Scheduling Model (NEEDS UPDATE)
-
-Main loop runs every \~100ms.
-
-Soft task structure:
-
--   `loop100ms()` --- input sampling, pump detection, OLED updates
--   `loop1Sec()` --- adaptive delay control, NTP updates, OTA servicing
--   `loop10Sec()` --- server start + connection checks
--   `loop1Min()` --- WiFi/Firebase reconnect logic
--   `loop1Hour()` --- Firebase summary retry
--   `loop1Day()` --- reset daily write counter
-
-OTA servicing may also be called in the main loop to ensure responsive
-firmware updates.
-
-------------------------------------------------------------------------
-
-## CONNECTIVITY:
-
-System     Reliability
----------- ------------------------------
-NTP        HTTP: Always works
-Weather    HTTP: Works quickly
-Firebase   HTTPS / TLS: Fragile, slow
-
-------------------------------------------------------------------------
-
-## Daily Lifecycle
-
-The system operates on a repeating daily cycle.
-
-Each day is divided into 6 blocks:
-
--   03:00 / 07:00 / 11:00 / 15:00 / 19:00 / 23:00
-
-At each boundary:
-
--   the previous 4 hours are finalized and reset
--   data is stored / checkpointed
--   state is persisted
-
-At 23:00:
-
--   the full day is known
--   totals are computed
--   estimates are computed if needed
--   Firebase is queued, and queue store in NVM
-
-------------------------------------------------------------------------
-
-## Recovery Strategies
-
-System designed to be robust to:
-
--   reboot in the middle of the day
--   Firebase not working for hours
--   TLS randomly failing
--   WiFi dropouts
--   NTP out of sync
-
-------------------------------------------------------------------------
-
-## Firebase Architecture
-
-### Write Model
-
-The system performs:
-
--   6 × 4-hour model buckets per day (3,7,11,15,19,23)
--   One authoritative daily summary write
-
-Intermediate 4-hour bucket state is persisted to NVS to prevent data
-loss during firmware updates or unexpected reboots.
-
-### Paths
-
-Normal mode:
-
-    /pump/<namespace>/<year>/daily_summary/YYYY_MM_DD/
-    /pump/<namespace>/<year>/daily_detail/YYYY_MM_DD/
-
-Test mode:
-
-    /pump/<namespace>/test_server/<year>/daily_summary/YYYY_MM_DD/
-    /pump/<namespace>/test_server/<year>/daily_detail/YYYY_MM_DD/
-
-### Daily Summary Stucture (NEEDS UPDATE)
-
--   timestamp
--   total_gallons (model-derived)
--   total_cycles (model-derived)
--   cycle1..cycle6
--   gallon1..gallon6
--   last_cycle_energy (Amp-seconds proxy)
-
-------------------------------------------------------------------------
-
-## Firebase Retry Strategy
-
-### Summary-Only Retry
-
-If a daily summary write fails:
-
--   Payload is serialized into a single-slot RAM buffer
--   Only daily summary is retried
--   Daily detail failures are ignored
--   No multi-slot queueing
--   Buffer is cleared on reboot
-
-### Retry Frequency
-
--   Retry occurs once per hour (`loop1Hour()`)
--   Requires Firebase to be ready
--   Requires valid system time
--   Limited by `MAX_DAILY_FB_WRITES` (default: 3 per day)
-
-### Day Boundary Reset
-
-If the queued summary belongs to a previous day:
-
--   Retry is automatically dropped
--   No cross-day carryover
-
-### Idempotency
-
-Daily summary key is deterministic (YYYY_MM_DD):
-
--   Retries overwrite same node
--   No duplicate records created
-
-### Firebase Data Logger
-(NEEDS UPDATE)
-
-------------------------------------------------------------------------
-
-## NVM Checkpointing  (UPDATE)
-
-### 4-Hour Block Persistence
-
-After each completed 4-hour block these items are written to NVS:
-
--   `GAL_4HR[6]`
--   `CYCLE_4HR[6]`
--   `daily4hrCount`
--   `day_key`
--   `save_epoch`
-
-On reboot:
-
--   State is restored only if:
-    -   Day key matches current day
-    -   Saved timestamp is within configured window (4 hours)
-
-If validation fails, state is ignored and cleared.
-
-### Boot Statistics
-
-On each reboot:
-
--   Boot counter increments
--   Previous boot timestamp stored
--   Last boot timestamp stored
-
-------------------------------------------------------------------------
-
-## Pump Metrics
-
-### Core Statistics
-
--   Pump cycles
--   Average cycle time
--   Standard deviation
--   Cycles per hour/day (model)
--   Gallons per hour/day (model)
-
-### Waveform Capture
-
-For each completed pump cycle:
-
--   Raw ADC waveform stored (up to 600 samples)
--   Last cycle waveform exposed in web UI
--   Average, min, max current computed
-
-### Energy Calculation
-
-Last cycle energy is computed as a fixed-window proxy:
-
--   Uses waveform samples 10..49
--   100ms cadence
--   Units: Amp-seconds (A·s)
-
-This value is stored in daily summary and daily detail.
-
-------------------------------------------------------------------------
-
-## Web UI (NEEDS UPDATE)
-
-Accessible at device IP address.
-
-Pages:
-
--   MAIN --- real-time stats
--   TREND --- daily history + gallons/day SVG chart
--   DETAILS --- waveform graph + energy metrics
-
-------------------------------------------------------------------------
-
-## Charts
-
-Charts are rendered as inline SVG (no external JS libraries).
-
-1) Gallons Per Day (last 365 days
-2) Current Waveform from last pump on event
-3) On / Off pulse wave for last 24 hours
-
-
-------------------------------------------------------------------------
-
-## OTA Firmware Update
-
-Supports ArduinoOTA-based firmware updates over WiFi.
-
--   Requires OTA-enabled firmware build
--   Uses configurable TCP port (default 3232)
--   Requires OTA handler to be serviced in main loop
--   First upload must be performed via USB
-
-------------------------------------------------------------------------
-
-## Stability Improvements
-
--   Heap guard before Firebase initialization
--   Hourly retry (no rapid retry loops)
--   RAM-only retry buffer
--   Deterministic daily summary writes
--   Safety fuse limiting daily writes
--   NVS-backed in-progress state recovery
--   Boot statistics tracking
--   Reduced dynamic memory in OLED hot path
--   Static HTML fragments stored in PROGMEM
--   Adaptive loop delay tuning
-
-------------------------------------------------------------------------
-
-# Time Handling
-
--   Real Time clock synced with NTP time server
--   Automatic time zone with DST handling
--   Time zone sanity checking every minute
-
-------------------------------------------------------------------------
-
-## Test Mode
-
-Test mode simulates:
-
--   Pump current waveform
--   Cycle timing
--   Randomized daily totals
--   Forced daily writes in hourly loop
-
-Used for UI and Firebase validation without hardware.
-
-------------------------------------------------------------------------
-
-## Prod Diagnostics (No Serial Available)
-
-### RAM Log
-
--   circular buffer (\~100 lines)
--   timestamps
--   exportable
-
-### CSV Export
-
-Exports as much internal data / variables as possible:
-
--   system states
--   history
--   Firebase state
--   Wifi State
--   NVM state
--   queued write
--   RAM log
--   Firebase log
-
-This is the **primary debugging interface**.
-
-------------------------------------------------------------------------
-
-## Test Mode Diagnostics
-
-Test mode supports very detailed serial logging
-
-------------------------------------------------------------------------
-
-## Weather (NEED UPDATE)
-
-- Temp / Avg Temp
-- Wind / Avg Wind / Gust
-- Rain (24 hrs) / Snow (24 hrs)
-
-------------------------------------------------------------------------
-
-## Build / Flash
-
-1.  Install Arduino IDE or PlatformIO
-2.  Install ESP32 board support
-3.  Configure `secrets.h` (WiFi + Firebase)
-4.  Upload firmware (USB required for first OTA-enabled build)
-
-------------------------------------------------------------------------
-
-## Project Structure (NEEDS UPDATE)
-
-Main File - Pump_Monitor.ino
-
-Pump detection + metrics: Pump_Monitor.cpp / pumpFunc.cpp
-Data: pumpData.cpp / datastore.cpp
-Firebase: firebase.cpp / pumpFBRepo.cpp / firebaseClient.cpp
-WiFi + Time: wifiFunctions.cpp / ntp.cpp
-UI + Indicators - oledFunc.cpp / ledFunc.cpp
-Web Server: serverFunc.cpp
-OTA: OTA.cpp
-NVM: nvm.cpp
-Test Mode: test_mode.cpp
-Charts: charts.cpp, pump365.h, eventData.cpp
-Diagnostics: diag.cpp
-Export Generation: export.cpp
-History Loader: history.cpp
-Utilities: utils.cpp
-Weather: weather.cpp
-
-Config: global.h
-Secrets: secrets.h
-
-------------------------------------------------------------------------
-
-## License
-
-Private project.
-
-------------------------------------------------------------------------
-
-## Limitations
-
-Firebase Client Stability
-
-The Firebase client library used in this project is not fully robust under rapid or repeated operations. In particular:
-
-Back-to-back write operations can cause:
-- failed requests
-- connection instability
-- occasional device resets (observed in earlier versions)
-
-The client does not reliably handle:
-- transient network instability
-- rapid retry loops
-- overlapping or concurrent operations
-
-## Mitigation Strategy
-
-To ensure stable operation, this project enforces:
-
-- Strict write serialization
-- Only one Firebase operation is performed at a time
-- Rate limiting
-- Daily summaries are processed at most once per hour
-- Weather writes are limited (e.g., every 6 hours)
-- Queue-based writes
-- Writes are enqueued and processed later
-- Failed writes are retried with spacing, not immediately
-- Write throttling
-- A maximum number of writes per day is enforced as a safety guard
-- Priority handling
-- Daily summaries are prioritized over weather updates
-
-## Design Implications
-
-- This system is intentionally single-threaded with respect to Firebase access
-- Multi-threading or parallel writes are avoided to prevent client instability
-- The system favors reliability over immediacy
-
-## Future Improvements
-- Replace or wrap the Firebase client with a more robust transport layer
-- Encapsulate globals and diagnostics
-- Implement backoff strategies for retries
-- Evaluate alternative backends if stability becomes a concern
-- Move Daily Statistics to NVM vs Firebase
-- Move RAM log to web page
-- Add an NVM log for crash debugging
-```
-
-## File: Pump_Monitor/datastore.h
-```c
-#pragma once
-
-#include "global.h"
-#include <string.h>
-
-#define DATASTORE_MAX 50
-#define CURRENTSTORE_MAX 100
-
-class DataStoreInt {
-  public:
-    DataStoreInt(int size, String units);
-    DataStoreInt();
-    float avg();
-    float ssAvg(float tolPct = 0.10f);   // Steady State Avg
-    float stdev();
-    void reset();
-    void addData(int x);
-    long getTotalCount();
-    String dataText();
-    String htmlText();
-    void init(int size, String units);
-    int getData(int i) const;
-    
-  private:
-    int _data[DATASTORE_MAX+2];
-    int _dataCount;
-    int _maxCount;
-    long _totalCount;
-    String _units;
-};
-
-
-class DataStoreFloat {
-  public:
-    DataStoreFloat(int size, int prec, String units);
-    DataStoreFloat();
-    float avg();
-    float stdev();
-    void reset();
-    void addData(float x);
-    String dataText();
-    long getTotalCount();
-    void init(int size, int prec, String units);
-    
-  private:
-    float _data[DATASTORE_MAX+2];
-    int _dataCount;
-    int _maxCount;
-    int _prec;
-    long _totalCount;
-    String _units;
-};
-
-class CurrentStoreInt {
-  public:
-    CurrentStoreInt();
-    float avg();
-    float ssAvg(float tolPercent = 0.2f);
-    void reset();
-    void addData(int x);
-    String dataText();
-    String htmlText();
-    String getLastDataText();
-    String getLastHtmlText();
-    
-  private:
-    int _data[CURRENTSTORE_MAX+2];
-    int _dataCount;
-    int _maxCount;
-    String _units;
-    String lastDataText;
-    String lastHtmlText;
-};
-```
-
-## File: Pump_Monitor/history.cpp
-```cpp
-#include "history.h"
-
-#include <Arduino.h>
-#include <string.h>
-#include <time.h>
-
-#include "global.h"
-#include "pump365.h"
-#include "firebase.h"
-#include "pumpFBRepo.h"
-#include "firebaseClient.h"
-#include "ntp.h"
-#include "wifiFunc.h"
-
-// Existing globals provided elsewhere in the project.
-extern PumpFBRepo pumpRepo;
-extern FirebaseClient fbClient;
-
-namespace {
-
-enum HistoryLoaderState : uint8_t {
-  HL_IDLE = 0,
-  HL_WAIT_PREREQS,
-  HL_LOADING,
-  HL_DONE
-};
-
-// Production-only historical earliest day.
-static const char* FB_EARLIEST_DAY_KEY = "2026_02_26";
-
-static Pump365Data* s_data = nullptr;
-static HistoryLoaderState s_histState = HL_IDLE;
-
-static bool s_enabled = false;
-static bool s_complete = false;
-static bool s_started = false;
-
-// Progress
-static uint16_t s_loaded = 0;        // number of applied days (real or missing)
-static uint16_t s_target = -1;       // total requested days
-static uint16_t s_nextDaysAgo = 1;   // start from yesterday
-
-// Timing / retry policy
-static uint32_t s_nextAttemptMs = 0;
-static uint16_t s_retryMinutes = 5;   // success can trend 5 -> 4 -> 3
-static uint16_t s_failCount = 0;      // after 3 failures, back off to 15 min
-
-// Anchor / status
-static time_t s_anchorEpoch = 0;
-static char s_currentKey[16] = "";
-static char s_histStatusText[48] = "IDLE";
-
-static void setHistStatus(const char* s) {
-  if (!s) s = "";
-  strncpy(s_histStatusText, s, sizeof(s_histStatusText) - 1);
-  s_histStatusText[sizeof(s_histStatusText) - 1] = '\0';
-}
-
-static uint16_t computeHistoryTargetCount() {
-#if TEST_MODE
-  return 45;
-#else
-  if (!validClock()) {
-    return -1;
-  }
-
-  if (s_anchorEpoch <= 0) {
-    startHistoryAnchorNow();
-  }
-
-  const time_t daySec = 24 * 60 * 60;
-  time_t anchor = s_anchorEpoch - daySec; // yesterday
-
-  char yesterdayKey[16];
-  makeDayKeyFromEpoch(anchor, yesterdayKey, sizeof(yesterdayKey));
-
-  if (strcmp(yesterdayKey, FB_EARLIEST_DAY_KEY) < 0) {
-    return 0;
-  }
-
-  struct tm tmYesterday = {};
-  struct tm tmEarliest = {};
-
-  int y, m, d;
-
-  if (sscanf(yesterdayKey, "%d_%d_%d", &y, &m, &d) != 3) {
-    return 0;
-  }
-  tmYesterday.tm_year = y - 1900;
-  tmYesterday.tm_mon  = m - 1;
-  tmYesterday.tm_mday = d;
-  tmYesterday.tm_hour = 12;
-
-  if (sscanf(FB_EARLIEST_DAY_KEY, "%d_%d_%d", &y, &m, &d) != 3) {
-    return 0;
-  }
-  tmEarliest.tm_year = y - 1900;
-  tmEarliest.tm_mon  = m - 1;
-  tmEarliest.tm_mday = d;
-  tmEarliest.tm_hour = 12;
-
-  time_t tYesterday = mktime(&tmYesterday);
-  time_t tEarliest  = mktime(&tmEarliest);
-
-  if (tYesterday < tEarliest) {
-    return 0;
-  }
-
-  return (int)(((tYesterday - tEarliest) / daySec) + 1);
-#endif
-}
-
-static bool historyLoaderKeyAllowed(const char* dayKey) {
-#if PROD_MODE
-  return strcmp(dayKey, FB_EARLIEST_DAY_KEY) >= 0;
-#else
-  (void)dayKey;
-  return true;
-#endif
-}
-
-static void scheduleNextAttempt() {
-  s_nextAttemptMs = millis() + (unsigned long)s_retryMinutes * 60UL * 1000UL;
-}
-
-static bool loaderPrereqsReady() {
-  return wifiOK() && validClock() && firebaseReadAllowed();
-}
-
-static bool isFirebaseAuthNotReadyError(const String& err) {
-  if (err.indexOf("token is not ready") >= 0) return true;
-  if (err.indexOf("token is expired") >= 0) return true;
-  if (err.indexOf("token is invalid") >= 0) return true;
-  if (err.indexOf("revoked or expired") >= 0) return true;
-  return false;
-}
-
-// Uses pump repo signature:
-static bool fetchDailySummaryForKey(
-    const char* dayKey,
-    bool& outExists,
-    int& outCyclesPerDay,
-    int& outGallonsPerDay,
-    float& outRainMm) {
-
-  outExists = false;
-  outCyclesPerDay = -1;
-  outGallonsPerDay = -1;
-  outRainMm = -1.0f;
-
-  bool ok = pumpRepo.readFirebaseDailySummary(
-      dayKey,
-      outExists,
-      outCyclesPerDay,
-      outGallonsPerDay,
-      outRainMm);
-
-  if (!ok) {
-    const String& err = fbClient.getLastError();
-
-    // Firebase auth/token not ready yet -> real retry condition
-    if (isFirebaseAuthNotReadyError(err)) {
-      return false;
-    }
-
-    // Missing path/day -> this is NOT a failure for history loading.
-    // Treat it as a valid missing day so loader can append a gap record.
-    if (err.indexOf("path not exist") >= 0) {
-      outExists = false;
-      outCyclesPerDay = -1;
-      outGallonsPerDay = -1;
-      outRainMm = -1.0f;
-      return true;
-    }
-
-    // Everything else is a real read failure
-    return false;
-  }
-
-  return true;
-}
-
-static void applyLoadedHistoryRecord(int cyclesPerDay, int gallonsPerDay, float rainMm) {
-  if (!s_data) return;
-  s_data->appendOlderDailyRecord(cyclesPerDay, gallonsPerDay, rainMm);
-}
-
-static void applyMissingHistoryRecord() {
-  if (!s_data) return;
-  s_data->appendOlderMissingDailyRecord();
-}
-
-static bool markComplete(const char* why) {
-  s_complete = true;
-  s_enabled = false;
-  s_histState = HL_DONE;
-  setHistStatus(why);
-  return true;
-}
-
-static void handleReadFailure() {
-  s_failCount++;
-  onFirebaseOpFailure(fbClient.getLastHTTPCode());
-
-  if (s_failCount >= 3) {
-    Serial.println("History loader backing off for 15 min after 3 failures");
-    s_failCount = 0;
-    s_retryMinutes = 15;
-    setHistStatus("BACKOFF_15M");
-    scheduleNextAttempt();
-    return;
-  }
-
-  if (s_retryMinutes < 5) s_retryMinutes++;
-  setHistStatus("RETRY_READ");
-  scheduleNextAttempt();
-}
-
-static void handleApplySuccess() {
-  s_failCount = 0;
-  onFirebaseOpSuccess();
-
-  // Success trends 5 -> 4 -> 3, never below 3.
-  if (s_retryMinutes >= 5) {
-    s_retryMinutes = 5;
-  } else if (s_retryMinutes > 3) {
-    s_retryMinutes--;
-  }
-
-  if (s_target >= 0 && s_loaded >= s_target) {
-    markComplete("COMPLETE");
-    return;
-  }
-
-  Serial.printf("History progress: %d/%d loaded, next in %d min\n",
-                s_loaded, s_target, s_retryMinutes);
-  setHistStatus("LOADING");
-  scheduleNextAttempt();
-}
-
-} // namespace
-
-// ------------------------------------------------------------------
-// Public code
-// ------------------------------------------------------------------
-
-const char* getEarliestHistoryKey() {
-  return FB_EARLIEST_DAY_KEY;
-}
-
-const char* historyLoaderProgressText() {
-  static char buf[16];
-
-  if (s_target < 0) {
-    snprintf(buf, sizeof(buf), "--/--");
-  } else {
-    snprintf(buf, sizeof(buf), "%d/%d", s_loaded, s_target);
-  }
-
-  return buf;
-}
-
-void historyLoaderBegin(Pump365Data& data) {
-  s_data = &data;
-  s_started = true;
-  s_enabled = true;
-  s_complete = false;
-  s_loaded = 0;
-  s_nextDaysAgo = 1;   // yesterday first
-  s_nextAttemptMs = 0;
-  s_retryMinutes = 5;
-  s_failCount = 0;
-  s_anchorEpoch = 0;
-  s_currentKey[0] = '\0';
-
-  s_target = -1;
-  s_histState = HL_WAIT_PREREQS;
-  setHistStatus("WAIT_PREREQS");
-
-  if (s_data) {
-    s_data->clearDailyHistory();
-  }
-}
-
-void historyLoaderTick() {
-  if (!s_started || !s_enabled || s_complete) return;
-  if (!s_data) return;
-
-  if (s_histState == HL_DONE || s_histState == HL_IDLE) return;
-
-  if ((long)(millis() - s_nextAttemptMs) < 0) return;
-
-  if (!loaderPrereqsReady()) {
-    s_histState = HL_WAIT_PREREQS;
-    setHistStatus("WAIT_PREREQS");
-    scheduleNextAttempt();
-    return;
-  }
-
-  // Initialize target once prerequisites are ready
-  if (s_target < 0) {
-    startHistoryAnchorNow();
-    s_target = computeHistoryTargetCount();
-
-    if (s_target < 0) {
-      setHistStatus("WAIT_CLOCK");
-      scheduleNextAttempt();
-      return;
-    }
-
-    Serial.printf("History target initialized: %d days\n", s_target);
-
-    if (s_target == 0) {
-      markComplete("EARLIEST_DAY_REACHED");
-      return;
-    }
-  }
-
-  s_histState = HL_LOADING;
-  setHistStatus("LOADING");
-
-  char dayKey[16];
-  makeHistoricalDayKey(s_nextDaysAgo, dayKey, sizeof(dayKey));
-
-  strncpy(s_currentKey, dayKey, sizeof(s_currentKey) - 1);
-  s_currentKey[sizeof(s_currentKey) - 1] = '\0';
-
-  // Guard against bad/early anchor dates before applying earliest day logic
-  if (s_loaded == 0 && !historyLoaderKeyAllowed(dayKey)) {
-    setHistStatus("WAIT_CLOCK");
-    startHistoryAnchorNow();
-    return;
-  }
-
-  if (!historyLoaderKeyAllowed(dayKey)) {
-    markComplete("EARLIEST_DAY_REACHED");
-    return;
-  }
-
-  bool exists = false;
-  int cyclesPerDay = -1;
-  int gallonsPerDay = -1;
-  float rainMm = -1.0f;
-
-  if (!fetchDailySummaryForKey(dayKey, exists, cyclesPerDay, gallonsPerDay, rainMm)) {
-    handleReadFailure();
-    return;
-  }
-
-  if (exists) {
-    applyLoadedHistoryRecord(cyclesPerDay, gallonsPerDay, rainMm);
-  } else {
-    applyMissingHistoryRecord();
-  }
-
-  s_loaded++;
-  s_nextDaysAgo++;
-
-  handleApplySuccess();
-}
-
-void historyLoaderReset() {
-  s_data = nullptr;
-  s_histState = HL_IDLE;
-  s_enabled = false;
-  s_complete = false;
-  s_started = false;
-  s_loaded = 0;
-  s_target = -1;
-  s_nextDaysAgo = 1;
-  s_nextAttemptMs = 0;
-  s_retryMinutes = 5;
-  s_failCount = 0;
-  s_anchorEpoch = 0;
-  s_currentKey[0] = '\0';
-  setHistStatus("IDLE");
-}
-
-void historyLoaderDelay(uint32_t delayMs) {
-  uint32_t candidate = millis() + delayMs;
-  if ((candidate - s_nextAttemptMs) > 0) {
-    s_nextAttemptMs = candidate;
-  }
-}
-
-bool historyLoaderIsEnabled() {
-  return s_enabled;
-}
-
-bool historyLoaderIsInProgress() {
-  return s_started && s_enabled && !s_complete;
-}
-
-bool historyLoaderIsComplete() {
-  return s_complete;
-}
-
-int historyLoaderLoadedCount() {
-  return s_loaded;
-}
-
-int historyLoaderTargetCount() {
-  return s_target;
-}
-
-const char* historyLoaderCurrentKey() {
-  return s_currentKey;
-}
-
-const char* historyLoaderGetStatusText() {
-  return s_histStatusText;
-}
-
-void startHistoryAnchorNow() {
-  s_anchorEpoch = getCurrentEpoch();
-}
-
-void setHistoryAnchorEpoch(time_t epoch) {
-  s_anchorEpoch = epoch;
-}
-
-time_t getHistoryAnchorEpoch() {
-  return s_anchorEpoch;
-}
-
-void makeDayKeyFromEpoch(time_t epoch, char* out, size_t outLen) {
-  if (!out || outLen == 0) return;
-
-  struct tm tmv;
-  localtime_r(&epoch, &tmv);
-
-  snprintf(out, outLen, "%04d_%02d_%02d",
-           tmv.tm_year + 1900,
-           tmv.tm_mon + 1,
-           tmv.tm_mday);
-}
-
-void makeHistoricalDayKey(int daysAgo, char* out, size_t outLen) {
-  time_t anchor = s_anchorEpoch;
-  if (anchor <= 0) {
-    anchor = getCurrentEpoch();
-  }
-
-  // daysAgo=1 => yesterday
-  const time_t t = anchor - ((time_t)daysAgo * 86400);
-  makeDayKeyFromEpoch(t, out, outLen);
-}
-
-void printDailyHistory() {
-  Serial.printf(
-      "History loader: loaded=%d target=%d enabled=%d complete=%d retryMin=%d failCount=%d status=%s current=%s\n",
-      s_loaded,
-      s_target,
-      (int)s_enabled,
-      (int)s_complete,
-      s_retryMinutes,
-      s_failCount,
-      s_histStatusText,
-      s_currentKey);
-
-  if (!s_data) {
-    Serial.println("History loader: no target data");
-    return;
-  }
-
-  Serial.println("----- Pump Daily History -----");
-  const int n = s_data->dailyValidCount();
-  for (int i = n - 1; i >= 0; i--) {
-    PumpDailyRecord rec;
-    if (!s_data->getDailyRecordAgo(i, rec)) continue;
-
-    char dayKey[16];
-    makeHistoricalDayKey(i + 1, dayKey, sizeof(dayKey));
-
-    Serial.print(dayKey);
-    Serial.print("  cycles=");
-    Serial.print(rec.cyclesPerDay);
-    Serial.print("  gallons=");
-    Serial.print(rec.gallonsPerDay);
-    Serial.print("  rain_mm=");
-    Serial.println(rec.rainMm, 1);
-  }
-}
-
-void printHistoricalDayKeys(int count) {
-  if (count < 1) count = 1;
-  if (count > 365) count = 365;
-
-  char key[16];
-  for (int i = 1; i <= count; i++) {
-    makeHistoricalDayKey(i, key, sizeof(key));
-    Serial.printf("History key[%d] = %s\n", i, key);
-  }
-}
-
-void runHistoricalDayKeyTest(int count) {
-  printHistoricalDayKeys(count);
-}
-```
-
-## File: Pump_Monitor/ledFunc.h
-```c
-#pragma once
-
-#define LED_ON 1
-#define LED_OFF 0
-
-extern uint8_t LED_STATE;
-
-void toggleLED();
-void LEDOn();
-void LEDOff();
-void setLED();
-```
-
-## File: Pump_Monitor/oled.cpp
-```cpp
-// Library Files
-#include <Wire.h>
-#include "HT_SSD1306Wire.h"
-#include "global.h"
-#include "oled.h"
-#include "firebase.h"
-#include "history.h"
-#include "ntp.h"
-#include "pumpData.h"
-#include "pumpFunc.h"
-#include "weather.h"
-
-// Just in case
-#include <stdio.h>
-#include <string.h>
-
-// Global Variables
-#include "global.h"
-
-// Display
-SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED);  // addr , freq , i2c group , resolution , rst
-
-// OLED State
-unsigned int OLED_MODE;
-static char PopupText[32] = "";
-static char PopupDetails[64] = "";
-uint32_t PopupTimer = 0;
-uint32_t MainTimer = 0;
-uint32_t MainTimeout = OLED_MODE_NO_TIMEOUT;
-
-#define MIN_MODE_CYCLE_TIME (5 * LOOPS_PER_SEC)
-
-//-------------------------------------------
-// HELPERS
-//-------------------------------------------
-const char* firebaseOLEDText() {
-  static char buf[8];
-
-  switch (getFirebaseState()) {
-    case FB_STATE_PRE_INIT:       return "WAIT";
-    case FB_STATE_INITIALIZING:   return "INIT";
-    case FB_STATE_PAUSED:         return "PAUSE";
-    case FB_STATE_CONNECTED:      return "CONN";
-    case FB_STATE_TEST_DELAY:
-    case FB_STATE_TEST_RUN:
-      snprintf(buf, sizeof(buf), "* %d *", getFirebaseCanaryCount());
-      return buf;
-  }
-  return "ERR";
-}
-
-void VextON(void) {
-  pinMode(Vext, OUTPUT);
-  digitalWrite(Vext, LOW);
-}
-
-void VextOFF(void)  //Vext default OFF
-{
-  pinMode(Vext, OUTPUT);
-  digitalWrite(Vext, HIGH);
-}
-
-void initDisplay() {
-  display.init();
-  OLED_MODE = OLED_OFF;
-  VextON();
-}
-
-void displayText() {
-  static unsigned int cnt = 0;
-  static unsigned int horOffset = 0;
-  static unsigned int vertOffset = 0;
-  static unsigned int vertOffsetMain = 0;
-
-  // Local scratch buffers
-  char line0[48];
-  char line1[48];
-  char line2[48];
-  char line3[48];
-  char line4[48];
-  char line5[48];
-
-  horOffset = (cnt / (60 * LOOPS_PER_SEC)) % 10;  // Every 60 seconds, span = 10 pixels  
-
-  const char* fbStatus = firebaseOLEDText();
-
-  if (OLED_MODE == OLED_MAIN) {
-    display.clear();
-    display.setTextAlignment(TEXT_ALIGN_LEFT);
-    display.setFont(ArialMT_Plain_10);
-
-    // Line 0: HEADER
-    if (TEST_MODE) snprintf(line0, sizeof(line0), "SHAH Pump %s T", APP_VERSION);
-    else           snprintf(line0, sizeof(line0), "SHAH Pump %s", APP_VERSION);
-    display.drawString(horOffset, vertOffsetMain, line0);
-
-    // Line 1: Last Cycle
-    float lastCycle = Pump.getDeltaMin();
-    if (lastCycle <= 0.1f) {
-      snprintf(line1, sizeof(line1), "Last Cycle: --");
-    } else {
-      snprintf(line1, sizeof(line1), "Last Cycle: %.1fm", lastCycle);
-    }
-    display.drawString(horOffset, 10 + vertOffsetMain, line1);
-
-    // Line 2: CPH / CPD
-    float avgCycleMin = Pump.getAvgCycleMin();
-    float cph = 0.0f;
-    int cpd = 0;
-
-    if (avgCycleMin > 0.1f) {
-      cph = 60.0f / avgCycleMin;
-      cpd = (int)(cph * 24.0f);
-    }
-    char curText[12];
-    Pump.getPumpCurText(curText, sizeof(curText));
-
-    snprintf(line2, sizeof(line2), "CPH: %.1f  CPD: %d", cph, cpd);
-    display.drawString(horOffset, 20 + vertOffsetMain, line2);
-
-
-    // Line 3: Gallons - Current
-    int gallonsPerDay = 0;
-    if (avgCycleMin > 0.1f) {
-      gallonsPerDay = (int)(5 * 60 * 24 / avgCycleMin);
-    }
-    if (avgCycleMin <= 0.1f) {
-      snprintf(line3, sizeof(line3), "GPD: --  I: %s", curText);
-    } else {
-      snprintf(line3, sizeof(line3), "GPD: %d  I: %s", gallonsPerDay, curText);
-    }
-    display.drawString(horOffset, 30 + vertOffsetMain, line3);
-
-
-    /////////////////////////////////////////
-    // Line 4: Revolving Line
-    /////////////////////////////////////////
-    const float TimePerStage = 2.0; // Seconds
-    const int Stages = 3;
-    const int TotalTime = LOOPS_PER_SEC * TimePerStage * Stages;
-    const int TimePerStageLoops = int(TimePerStage * LOOPS_PER_SEC);
-
-    // Weather Info
-    float temp = 0, wind = 0, rain = 0;
-    bool okT = getTempF(temp);
-    bool okW = getWindMph(wind);
-    bool okR = getRainLast24h(rain);
-    String tempStr = okT ? String(int(temp + 0.5)) : "*";
-    String windStr = okW ? String(int(wind + 0.5)) : "*";
-    String rainStr = okR ? String(int(rain + 0.5)) : "*";
-
-    if (LOOP_COUNT % TotalTime < TimePerStageLoops) {
-      // Pct ON / OFF
-      snprintf(line4, sizeof(line4), "%sF   %sMPH  R: %smm", tempStr, windStr, rainStr);
-    }
-    else if (LOOP_COUNT % TotalTime < 2 * TimePerStageLoops) {
-      // WiFi / Firebase status
-      snprintf(line4, sizeof(line4), "WIFI: %s  FB: %s", CONN_STATUS, fbStatus);
-    }
-    else {
-      if (historyLoaderIsComplete())
-      {
-        snprintf(line4, sizeof(line4), "HISTORY LOADED: [%d]", 
-          historyLoaderTargetCount());
-      }
-      else 
-      {
-        snprintf(line4, sizeof(line4), "HISTORY: %s", historyLoaderProgressText());
-      }
-    }
-
-    display.drawString(horOffset, 40 + vertOffsetMain, line4);
-
-    // Line 5: On Time / Clock
-    float hours = cnt / 36000.0f;
-    if (hours < 24.0f) {
-      snprintf(line5, sizeof(line5), "UP:%.1fh | CLK:%s", hours, getClock());
-    } else {
-      float days = hours / 24.0f;
-      snprintf(line5, sizeof(line5), "UP:%.1fd | CLK:%s", days, getClock());
-    }
-    display.drawString(horOffset, 50 + vertOffsetMain, line5);
-
-    // write the buffer to the display
-    display.display();
-
-    // Update timers and change state as needed
-    if (MainTimer > 0) MainTimer--;
-    if (MainTimeout != OLED_MODE_NO_TIMEOUT && MainTimer == 0) {
-      OLED_MODE = OLED_MINIMIZED;  
-    }
-  }
-
-else if (OLED_MODE == OLED_MINIMIZED) {
-  float deltaMin = Pump.getAvgCycleMin();
-  if (deltaMin < 0.1f) deltaMin = 5.0f;
-
-  uint32_t gallonsPerDay = (uint32_t)(5 * 60 * 24 / deltaMin);
-
-  char cycMin[10];
-  snprintf(cycMin, sizeof(cycMin), "%.1f", deltaMin);
-
-  const unsigned int CYCLE_COUNT = 8;
-  unsigned int mode = (cnt / MIN_MODE_CYCLE_TIME) % CYCLE_COUNT;
-
-  display.clear();
-  display.setTextAlignment(TEXT_ALIGN_LEFT);
-  display.setFont(ArialMT_Plain_10);
-
-  if (mode == 0) {
-    if (TEST_MODE) snprintf(line0, sizeof(line0), "*TEST MODE* %s", APP_VERSION);
-    else           snprintf(line0, sizeof(line0), "PUMP APP %s", APP_VERSION);
-    display.drawString(horOffset, vertOffset, line0);
-  }
-  else if (mode == 1) {
-    snprintf(line2, sizeof(line2), "ON: %u%c [%u%c]",
-            (unsigned)(cnt / LOOPS_PER_SEC), 's',
-            (unsigned)(cnt / 864000), 'd');
-    display.drawString(horOffset, vertOffset, line2);
-  }
-  else if (mode == 2) {
-    snprintf(line2, sizeof(line2), "CYC: %sm %ld GPD", cycMin, gallonsPerDay);
-    display.drawString(horOffset, vertOffset, line2);
-  }
-  else if (mode == 3) {
-    snprintf(line2, sizeof(line2), "CLOCK: %s", getClock());
-    display.drawString(horOffset, vertOffset, line2);
-  }
-  else if (mode == 4) {
-    snprintf(line2, sizeof(line2), "DATE: %s", getDate());
-    display.drawString(horOffset, vertOffset, line2);
-  }
-  else if (mode == 5) {
-    snprintf(line2, sizeof(line2), "YEAR: %s", getYearStr());
-    display.drawString(horOffset, vertOffset, line2);
-  }
-  else if (mode == 6) {
-    snprintf(line2, sizeof(line2), "Wifi: %s  FB: %s", CONN_STATUS, fbStatus);
-    display.drawString(horOffset, vertOffset, line2);
-  }
-  else {
-    display.drawString(horOffset, vertOffset, "Press TOP Button");
-  }
-
-  if (cnt % (120 * LOOPS_PER_SEC) == 0) vertOffset = random(0, 50);
-
-  display.display();
-}
-
-  cnt++;  // shared counter for all modes
-}
-
-void displayPopupScreen(const char* text, const char* details) {
-  strncpy(PopupText, text, sizeof(PopupText) - 1);
-  PopupText[sizeof(PopupText) - 1] = '\0';
-
-  strncpy(PopupDetails, details, sizeof(PopupDetails) - 1);
-  PopupDetails[sizeof(PopupDetails) - 1] = '\0';
-
-  PopupTimer = 0;
-  OLED_MODE = OLED_POPUP;
-  updatePopupScreen();
-}
-
-void updatePopupScreen() {
-  if (OLED_MODE == OLED_POPUP) {
-    display.clear();
-    display.setTextAlignment(TEXT_ALIGN_LEFT);
-    display.setFont(ArialMT_Plain_16);
-    display.drawString(0, 0, PopupText);
-    display.setFont(ArialMT_Plain_10);
-    display.drawString(0, 16, PopupDetails);
-
-    // write the buffer to the display
-    display.display();
-
-    PopupTimer++;
-  }
-}
-
-void newPopupScreen(const char* text, const char* details) {
-  displayPopupScreen(text,details);
-  updatePopupScreen();
-}
-
-void oledMain(uint32_t duration) {
-  OLED_MODE = OLED_MAIN;
-  MainTimer = duration;
-  MainTimeout = duration;
-}
-
-void oledMinimized() {
-  OLED_MODE = OLED_MINIMIZED;
-}
-
-void oledOff() {
-  OLED_MODE = OLED_OFF;
-}
-```
-
-## File: Pump_Monitor/ota.cpp
-```cpp
-// ota.cpp
-#include <ArduinoOTA.h>
-#include <ESPmDNS.h>
-#include "ota.h"
-#include "global.h"
-#include "wifiFunc.h"
-
-static bool _otaInProgress = false;
-static unsigned int otaState = OTA_OFF;
-
-unsigned int getOtaState() {return otaState;}
-void reinitOta() {otaState = OTA_INIT;}
-
-void initOTA(const char* hostname)
-{
-  if (!MDNS.begin(hostname)) {
-    Serial.println("mDNS failed");
-  } else {
-    Serial.println("mDNS started");
-  }
-  ArduinoOTA.setHostname(hostname);
-  ArduinoOTA.setPort(3232);
-
-  // Optional but strongly recommended
-  //ArduinoOTA.setPassword("pumpOTA123");   // change this!
-
-  ArduinoOTA.onStart([]() {
-    _otaInProgress = true;
-    Serial.println("OTA Start");
-  });
-
-  ArduinoOTA.onEnd([]() {
-    Serial.println("OTA End");
-    _otaInProgress = false;
-  });
-
-  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-    static int16_t lastPct = -5;
-
-    int pct = (progress * 100) / total;
-
-    if (pct - lastPct >= 5 || pct == 100) {
-      Serial.printf("OTA Progress: %u%%\n", pct);
-      lastPct = pct;
-    }
-  });
-
-  ArduinoOTA.onError([](ota_error_t error) {
-    Serial.printf("OTA Error[%u]: ", error);
-      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
-      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
-      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
-      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
-      else if (error == OTA_END_ERROR) Serial.println("End Failed");
-      else Serial.println("Unknown");
-      _otaInProgress = false;
-    });
-
-  ArduinoOTA.begin();
-  Serial.printf("[OTA] Host: %s\n", hostname);
-  Serial.println("[OTA] Ready");
-}
-
-void updateOTAState() {
-  bool wifiStable = wifiLinkReady();  
-
-  switch (otaState) {
-    case OTA_OFF:
-      if (wifiStable) {
-        Serial.println("[OTA] OFF -> ON");
-        initOTA(TEST_MODE ? "pump-test" : "pump-prod");
-        otaState = OTA_ON;
-      }
-      break;
-
-    case OTA_ON:
-      if (!wifiStable) {
-        Serial.println("[OTA] ON -> INIT");
-        otaState = OTA_INIT;
-      }
-      break;
-
-    case OTA_INIT:
-      if (wifiStable) {
-        Serial.println("[OTA] INIT -> ON");
-        initOTA(TEST_MODE ? "pump-test" : "pump-prod");
-        otaState = OTA_ON;
-      }
-      break;
-  }
-}
-
-void handleOTA()
-{
-  ArduinoOTA.handle();
-}
-
-bool otaInProgress()
-{
-  return _otaInProgress;
-}
-```
-
-## File: Pump_Monitor/testcode.cpp
-```cpp
-// Test Code
-#include "global.h"
-#include <WiFi.h>
-#include "weather.h"
-#include "ntp.h"
-#include "pumpFBRepo.h"
-#include "FirebaseClient.h"
-#include "wifiFunc.h"
-
-extern PumpFBRepo pumpRepo;
-```
-
-## File: Pump_Monitor/utils.cpp
-```cpp
-// utils.cpp
-#include "global.h"
-
-uint32_t getCurrentEpoch();
-static uint32_t s_bootMs = millis();
-
-const char* getMonitorTime() {
-  static char str[16];
-
-  const float loopsPerSec = (float)LOOPS_PER_SEC;
-  const float monMin = (float)LOOP_COUNT / (60.0f * loopsPerSec);
-  const float monHr  = (float)LOOP_COUNT / (3600.0f * loopsPerSec);
-  const float monDay = (float)LOOP_COUNT / (86400.0f * loopsPerSec);
-
-  if (monHr < 1.0f) {
-    snprintf(str, sizeof(str), "%.1f m", monMin);
-  }
-  else if (monDay < 1.0f) {
-    snprintf(str, sizeof(str), "%.1f hr", monHr);
-  }
-  else {
-    snprintf(str, sizeof(str), "%.1f day", monDay);
-  }
-
-  return str;
-}
-
-uint32_t msSinceBoot() {
-  return (millis() - s_bootMs);
-}
-
-uint32_t minutesSinceBoot() {
-  return msSinceBoot() / 60000UL;
-}
-uint32_t hoursSinceBoot() {
-  return msSinceBoot() / 3600000UL;
-}
-
-//--------------------------------------------------
-// Logging Functions
-//--------------------------------------------------
-
-void Log(String text) {
-  Serial.println(text);
-}
-
-void VLog(String text) {
-  if (VERBOSE) Serial.println(text);
-}
-
-void TLog(const char* msg)
-// 1-arg overload: plain message
- {
-  if (TEST_MODE) Serial.println(msg);
-}
-
-// 2-arg: timing only
-void TLog(const char* label, uint32_t startTime) {
-  if (!LOG_TIME) return;
-  Serial.print(label);
-  Serial.println(micros() - startTime);
-}
-
-// Date Helper
-void getDayKeyForOffset(int daysAgo, char* out, size_t len) {
-  time_t now = getCurrentEpoch();
-  time_t t = now - (daysAgo * 86400);
-
-  struct tm tm;
-  localtime_r(&t, &tm);
-
-  snprintf(out, len, "%04d_%02d_%02d",
-    tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
-}
-```
-
-## File: Pump_Monitor/utils.h
-```c
-// utils.h
-#pragma once
-#include "global.h"
-#include <Arduino.h>
-
-// Time and Date
-const char* getMonitorTime();
-uint32_t msSinceBoot();
-uint32_t hoursSinceBoot();
-uint32_t minutesSinceBoot();
-void getDayKeyForOffset(int daysAgo, char* out, size_t len);
-
-// Logging
-void Log(String text);
-void VLog(String text);
-void TLog(const char* msg);
-void TLog(const char* label, uint32_t startTime);
-
-// 2-arg overload: label + value (template)
-template<typename T>
-void TLog(const char* label, const T& value) {
-  if (!TEST_MODE) return;
-  Serial.print(label);
-  Serial.println(value);
-}
-
-// 3-arg: label + value + timing
-template<typename T>
-void TLog(const char* label, const T& value, uint32_t startTime) {
-  if (!LOG_TIME) return;
-  Serial.print(label);
-  Serial.print(value);
-  Serial.print(" ");
-  Serial.println(micros() - startTime);
-}
-```
-
-## File: Pump_Monitor/wifiFunc.cpp
-```cpp
-// wifiFunctions.cpp
-#include "global.h"
-
-#include "diag.h"
-#include "WiFi.h"
-#include "wifiFunc.h"
-#include "oled.h"
-#include "ledFunc.h"
-#include "secrets.h"
-#include <lwip/inet.h>   // for INADDR_NONE (ESP32)
-#include <time.h>
-#include <WiFiClientSecure.h>
-
-#define TEST_DHCP_ONLY 0   // set to 0 to restore DHCP->static reconnect
-
-// external variables
-extern const char* CONN_STATUS;
-extern WiFiServer server;
-
-static bool serverStarted = false;
-
-bool wifiLinkUp() {
-  return WiFi.status() == WL_CONNECTED &&
-         WiFi.localIP() != IPAddress(0,0,0,0) &&
-         WiFi.dnsIP()  != IPAddress(0,0,0,0);
-}
-
-bool timeValid() {
-  return time(nullptr) > 1577836800; // 2020-01-01
-}
-
-bool syncTime(uint32_t timeoutMs = 15000) {
-  Serial.println("Syncing time (NTP)...");
-  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
-
-  uint32_t start = millis();
-  while (millis() - start < timeoutMs) {
-    time_t now = time(nullptr);
-    if (now > 1700000000) {
-      Serial.print("Epoch time: ");
-      Serial.println((uint32_t)now);
-      return true;
-    }
-    Serial.print(".");
-    delay(500);
-  }
-
-  Serial.println("\nNTP sync FAILED");
-  Serial.print("Epoch time: ");
-  Serial.println((uint32_t)time(nullptr));
-  return false;
-}
-
-bool wifiLinkReady() {
-  static uint32_t goodSinceMs = 0;
-  static uint32_t lastBadMs = 0;
-
-  bool connected = (WiFi.status() == WL_CONNECTED);
-
-  if (!connected) {
-    goodSinceMs = 0;
-    lastBadMs = millis();
-    return false;
-  }
-
-  IPAddress ip = WiFi.localIP();
-
-  bool ipValid =
-    (ip != IPAddress(0,0,0,0)) &&
-    (ip != IPAddress(255,255,255,255));
-
-  bool rssiValid = (WiFi.RSSI() < 0);  // RSSI should be negative dBm
-
-  bool good = connected && ipValid && rssiValid;
-
-  if (!good) {
-    goodSinceMs = 0;
-    lastBadMs = millis();
-    return false;
-  }
-
-  // Require stability after last "bad"
-  if (goodSinceMs == 0) {
-    goodSinceMs = millis();
-    return false;
-  }
-
-  // Require BOTH:
-  // - stable for 5s
-  // - no disconnects in last 5s
-  if ((millis() - goodSinceMs) >= 5000 &&
-      (millis() - lastBadMs) >= 5000) {
-    return true;
-  }
-
-  return false;
-}
-
-bool dnsReady() {
-  static uint32_t lastCheckMs = 0;
-  static bool lastResult = false;
-
-  if (WiFi.status() != WL_CONNECTED) {
-    lastResult = false;
-    return false;
-  }
-
-  if (millis() - lastCheckMs < 5000) {
-    return lastResult;
-  }
-
-  lastCheckMs = millis();
-
-  IPAddress ip;
-  lastResult = (WiFi.hostByName("arduino-27cc5-default-rtdb.firebaseio.com", ip) == 1 &&
-                ip != IPAddress(0,0,0,0));
-  return lastResult;
-}
-
-
-void updateWifiDiagState() {
-  if (WiFi.status() != WL_CONNECTED) {
-    diagState.setWifiState("WIFI_DISCONNECTED");
-    return;
-  }
-
-  IPAddress ip  = WiFi.localIP();
-  IPAddress gw  = WiFi.gatewayIP();
-  IPAddress dns = WiFi.dnsIP();
-  const uint8_t* bssid = WiFi.BSSID();
-
-  char buf[32];
-
-  // BSSID
-  if (bssid) {
-    snprintf(buf, sizeof(buf), "%02X:%02X:%02X:%02X:%02X:%02X",
-      bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
-  } else {
-    snprintf(buf, sizeof(buf), "--");
-  }
-  diagState.setWifiBSSID(buf);
-
-  // RSSI
-  snprintf(buf, sizeof(buf),"%d CH:%d", WiFi.RSSI(), WiFi.channel());
-  diagState.setWifiRSSI(buf);
-
-  // IP
-  snprintf(buf, sizeof(buf),"%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
-  diagState.setWifiIP(buf);
-
-  // GW
-  snprintf(buf, sizeof(buf),"%u.%u.%u.%u", gw[0], gw[1], gw[2], gw[3]);
-  diagState.setWifiGW(buf);
-
-  // DNS
-  snprintf(buf, sizeof(buf),"%u.%u.%u.%u", dns[0], dns[1], dns[2], dns[3]);
-  diagState.setWifiDNS(buf);
-
-  // State
-  diagState.setWifiState("CONNECTED");
-}
-
-
-
-
-
-void scanWifi() {
-    if (WiFi.status() == WL_CONNECTED) {
-        Serial.println("Skipping WiFi scan: already connected");
-        return;
-    }
-
-    displayPopupScreen("SCANNING WIFI","Finding Networks");
-    updatePopupScreen();
-    Serial.println("Starting WiFi scan...");
-
-    int startTime = micros();
-    int netCount = WiFi.scanNetworks();
-    
-    Serial.println("Scan complete");
-    if (netCount == 0) {
-        Serial.println("NO networks found");
-    } else {
-        Serial.print(netCount);
-        Serial.println(" Networks found");
-        for (int i = 0; i < netCount; ++i) {
-            // Print SSID and RSSI for each network found
-            Serial.print(i + 1);
-            Serial.print(": ");
-            Serial.print(WiFi.SSID(i));
-            Serial.print(" (");
-            Serial.print(WiFi.RSSI(i));
-            Serial.print(")");
-            Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
-            delay(10);
-        }
-    }
-    Serial.println("");
-    Serial.println("Scan time: "+String(micros() - startTime));
-}
-
-bool waitForWifiStable(uint32_t stableMs, uint32_t timeoutMs) {
-  // Serial.println("Waiting for WiFi to stabilize...");
-
-  uint32_t tStart = millis();
-  uint32_t stableStart = 0;
-
-  while (millis() - tStart < timeoutMs) {
-    if (wifiLinkUp() && timeValid()) {
-      if (stableStart == 0) stableStart = millis();
-      if (millis() - stableStart >= stableMs) {
-        // Serial.println("WiFi stable.");
-        return true;
-      }
-    } else {
-      stableStart = 0; // reset stability window
-    }
-    delay(50);
-  }
-
-  Serial.println("WiFi NOT stable (timeout)");
-  return false;
-}
-
-bool connectDhcpThenStaticHost(const char* ssid, const char* password) {
-    int host = TEST_SERVER_HOST_ID;
-    if (!TEST_MODE) host = EDGE_HOST_ID;
-
-  // If already connected with correct static IP, do nothing
-  if (WiFi.status() == WL_CONNECTED) {
-    IPAddress ip = WiFi.localIP();
-    if (ip[3] == host) {
-      return true;
-    }
-  }
-
-  Serial.println("WiFi: DHCP -> static host reconnect");
-
-  WiFi.disconnect(true);
-  delay(250);
-  WiFi.mode(WIFI_STA);
-  WiFi.setSleep(false);
-
-  // -----------------------------
-  // Step 1: Connect using DHCP
-  // -----------------------------
-  WiFi.begin(ssid, password);
-
-  uint32_t t0 = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - t0 < 15000) {
-    delay(200);
-  }
-
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("WiFi DHCP connect failed");
-    return false;
-  }
-
-  // Wait until DHCP options are populated
-  t0 = millis();
-  while ((WiFi.gatewayIP() == IPAddress(0,0,0,0) ||
-          WiFi.gatewayIP() == IPAddress(255,255,255,255) ||
-          WiFi.subnetMask() == IPAddress(0,0,0,0)) &&
-         millis() - t0 < 5000) {
-    delay(200);
-  }
-
-  IPAddress gw   = WiFi.gatewayIP();
-  IPAddress mask = WiFi.subnetMask();
-  IPAddress dns  = WiFi.dnsIP();
-
-  if (gw == IPAddress(0,0,0,0) || mask == IPAddress(0,0,0,0)) {
-    Serial.println("DHCP did not provide valid network info");
-    return false;
-  }
-
-#if TEST_DHCP_ONLY
-  Serial.println("TEST: staying on DHCP (skipping static reconnect)");
-  return true;   // WiFi is connected via DHCP; caller can proceed to NTP/Firebase
-#endif
-
-  // -----------------------------
-  // Step 2: Build static IP
-  // -----------------------------
-  IPAddress staticIP;
-
-  // Common home LAN case (/24)
-  if (mask == IPAddress(255,255,255,0)) {
-    staticIP = IPAddress(gw[0], gw[1], gw[2], host);
-  } else {
-    // Fallback: derive network portion
-    IPAddress net(gw[0] & mask[0],
-                  gw[1] & mask[1],
-                  gw[2] & mask[2],
-                  gw[3] & mask[3]);
-
-    staticIP = IPAddress(net[0], net[1], net[2], host);
-
-    Serial.print("WARN: non-/24 subnet detected: ");
-    Serial.println(mask);
-  }
-
-  Serial.print("DHCP IP: ");
-  Serial.println(WiFi.localIP());
-  Serial.print("Gateway: ");
-  Serial.println(gw);
-  Serial.print("Subnet: ");
-  Serial.println(mask);
-  Serial.print("DNS: ");
-  Serial.println(dns);
-  Serial.print("Static IP: ");
-  Serial.println(staticIP);
-
-  // -----------------------------
-  // Step 3: Reconnect using static IP
-  // -----------------------------
-  WiFi.disconnect(true);
-  delay(250);
-
-  WiFi.config(staticIP, gw, mask, dns);
-  WiFi.begin(ssid, password);
-
-  t0 = millis();
-  while (WiFi.status() != WL_CONNECTED && millis() - t0 < 15000) {
-    delay(200);
-  }
-
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("Static reconnect failed");
-    return false;
-  }
-
-  Serial.print("WiFi connected with static IP: ");
-  Serial.println(WiFi.localIP());
-  return (WiFi.localIP() == staticIP);
-}
-
-void connectPumpWifi() {
-  char details[64];
-  snprintf(details, sizeof(details), "Network: %s", WIFI_SSID);
-  displayPopupScreen("CONNECTING...", details);
-  updatePopupScreen();
-
-  bool ok = connectDhcpThenStaticHost(WIFI_SSID, WIFI_PSW);
-
-  if (ok) {
-    CONN_STATUS = "CONN";
-    Serial.println("WiFi connected with static host 184/190");
-    Serial.print("IP address: ");
-    Serial.println(WiFi.localIP());
-
-    // Keep your time sync here (don’t return early if you want server/UI to keep working)
-    if (!syncTime()) {
-      Serial.println("NTP failed; skipping Firebase (TLS may fail).");
-    }
-
-  } else {
-    CONN_STATUS = "NOT CONNECTED";
-    Serial.println("WiFi connect FAILED");
-  }
-
-  oledMain(MAIN_TIMEOUT_SEC);
-  LEDOff();
-}
-
-bool ensureServerStarted() {
-  // If WiFi dropped, allow restart later
-  if (serverStarted && WiFi.status() != WL_CONNECTED) {
-    serverStarted = false;
-  }
-
-  // Only start once we have a real IP
-  IPAddress ip = WiFi.localIP();
-  bool hasIP = (ip != IPAddress(0,0,0,0) && ip != IPAddress(255,255,255,255));
-
-  if (!serverStarted && WiFi.status() == WL_CONNECTED && hasIP) {
-    server.begin();
-    serverStarted = true;
-    Serial.println("SERVER STARTED");
-    Serial.print("Open: http://");
-    Serial.print(WiFi.localIP());
-    Serial.println("/");
-  }
-
-  return serverStarted;
-}
-
-
-bool wifiOK() {
-    if (WiFi.status() == WL_CONNECTED  &&
-        WiFi.localIP() != IPAddress(0,0,0,0)) {
-    CONN_STATUS = "CONN";
-    return true;
-    }
-
-    CONN_STATUS = "OFF";
-    return false;
-}
-
-bool dnsOK() {
-  return WiFi.dnsIP() != IPAddress(0,0,0,0);
-}
-
-bool internetOK() {
-  WiFiClient c;
-  int timeout = 2000;
-  c.setTimeout(timeout / 1000);
-  return c.connect("1.1.1.1", 80);
-}
-
-bool internetOK443() {
-  WiFiClientSecure c;
-  int timeout = 3000;
-  c.setInsecure();                 // reachability test only
-  c.setTimeout(timeout / 1000);    // seconds
-  bool ok = c.connect("www.google.com", 443);
-  c.stop();
-  return ok;
-}
-```
-
-## File: Pump_Monitor/charts.cpp
+## File: datalogger/charts.cpp
 ```cpp
 #include "charts.h"
 
@@ -4501,1859 +652,1161 @@ void renderPumpEvent24hChart(WiFiClient &client) {
 }
 ```
 
-## File: Pump_Monitor/testcode.h
+## File: datalogger/charts.h
 ```c
 #pragma once
+
+#include <WiFi.h>
+
+void renderGallonsPerDayChart(WiFiClient &client);
+void renderCurrentWaveChart(WiFiClient &client);
+void renderPumpEvent24hChart(WiFiClient &client);
 ```
 
-## File: Pump_Monitor/firebaseClient.h
+## File: datalogger/datalogger.ino
+```
+// Included Library Files
+#include <Arduino.h>
+#include <WiFi.h>
+
+// My Libraries
+#include "event.h"
+
+// My Files
+#include "global.h"
+#include "datastore.h"
+#include "diag.h"
+#include "ledFunc.h"
+#include "ntp.h"
+#include "nvm.h"
+#include "oled.h"
+#include "ota.h"
+#include "pumpData.h"
+#include "pumpFunc.h"
+#include "ramlog.h"
+#include "server.h"
+#include "testcode.h"
+#include "test_mode.h"
+#include "wifiFunc.h"
+
+// Version Info
+const char APP_VERSION[] PROGMEM = "V0.0A";
+
+// System States
+const char* CONN_STATUS = "OFF";
+uint32_t LOOP_COUNT = 0;
+uint32_t LOOP_TIME = 1000;
+int ISR_CNT = 0;
+unsigned int ONE_SEC_TIMER_MS = 0;
+uint16_t ADAPTIVE_DELAY = 98;
+unsigned int START_TIME = 0;
+
+// Error Counts
+int WIFI_ERR = 0;
+
+// Hardware States
+int ADC1_COUNT = 0;
+float ADC1_VOLT = 0;
+int BTN_VAL = 0;
+int D1_VAL = 2;
+int TS1_VAL = 0;
+
+// NVM Boot Status
+static bool gNvmRestoreDone = false;
+
+// Events
+Event testEvent;
+
+// Diagnostics
+Diag diagState;
+
+// Binary Identifier
+#if TEST_MODE
+__attribute__((used)) static const char BUILD_MODE_MARKER[] PROGMEM =
+    "PUMP_MONITOR|MODE=TEST";
+#else
+__attribute__((used)) static const char BUILD_MODE_MARKER[] PROGMEM =
+    "PUMP_MONITOR|MODE=PROD";
+#endif
+
+const char* getBuildModeMarker() {
+  return BUILD_MODE_MARKER;
+}
+
+void IRAM_ATTR isrFunction() {
+  PUMP_EVENT = 1;
+  ISR_CNT++;
+}
+
+void initNvmBootRestore() {
+  if (gNvmRestoreDone) return;
+
+  if (!timeValid()) {
+    Serial.println("Time not valid yet; skipping NVM restore.");
+    return;
+  }
+
+  char dayKey[16]; 
+  const uint32_t nowEpoch = getCurrentEpoch();
+  getCurrentDayKey(dayKey, sizeof(dayKey));
+
+  // Update boot stats
+  nvmUpdateBootStats(nowEpoch);
+
+  gNvmRestoreDone = true;  // if we got here the restore was completed
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  // Init ADC
+  adcAttachPin(ADC1_PIN);
+  //analogSetClockDiv(255); // 1338mS
+
+  // Init LED
+  pinMode(LED_PIN, OUTPUT);  // Set GPIO25 as digital output pin
+
+  // Init ISR
+  //pinMode(ISR_PIN, INPUT_PULLUP);
+  //attachInterrupt(ISR_PIN, isrFunction, RISING);
+
+  // Init OLED
+  initDisplay();
+
+  // Init NVM
+  nvmInit();
+
+  // Randomize
+  randomSeed((uint32_t)esp_random());
+
+  // Set WiFi to station mode and disconnect from an AP if it was previously connected
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  delay(500);
+
+  Serial.println();
+  Serial.println();
+  Serial.print(F("### STARTING DATA LOGGER: "));
+  Serial.print(FPSTR(APP_VERSION));   // FPSTR reads PROGMEM string
+  Serial.println(F(" ###"));
+  Serial.println("Setup Complete");
+  //scanWifi();   // DISABLED – creates issues with Firebase TLS stability.  Only use for debugging board bring up
+  Serial.println(getBuildModeMarker());
+  connectWifi();
+
+  // NTP Time Server
+  newPopupScreen("NTP Setup", "Syncing NTP time");
+  setupNTP();
+  oledMain(MAIN_TIMEOUT_SEC);
+
+  // Setup NVM Boot Restore  (must be after NTP)
+  initNvmBootRestore();
+  nvmDumpPumpState();
+
+  // Init Pump
+  initPump();
+
+  // Store Startup Time
+  START_TIME = (millis() / 1000); 
+
+  // Test Functions
+  //testDataStore(); 
+
+  // Init OTA
+  initOTA(TEST_MODE ? "pump-test" : "pump-prod");
+
+  // Setup done, go to main screen
+  oledMain(MAIN_TIMEOUT_SEC);
+}
+
+void loop() {
+  static unsigned long loopCount = 0;
+
+  webServer();   // SERVICE HTTP AS FAST AS POSSIBLE
+
+  loop100ms();                              // Run the 100ms loop
+  if (loopCount % 10 == 0) loop1Sec();      // Run the 1 sec loop
+  if (loopCount % 100 == 0) loop10Sec();    // Run the 10 sec loop
+  if (loopCount % 600 == 0) loop1Min();     // Run the 1 minute loop
+
+  // Complete the loop
+  loopCount++;
+  LOOP_COUNT++;
+
+  delay(ADAPTIVE_DELAY);  // avg code run time is ~2 ms
+}
+
+void loop100ms() {
+  // Run Simulation if needed
+  if (TEST_MODE) simulateLogger();
+
+  // Read Inputs
+  readDigitalButton();
+  readADC();
+
+  // Run Main Logic
+  checkForPumpEvent();  // Want accurate timing so check every 100ms
+  processPumpEvent();
+
+  // Update Outputs
+  displayText();
+  updatePopupScreen();
+  setLED();
+  //webServer();  REMOVE AFRER TESTING
+
+  // process Events
+  processLoopCheck();
+  processTestEvent();
+
+  // Others
+  handleOTA();
+}
+
+void loop1Sec() {
+  static uint32_t count_1s;
+
+  // Adaptive Loop Adjust
+  static uint32_t prevLoopStart;
+  uint32_t msNow = millis();
+  ONE_SEC_TIMER_MS = msNow - prevLoopStart;
+  prevLoopStart = msNow;
+
+  // Dynamically Adjust Loop Time
+  if (ONE_SEC_TIMER_MS < 1000 && ADAPTIVE_DELAY < 100) ADAPTIVE_DELAY++;
+  else if (ONE_SEC_TIMER_MS > 1000 && ADAPTIVE_DELAY > 80) ADAPTIVE_DELAY--;
+
+
+  // process 1 second tasks
+  readDigital();
+  readTouchSwitch();
+  writeDAC();
+
+  // Keep NTP Clock Valid
+  if (wifiOK()) updateNTP();
+
+  // update loop counter
+  count_1s++;
+}
+
+void loop10Sec() {
+  ensureServerStarted();
+
+  // Early WiFi stabilization
+  if (LOOP_COUNT < 40 * LOOPS_PER_SEC) checkWifi();
+
+
+  // OTA
+  void updateOTAState();
+
+  // Make sure NVM was checked after boot
+  if (!gNvmRestoreDone) initNvmBootRestore();  
+}
+
+void loop1Min() {
+  static uint16_t minCount = 0;
+  minCount = (minCount + 1) % 600;  // Prevent Overflow
+
+  // Update System State
+  if (WiFi.status() != WL_CONNECTED) diagState.setSystemState("*NO WIFI*");
+  else if (!validClock()) diagState.setSystemState("*NO CLOCK*");
+  else diagState.setSystemState("RUNNING");
+
+  // Reconnect Wifi if needed
+  checkWifi();
+  updateWifiDiagState();
+  diagState.updateDiagInfo();
+
+  // Check NTP
+  ensureTimeHealthy();
+
+  // Run normal scheduled hourly tasks
+  checkForOneHourTasks();
+}
+
+void checkForOneHourTasks() {
+  static int8_t lastHour = -1;
+
+  // Only run hourly logic if NTP/system time is valid
+  if (!validClock()) return;
+
+  const uint8_t hour = getHourInt();
+  if (hour < 0 || hour > 23) return;
+
+  // First valid hour after boot: initialize and do nothing
+  if (lastHour < 0) {
+    lastHour = hour;
+    return;
+  }
+
+  // Detect a clean hour rollover (including 23 -> 0)
+  const bool advanced =
+    ((hour > 0 && lastHour == hour - 1) || (hour == 0 && lastHour == 23));
+
+  if (hour != lastHour && advanced) {
+    loop1Hour(hour);
+    if (hour == 0) loop1DayMidnight();
+    lastHour = hour;
+  } 
+  else if (hour != lastHour) {
+    // Clock jumped (NTP correction / reboot / manual set) — resync without firing loops
+    lastHour = hour;
+  }
+}
+
+// One Hour Tasks - On the hour
+void loop1Hour(int hour) {
+  Serial.println();
+  Serial.print("*** RUNNING 1 HOUR LOOP [");
+  Serial.print(hour);
+  Serial.println("]");
+
+}
+
+// Midnight
+void loop1DayMidnight() {
+  Serial.println();
+  Serial.println("*** RUNNING 1 DAY LOOP - MIDNIGHT");
+
+  // send daily email
+  textStatus();
+
+}
+
+//------------------------------------------------------------------------
+
+void writeDAC() {
+  //dacWrite(DAC_PIN, LOOP_COUNT % 250);
+}
+
+void readADC() {
+  uint32_t startTime = micros();
+
+  if (TEST_MODE) ADC1_COUNT = getTestModeADC();
+  else ADC1_COUNT = analogRead(ADC1_PIN);
+
+  ADC1_VOLT = 3.3 * (ADC1_COUNT / 4095.0);
+  TLog("ADC: ", ADC1_COUNT, startTime);
+  TLog("ADC read time: ", startTime);
+}
+
+void readDigital() {
+  uint32_t startTime = micros();
+  D1_VAL = digitalRead(D1_PIN);
+  TLog("Digital read time: ", startTime);
+}
+
+void readDigitalButton() {
+  static uint8_t oldBtn = 1;
+  BTN_VAL = digitalRead(BTN_PIN);     // Read New Button Status
+  if (oldBtn == 1 && BTN_VAL == 0) processButton();
+  oldBtn = BTN_VAL;                   // Save Status
+}
+
+void readTouchSwitch() {
+  uint32_t startTime = micros();
+  TS1_VAL = touchRead(TS1_PIN);
+  TLog("TS read time: ", startTime);
+}
+
+void processButton() {
+  Serial.println("Button Event");
+  displayPopupScreen("BUTTON PRESSED", "Show Main Menu");
+  delay(1000);
+  if (wifiRadioOn()) {
+    newPopupScreen("Turn OFF Wifi", "");
+    disconnectWifi();
+  } else {
+    newPopupScreen("Turn ON Wifi", "");
+    connectWifi();
+  }
+  delay(1000);
+  oledMain(MAIN_TIMEOUT_SEC);
+}
+
+void processLoopCheck() {
+  static uint32_t loopCount = 0;
+  static uint32_t startTime = 0;
+  if (loopCount % 999 == 0) {
+    LOOP_TIME = int((millis() - startTime) / 100);
+    Serial.println();
+    if (LOOP_TIME < 950 || LOOP_TIME > 1050) {
+      Serial.println("*** Total time for 1000 loops:" + String(LOOP_TIME));
+    }
+    startTime = millis();
+  }
+  loopCount++;
+}
+
+void processTestEvent() {
+  if (testEvent.check()) {
+    Serial.println();
+    Serial.println("*** TEST EVENT ***");
+    Serial.println("Total time for Test Event:" + String(testEvent.getDelta()) + "ms");
+    Serial.println();
+    testEvent.setSec(73);
+  }
+}
+
+void testEmail() {
+  //email.sendEmail("aneilshah@yahoo.com", "Sump Pump Status", "This will be data...\nSomeday");
+  //email.sendEmail("7343555141@vtext.com", "Sump Pump", "Cycles: 5\nGallons Pumped: 600");
+}
+
+void textStatus() {
+  float deltaMin = Pump.getAvgCycleMin();
+  if (deltaMin < 0.1) deltaMin = 5.0;  // default to 5 mins if there is no data
+  int cph = 60 / deltaMin;
+  int cpd = 60 * 25 / deltaMin;
+  int GPM = 48;  // Delete this after fixing
+  int gallonsPerHour = 60 * GPM / deltaMin;   // WRONG - FIX THIS
+  uint32_t gallonsPerDay = 60 * 24 * GPM / deltaMin;  // WRONG - FIX THIS
+
+  String body = "Cycles: " + String(Pump.getPumpEventCount()) + "\n";
+
+  float monMin = float(LOOP_COUNT / 60.0 / LOOPS_PER_SEC);
+  float monDay = float(LOOP_COUNT / 3600.0 / 24 / LOOPS_PER_SEC);
+  if (monDay < 1) {
+    body += "Monitor Time: " + String(monMin) + "m\n";
+  } else {
+    body += "Monitor Time: " + String(monDay) + "d\n";
+  }
+
+  float pumpOnMin = float(Pump.getPumpOnTimeLoops() / 60.0 / LOOPS_PER_SEC);
+  float pumpOnHour = float(Pump.getPumpOnTimeLoops() / 3600.0 / LOOPS_PER_SEC);
+  if (pumpOnHour < 1) {
+    body += "Pump Time: " + String(pumpOnMin) + "m\n";
+  } else {
+    body += "Pump Time: " + String(pumpOnHour) + "h\n";
+  }
+  body += "Current: " + Pump.getPumpCurText() + "\n";
+  body += "Avg Cycle: " + String(Pump.getAvgCycleMin()) + "m\n";
+  body += "StDev: " + String(Pump.getStDevCycleMin()) + "m\n";
+  body += "CPD: " + String(cpd) + " / " + String(gallonsPerDay) + " Gal\n";
+  body += "TS: " + String(getTimestamp()) + "\n";
+
+  //email.sendEmail("aneilshah@yahoo.com", "Sump Pump Status", body);
+  //email.sendEmail("7343555141@vtext.com", "Pump", "\n"+body);
+}
+
+void testDataStore() {
+  delay(1000);
+  DataStoreFloat X(15, 1, "abc");
+  for (int i = 0; i <100; i++) {
+    X.addData(i + (float(i)/100));
+    Serial.println(X.dataText());
+  }
+}
+
+void checkWifi() {
+  if (!wifiOK()) {
+    Serial.println("WiFi not OK, reconnecting...");
+    connectWifi();
+    WIFI_ERR++;
+    return;
+  }
+
+  // 2) Optional: ensure WiFi stabilizes after reconnect
+  if (!waitForWifiStable(1500, 5000)) {
+    Serial.println("WiFi not stable yet");
+    return;
+  }
+}
+
+// Version History
+// 0.0 Jul-09-2026 Initial Code
+```
+
+## File: datalogger/datastore.cpp
+```cpp
+#include "datastore.h"
+
+// ################################################################################################
+// CLASS DataStoreInt
+// ################################################################################################
+
+DataStoreInt::DataStoreInt(int size, String units) {
+  if (size <= DATASTORE_MAX) _maxCount = size;
+  else _maxCount = DATASTORE_MAX;
+  _units = units;
+  reset();
+}
+
+DataStoreInt::DataStoreInt() {
+  _units = "";
+  _maxCount = DATASTORE_MAX;
+  reset();
+}
+
+float DataStoreInt::avg() {
+  uint32_t sum = 0;
+
+  for (int i = 0; i < _dataCount; i++) {
+    sum += _data[i];
+  }
+
+  float result = 0.0;
+  if (_dataCount) result = float(sum / _dataCount);
+  return result;
+}
+
+int DataStoreInt::getData(int i) const {
+  if (i < 0 || i >= _dataCount) return 0;
+  return _data[i];
+}
+
+float DataStoreInt::stdev() {
+  float devSum = 0;
+  float delta = 0;
+  const float Avg = avg();
+
+  for (int i = 0; i < _dataCount; i++) {
+    delta = float(_data[i] - Avg);
+    devSum += delta * delta;
+  }
+
+  float result = 0.0;
+  if (_dataCount) result = float(sqrt(devSum / _dataCount));
+  return result;
+}
+
+void DataStoreInt::reset() {
+  _dataCount = 0;
+  _totalCount = 0;
+  for (int i = 0; i < _maxCount; i++) _data[i] = 0;
+}
+
+void DataStoreInt::init(int size, String units) {
+  if (size <= DATASTORE_MAX) _maxCount = size;
+  else _maxCount = DATASTORE_MAX;
+  _units = units;
+}
+
+long DataStoreInt::getTotalCount() {return _totalCount;}
+
+void DataStoreInt::addData(int x) {
+  for (int i = _maxCount - 1; i > 0; i--) _data[i] = _data[i - 1]; 
+  _data[0] = x;
+  if (_dataCount < _maxCount) _dataCount++;
+  _totalCount++;
+}
+
+String DataStoreInt::dataText() {
+  float Avg = avg();
+  float Stdev = stdev();
+  String str = "";
+  int Max = _dataCount;
+  if (Max > DATASTORE_MAX) Max = DATASTORE_MAX;
+
+  str += "n:" + String(_dataCount) + " | ";
+  for (int i = 0; i < Max; i++) {
+    str += String(_data[i]) + " ";
+  }
+  if (_dataCount > 0) str += _units;
+  str += " | AVG:" + String(avg());
+  str += " | StDev:" + String(stdev());
+
+  return str;
+}
+
+String DataStoreInt::htmlText() {
+  float Avg = avg();
+  float Stdev = stdev();
+  String str = "";
+  int Max = _dataCount;
+  if (Max > DATASTORE_MAX) Max = DATASTORE_MAX;
+
+  str += "n:" + String(_dataCount) + " | ";
+  for (int i = 0; i < Max; i++) {
+    str += String(_data[i]) + "&ensp;";
+  }
+  if (_dataCount > 0) str += _units;
+  str += " | AVG:" + String(avg());
+  str += " | StDev:" + String(stdev());
+
+  return str;
+}
+
+// ################################################################################################
+// CLASS DataStoreFloat
+// ################################################################################################
+
+DataStoreFloat::DataStoreFloat(int size, int prec, String units) {
+  if (size <= DATASTORE_MAX) _maxCount = size;
+  else _maxCount = DATASTORE_MAX;
+  _prec = prec;
+  _units = units;
+  reset();
+}
+
+DataStoreFloat::DataStoreFloat() {
+  _units = "";
+  _maxCount = DATASTORE_MAX;
+  _prec = 1;
+  reset();
+}
+
+float DataStoreFloat::avg() {
+  float sum = 0;
+
+  for (int i = 0; i < _dataCount; i++) {
+    sum += _data[i];
+  }
+
+  float result = 0.0;
+  if (_dataCount) result = float(sum / _dataCount);
+  return result;
+}
+
+float DataStoreFloat::stdev() {
+  float devSum = 0;
+  float delta = 0;
+  const float Avg = avg();
+
+  for (int i = 0; i < _dataCount; i++) {
+    delta = float(_data[i] - Avg);
+    devSum += delta * delta;
+  }
+
+  float result = 0.0;
+  if (_dataCount) result = float(sqrt(devSum / _dataCount));
+  return result;
+}
+
+void DataStoreFloat::reset() {
+  _dataCount = 0;
+  _totalCount = 0;
+  for (int i = 0; i < _maxCount; i++) _data[i] = 0.0;
+}
+
+void DataStoreFloat::addData(float x) {
+  for (int i = _maxCount - 1; i > 0; i--) _data[i] = _data[i - 1]; 
+  _data[0] = x;
+  if (_dataCount < _maxCount) _dataCount++;
+  _totalCount++;
+}
+
+void DataStoreFloat::init(int size, int prec, String units) {
+  if (size <= DATASTORE_MAX) _maxCount = size;
+  else _maxCount = DATASTORE_MAX;
+  _units = units;
+  _prec = prec;
+}
+
+long  DataStoreFloat::getTotalCount() {return _totalCount;}
+
+String DataStoreFloat::dataText() {
+  float Avg = avg();
+  float Stdev = stdev();
+  String str = "";
+  int Max = _dataCount;
+  if (Max > DATASTORE_MAX) Max = DATASTORE_MAX;
+
+  str += "n:" + String(_dataCount) + " | ";
+  for (int i = 0; i < Max; i++) {
+    str += String(_data[i],_prec) + " ";
+  }
+  if (_dataCount > 0) str += _units;
+  str += " | AVG:" + String(avg());
+  str += " | StDev:" + String(stdev());
+
+  return str;
+}
+
+
+// ################################################################################################
+// CLASS CurrentStoreInt
+// ################################################################################################
+
+CurrentStoreInt::CurrentStoreInt() {
+  _units = "";
+  _maxCount = CURRENTSTORE_MAX;
+  reset();
+}
+
+float CurrentStoreInt::avg() {
+  uint32_t sum = 0;
+
+  for (int i = 0; i < _dataCount; i++) {
+    sum += _data[i];
+  }
+
+  float result = 0.0;
+  if (_dataCount) result = float(sum / _dataCount);
+  return result;
+}
+
+float CurrentStoreInt::ssAvg(float tolPercent) { // Steady State average, tolPercent = 0.1 for 10%
+  if (_dataCount <= 0) return 0.0f;
+
+  // First-pass average (includes inrush/tail)
+  const float a0 = avg();
+  if (a0 <= 0.0f) return a0;  // avoid weirdness when idle/zero
+
+  // Keep only samples within +/- tolPercent of the first average
+  const float band = fabsf(a0) * tolPercent;
+
+  uint32_t sum = 0;
+  int n = 0;
+
+  for (int i = 0; i < _dataCount; i++) {
+    const float x = (float)_data[i];
+    if (fabsf(x - a0) <= band) {
+      sum += _data[i];
+      n++;
+    }
+  }
+
+  // If filter excluded everything (or almost everything), fall back to a0
+  if (n <= 0) return a0;
+
+  return (float)sum / (float)n;
+}
+
+void CurrentStoreInt::reset() {
+  _dataCount = 0;
+  lastDataText = dataText();
+  lastHtmlText = htmlText();
+  for (int i = 0; i < _maxCount; i++) _data[i] = 0;  // reset data
+}
+
+void CurrentStoreInt::addData(int x) {
+  for (int i = _maxCount - 1; i > 0; i--) _data[i] = _data[i - 1]; 
+  _data[0] = x;
+  if (_dataCount < _maxCount) _dataCount++;
+}
+
+String CurrentStoreInt::dataText() {
+  float Avg = avg();
+  String str = "";
+  int Max = _dataCount;
+  if (Max > CURRENTSTORE_MAX) Max = CURRENTSTORE_MAX;
+
+  str += "n:" + String(_dataCount) + " | ";
+  for (int i = 0; i < Max; i++) {
+    str += String(_data[i]) + " ";
+  }
+  if (_dataCount > 0) str += _units;
+  str += " | AVG:" + String(avg());
+
+  return str;
+}
+
+String CurrentStoreInt::htmlText() {
+  float Avg = avg();
+  String str = "";
+  int Max = _dataCount;
+  if (Max > CURRENTSTORE_MAX) Max = CURRENTSTORE_MAX;
+
+  str += "n:" + String(_dataCount) + " | ";
+  for (int i = 0; i < Max; i++) {
+    str += String(_data[i]) + "&ensp;";
+  }
+  if (_dataCount > 0) str += _units;
+  str += " | AVG:" + String(avg());
+
+  return str;
+}
+
+String CurrentStoreInt::getLastDataText() {return lastDataText;}
+String CurrentStoreInt::getLastHtmlText() {return lastHtmlText;}
+```
+
+## File: datalogger/datastore.h
 ```c
 #pragma once
-#include <Arduino.h>
-#include <Firebase_ESP_Client.h>
 
-class FirebaseClient {
-public:
-  FirebaseClient();
+#include "global.h"
+#include <string.h>
 
-  bool begin(const char* apiKey, const char* dbUrl, uint32_t timeoutMs);
-  bool ready() const;
+#define DATASTORE_MAX 50
+#define CURRENTSTORE_MAX 100
 
-  // Existing APIs (kept)
-  bool writeInt(const String& path, int v);
-  bool writeFloat(const String& path, float v);
-  bool writeString(const String& path, const String& v);
+class DataStoreInt {
+  public:
+    DataStoreInt(int size, String units);
+    DataStoreInt();
+    float avg();
+    float ssAvg(float tolPct = 0.10f);   // Steady State Avg
+    float stdev();
+    void reset();
+    void addData(int x);
+    long getTotalCount();
+    String dataText();
+    String htmlText();
+    void init(int size, String units);
+    int getData(int i) const;
+    
+  private:
+    int _data[DATASTORE_MAX+2];
+    int _dataCount;
+    int _maxCount;
+    long _totalCount;
+    String _units;
+};
 
-  // Existing overloads (kept)
-  bool writeInt(const String& base, const char* field, int v);
-  bool writeFloat(const String& base, const char* field, float v);
-  bool writeString(const String& base, const char* field, const String& v);
 
-  // NEW: JSON node update (single request for many fields)
-  bool writeJSON(const String& path, FirebaseJson& json);
-  bool readJSON(const String& path, FirebaseJson& json);
+class DataStoreFloat {
+  public:
+    DataStoreFloat(int size, int prec, String units);
+    DataStoreFloat();
+    float avg();
+    float stdev();
+    void reset();
+    void addData(float x);
+    String dataText();
+    long getTotalCount();
+    void init(int size, int prec, String units);
+    
+  private:
+    float _data[DATASTORE_MAX+2];
+    int _dataCount;
+    int _maxCount;
+    int _prec;
+    long _totalCount;
+    String _units;
+};
 
-  // Optional convenience: build "path + field" once
-  const String& mkKeyPublic(const String& base, const char* field);
-
-  // Getters
-  int getLastHTTPCode() const { return lastHttpCode; }
-  uint32_t getLastDT() const { return lastDT; }
-  String getLastError() const { return lastErr; }
-
-  void refreshToken();  // stub for now
-
-private:
-  const String& mkKey(const String& base, const char* field);
-
-  FirebaseData fbdo;
-  FirebaseAuth auth;
-  FirebaseConfig config;
-  bool initialized = false;
-  String lastErr = "";
-  String _keyBuf;
-  int lastHttpCode = 0;
-  uint16_t lastWriteMs = 0;
-  uint16_t lastReadMs = 0;
-  uint16_t lastDT = 0;
+class CurrentStoreInt {
+  public:
+    CurrentStoreInt();
+    float avg();
+    float ssAvg(float tolPercent = 0.2f);
+    void reset();
+    void addData(int x);
+    String dataText();
+    String htmlText();
+    String getLastDataText();
+    String getLastHtmlText();
+    
+  private:
+    int _data[CURRENTSTORE_MAX+2];
+    int _dataCount;
+    int _maxCount;
+    String _units;
+    String lastDataText;
+    String lastHtmlText;
 };
 ```
 
-## File: Pump_Monitor/nvm.cpp
-```cpp
-// nvm.cpp
-#include <Preferences.h>
-#include <string.h>
-#include "global.h"
+## File: datalogger/diag.h
+```c
+#pragma once
+#include <Arduino.h>
 #include "ntp.h"
-#include "nvm.h"
-#include "pumpFunc.h"
 
-static Preferences prefs;
+class Diag {
+public:
+  // Setters
+  void setSystemState(const char* value) { setValue(systemState, value); }
+  void setWifiState(const char* value) { setValue(wifiState, value); }
+  void setWifiRSSI(const char* value) { setValue(wifiRSSI, value); }
+  void setWifiIP(const char* value) { setValue(wifiIP, value); }
+  void setWifiBSSID(const char* value) { setValue(wifiBSSID, value); }
+  void setWifiDNS(const char* value) { setValue(wifiDNS, value); }
+  void setWifiGW(const char* value) { setValue(wifiGW, value); }
+  void setNTPState(const char* value) { setValue(ntpState, value); }
+  void setPowerOnReason(const char* value) { setValue(powerOnReason, value); }
+  void setHeapInfo(const char* value) { setValue(heapInfo, value); }
+  void setNvmInfo(const char* value) { setValueLong(nvmInfo, value); }
+  void setDiag1(const char* value) { setValue(diag1, value); }
 
-// Namespaces
-static const char* NS_PUMP = "pump";
-static const char* NS_BOOT = "boot";
-static const char* NS_QUEUE = "queue";
 
-// Keys (pump namespace)
-static const char* K_HAS_STATE  = "has_state";
-static const char* K_DAY_KEY    = "day_key";
-static const char* K_SAVE_EPOCH = "save_epoch";
-static const char* K_BLK_CNT    = "blk_cnt";
-static const char* K_FIRST_BLK  = "first_block";
-static const char* K_LAST_HOUR  = "last_hour";
-static const char* K_GAL4HR     = "gal4hr";
-static const char* K_CYC4HR     = "cyc4hr";
-static const char* K_WRITE_COUNT = "write_count";  // Export this one
+  // Getters
+  const char* getSystemState() const { return systemState; }
+  const char* getWifiState() const { return wifiState; }
+  const char* getWifiRSSI() const { return wifiRSSI; }
+  const char* getWifiIP() const { return wifiIP; }
+  const char* getWifiBSSID() const { return wifiBSSID; }
+  const char* getWifiDNS() const { return wifiDNS; }
+  const char* getWifiGW() const { return wifiGW; }
+  const char* getNTPState() const { return ntpState; }
 
-// Keys (boot namespace)
-static const char* K_BOOT_COUNT     = "boot_count";
-static const char* K_LAST_BOOT_EPOCH = "last_boot_epoch";
-static const char* K_PREV_BOOT_EPOCH = "prev_boot_epoch";
+  // Updaters
+  void updateDiagInfo() {
+    // NTP
+    if (!validClock()) {
+      setNTPState("NTP_WAIT");
+    } else {
+      setNTPState("NTP_OK");
+    }
 
-// Keys (queue namespace)
-static const char* K_Q_HAS         = "has_daily";
-static const char* K_Q_DAY_KEY     = "day_key";
-static const char* K_Q_GAL         = "gallons";
-static const char* K_Q_CYC         = "cycles";
-static const char* K_Q_RAIN        = "rain_mm";
-static const char* K_Q_HAS_RAIN    = "has_rain";
-static const char* K_Q_TIMESTAMP   = "ts";
-static const char* K_Q_LAST_ENERGY = "last_energy";
-static const char* K_Q_GAL4HR      = "gal4hr";
-static const char* K_Q_CYC4HR      = "cyc4hr";
+    // Heap
+    char buf[32];
+    snprintf(buf, sizeof(buf), "%u / %u",
+      ESP.getFreeHeap(),
+      ESP.getMinFreeHeap());
 
-void nvmInit() {
-  // Nothing required. Preferences/NVS is ready by default on ESP32.
-  // This exists just to give you a clean "init hook".
-}
-
-static bool safeStrEq(const String& a, const char* b) {
-  return b && a.equals(b);
-}
-
-//-------------------------------------------------
-// 4 Hour Blocks
-//-------------------------------------------------
-
-bool nvmSave4hrState(
-  const char* dayKey,
-  uint32_t saveEpoch,
-  uint8_t idx,
-  const uint32_t* gal4hr, size_t gal4hrCount,
-  const uint32_t* cyc4hr, size_t cyc4hrCount
-) {
-  if (!dayKey || !gal4hr || !cyc4hr) return false;
-  if (gal4hrCount == 0 || cyc4hrCount == 0) return false;
-
-  if (!prefs.begin(NS_PUMP, false)) return false;
-  
-  // Get updated write counts
-  uint32_t oldWriteCount = prefs.getULong(K_WRITE_COUNT, 0);
-  uint32_t newWriteCount = oldWriteCount + 1;  // incremenet explicitly
-  uint8_t hour = getHourInt();
-  uint8_t oldDailyCount = prefs.getUChar(K_BLK_CNT, INVALID_BLOCK);
-
-  bool ok = true;
-  ok &= prefs.putBool(K_HAS_STATE, true);
-  ok &= (prefs.putString(K_DAY_KEY, dayKey) > 0);
-  ok &= (prefs.putULong(K_SAVE_EPOCH, (unsigned long)saveEpoch) > 0);
-  ok &= (prefs.putUChar(K_LAST_HOUR, hour) > 0);
-  ok &= (prefs.putULong(K_WRITE_COUNT, newWriteCount) > 0);
-
-  // Update Block count on change
-  if (oldDailyCount < NUM_4HR_BLOCKS && oldDailyCount != INVALID_BLOCK) {
-    ok &= (prefs.putUChar(K_BLK_CNT, oldDailyCount + 1) > 0);
-  } else {
-    ok &= (prefs.putUChar(K_BLK_CNT, oldDailyCount) > 0);
-  }
-
-  // Save First Block on first write of day only
-  if (oldDailyCount == 0) ok &= (prefs.putUChar(K_FIRST_BLK, idx) > 0);
-
-  // Store arrays as raw bytes
-  ok &= (prefs.putBytes(K_GAL4HR, gal4hr, gal4hrCount * sizeof(uint32_t)) == (gal4hrCount * sizeof(uint32_t)));
-  ok &= (prefs.putBytes(K_CYC4HR, cyc4hr, cyc4hrCount * sizeof(uint32_t)) == (cyc4hrCount * sizeof(uint32_t)));
-
-  prefs.end();
-
-  if (ok) snprintf(blockDayKey, BLOCK_DAY_KEY_SIZE, "%s", dayKey);
-  return ok;
-}
-
-NvmRestoreResult nvmRestore4hrStateIfFresh(
-  const char* dayKey,
-  uint32_t nowEpoch,
-  uint32_t maxAgeSeconds,
-  uint32_t* outGal4hr, size_t gal4hrCount,
-  uint32_t* outCyc4hr, size_t cyc4hrCount) 
-{
-  if (!dayKey || !outGal4hr || !outCyc4hr) {
-    return NVM_RESTORE_BAD_ARGS;
-  }
-  if (gal4hrCount == 0 || cyc4hrCount == 0) {
-    return NVM_RESTORE_BAD_ARGS;
-  }
-
-  // Open NVS
-  if (!prefs.begin(NS_PUMP, true)) return NVM_RESTORE_PREFS_FAIL;
-
-  // Check State
-  const bool has = prefs.getBool(K_HAS_STATE, false);
-  if (!has) { prefs.end(); return NVM_RESTORE_NO_STATE; }
-
-  // Check Day Key
-  const String savedDay = prefs.getString(K_DAY_KEY, "");
-  if (!safeStrEq(savedDay, dayKey)) { 
-    prefs.end();
-      Serial.printf("NVM day mismatch: saved='%s' requested='%s'\n",
-        savedDay.c_str(), dayKey); 
-    return NVM_RESTORE_DAY_MISMATCH;
-  }
-
-  // Check Epoch validity
-  const uint32_t savedEpoch = (uint32_t)prefs.getULong(K_SAVE_EPOCH, 0);
-  if (savedEpoch == 0) {
-    Serial.println("NVM restore rejected: no saved epoch in NVM.");
-    prefs.end();
-    return NVM_RESTORE_SAVED_EPOCH_ZERO;
-  }
-  if (nowEpoch == 0) {
-    Serial.println("NVM restore rejected: current time not valid.");
-    prefs.end();
-    return NVM_RESTORE_NOW_EPOCH_ZERO;
-  }
-
-  // Check NVM Age
-  const uint32_t age_sec =
-      (nowEpoch >= savedEpoch) ? (nowEpoch - savedEpoch) : 0xFFFFFFFFu;
-
-  const int age_min = int(age_sec) / 60;
-
-  if (age_sec > maxAgeSeconds) {
-    Serial.printf("NVM restore rejected: age=%lu sec [%lu min] > max=%lu sec \n",
-                  (unsigned long)age_sec,
-                  (int) age_min,
-                  (unsigned long)maxAgeSeconds);
-    prefs.end();
-    return NVM_RESTORE_TOO_OLD;
+    setHeapInfo(buf);
   } 
 
-  // Restore arrays
-  const size_t needGal = gal4hrCount * sizeof(uint32_t);
-  const size_t needCyc = cyc4hrCount * sizeof(uint32_t);
-
-  const size_t gotGal = prefs.getBytes(K_GAL4HR, outGal4hr, needGal);
-  const size_t gotCyc = prefs.getBytes(K_CYC4HR, outCyc4hr, needCyc);
-
-  prefs.end();
-
-  const bool ok = (gotGal == needGal) && (gotCyc == needCyc);
-  if (!ok) {
-    Serial.printf("NVM restore failed: bytes mismatch gal=%u/%u cyc=%u/%u\n",
-      (unsigned)gotGal, (unsigned)needGal,
-      (unsigned)gotCyc, (unsigned)needCyc);
-    return NVM_RESTORE_BYTES_MISMATCH;
-  } 
-
-  // Else Everything OK, Restore
-  Serial.printf("NVM restore accepted: age=%ld min, blocks=%d\n",
-    (unsigned long)age_min, getStoredDailyBlockCount());
-  return NVM_RESTORE_OK;
+  Diag() {
+    setDefault(systemState);
+    setDefault(wifiState);
+    setDefault(wifiRSSI);
+    setDefault(wifiIP);
+    setDefault(wifiBSSID);
+    setDefault(wifiGW);
+    setDefault(wifiDNS);
+    setDefault(ntpState);
+    setDefault(powerOnReason);
+    setDefault(heapInfo);
+    setDefault(nvmInfo);
+    setDiag1("[unused]");
 }
 
-void nvmClear4hrState() {  
-  if (!prefs.begin(NS_PUMP, false)) return;
+private:
+  static const uint16_t DIAG_BUF_SIZE = 32;
+  static const uint16_t DIAG_BUF_LONG = 160;
 
-  // Dont remove K_WRITE_COUNT
-  prefs.remove(K_HAS_STATE);
-  prefs.remove(K_DAY_KEY);
-  prefs.remove(K_SAVE_EPOCH);
-  prefs.remove(K_BLK_CNT);
-  prefs.remove(K_FIRST_BLK);
-  prefs.remove(K_LAST_HOUR);
-  prefs.remove(K_GAL4HR);
-  prefs.remove(K_CYC4HR);
-  prefs.end();
-}
+  char systemState[DIAG_BUF_SIZE];
+  char wifiState[DIAG_BUF_SIZE];
+  char wifiRSSI[DIAG_BUF_SIZE];
+  char wifiIP[DIAG_BUF_SIZE];
+  char wifiBSSID[DIAG_BUF_SIZE];
+  char wifiGW[DIAG_BUF_SIZE];
+  char wifiDNS[DIAG_BUF_SIZE];
+  char ntpState[DIAG_BUF_SIZE];
+  char powerOnReason[DIAG_BUF_SIZE];
+  char heapInfo[DIAG_BUF_SIZE];
+  char diag1[DIAG_BUF_SIZE];
+  char nvmInfo[DIAG_BUF_LONG];
 
-bool nvmSetZeroBlocks() {
-  bool ok = true;
+  char fbState[DIAG_BUF_SIZE];
+  char fbError[64];
+  char fbTimeout[DIAG_BUF_SIZE];
 
-  if (!prefs.begin(NS_PUMP, false)) {
-    return false;
-  }
-
-  // Default / clean values
-  char dayKey[BLOCK_DAY_KEY_SIZE]; 
-  const uint32_t nowEpoch = getCurrentEpoch();
-  getCurrentDayKey(dayKey, sizeof(dayKey));
-  const uint8_t zeroBlkCnt = 0;
-  const uint8_t zeroFirstBlk = 0;
-  const uint8_t zeroLastHour = 0;
-
-  // Create zero-filled temp buffers
-  uint32_t zeroGal[NUM_4HR_BLOCKS] = {0};
-  uint32_t zeroCyc[NUM_4HR_BLOCKS] = {0};
-
-  ok &= prefs.putBool(K_HAS_STATE, true);
-
-  ok &= (prefs.putString(K_DAY_KEY, dayKey) > 0);
-  ok &= (prefs.putULong(K_SAVE_EPOCH, nowEpoch) > 0);
-  ok &= (prefs.putUChar(K_BLK_CNT, zeroBlkCnt) > 0);
-  ok &= (prefs.putUChar(K_FIRST_BLK, zeroFirstBlk) > 0);
-  ok &= (prefs.putUChar(K_LAST_HOUR, zeroLastHour) > 0);
-  // Dont change K_WRITE_COUNT
-
-  const size_t galBytes = sizeof(zeroGal);
-  const size_t cycBytes = sizeof(zeroCyc);
-
-  ok &= (prefs.putBytes(K_GAL4HR, zeroGal, galBytes) == galBytes);
-  ok &= (prefs.putBytes(K_CYC4HR, zeroCyc, cycBytes) == cycBytes);
-
-  prefs.end();
-  return ok;
-}
-
-//-------------------------------------------------
-// NVM Getters
-//-------------------------------------------------
-
-uint32_t getTotalBlockWriteCount() {
-  if (!prefs.begin(NS_PUMP, true)) {return 0;}
-  const uint32_t v = (uint32_t)prefs.getULong(K_WRITE_COUNT, 0);
-  prefs.end();
-  return v;
-}
-
-uint8_t getLastStoredBlockHour() {
-  if (!prefs.begin(NS_PUMP, true)) {return INVALID_BLOCK;}
-  const uint8_t v = (uint8_t)prefs.getUChar(K_LAST_HOUR, INVALID_BLOCK);
-  prefs.end();
-  return v;
-}
-
-uint8_t getStoredDailyBlockCount() {
-  if (!prefs.begin(NS_PUMP, true)) {return INVALID_BLOCK;}
-  const uint8_t v = (uint8_t)prefs.getUChar(K_BLK_CNT, INVALID_BLOCK);
-  prefs.end();
-  return v;
-}
-
-uint8_t getFirst4hrBlockIdx() {
-  if (!prefs.begin(NS_PUMP, true)) {return INVALID_BLOCK;}
-  const uint8_t v = (uint8_t)prefs.getUChar(K_FIRST_BLK, INVALID_BLOCK);
-  prefs.end();
-  return v;
-}
-
-//-------------------------------------------------
-// BOOT INFO
-//-------------------------------------------------
-
-void nvmUpdateBootStats(uint32_t nowEpoch) {
-  if (!prefs.begin(NS_BOOT, false)) return;
-
-  const uint32_t bootCount = (uint32_t)prefs.getUInt(K_BOOT_COUNT, 0);
-  const uint32_t lastBoot  = (uint32_t)prefs.getUInt(K_LAST_BOOT_EPOCH, 0);
-
-  prefs.putUInt(K_BOOT_COUNT, bootCount + 1);
-  prefs.putUInt(K_PREV_BOOT_EPOCH, lastBoot);
-  prefs.putUInt(K_LAST_BOOT_EPOCH, nowEpoch);
-
-  prefs.end();
-}
-
-uint32_t nvmGetBootCount() {
-  if (!prefs.begin(NS_BOOT, true)) return 0;
-  const uint32_t v = (uint32_t)prefs.getUInt(K_BOOT_COUNT, 0);
-  prefs.end();
-  return v;
-}
-
-uint32_t nvmGetLastBootEpoch() {
-  if (!prefs.begin(NS_BOOT, true)) return 0;
-  const uint32_t v = (uint32_t)prefs.getUInt(K_LAST_BOOT_EPOCH, 0);
-  prefs.end();
-  return v;
-}
-
-uint32_t nvmGetPrevBootEpoch() {
-  if (!prefs.begin(NS_BOOT, true)) return 0;
-  const uint32_t v = (uint32_t)prefs.getUInt(K_PREV_BOOT_EPOCH, 0);
-  prefs.end();
-  return v;
-}
-
-void logNVMFailure(NvmRestoreResult result)
-{
-  switch (result) {
-
-    case NVM_RESTORE_NO_STATE:
-      Serial.println("NVM RESTORE Failed: no saved nvm state");
-      break;
-
-    case NVM_RESTORE_DAY_MISMATCH:
-      Serial.println("NVM RESTORE Failed: day mismatch");
-      break;
-
-    case NVM_RESTORE_TOO_OLD:
-      Serial.println("NVM RESTORE Failed: Timestamp too Old");
-      break;
-
-    case NVM_RESTORE_NOW_EPOCH_ZERO:
-      Serial.println("NVM RESTORE Failed: invalid system time");
-      break;
-
-    case NVM_RESTORE_SAVED_EPOCH_ZERO:
-      Serial.println("NVM RESTORE Failed: invalid saved epoch");
-      break;
-
-    case NVM_RESTORE_BYTES_MISMATCH:
-      Serial.println("NVM RESTORE Failed: array size mismatch");
-      break;
-
-    case NVM_RESTORE_PREFS_FAIL:
-      Serial.println("NVM RESTORE Failed: prefs.begin failed");
-      break;
-
-    case NVM_RESTORE_BAD_ARGS:
-      Serial.println("NVM RESTORE Failed: bad arguments.");
-      break;
-
-    default:
-      Serial.println("NVM RESTORE Failed: unknown failure.");
-      break;
-  }
-}
-
-void nvmDumpPumpState()
-{
-  Serial.println("----- NVM PUMP DUMP BEGIN -----");
-
-  if (!prefs.begin(NS_PUMP, true)) {
-    Serial.println("NVM dump failed: prefs.begin(NS_PUMP) failed");
-    return;
-  }
-
-  bool hasState = prefs.getBool(K_HAS_STATE, false);
-  String dayKey = prefs.getString(K_DAY_KEY, "");
-  uint32_t saveEpoch = (uint32_t)prefs.getULong(K_SAVE_EPOCH, 0);
-  uint8_t blkCnt = prefs.getInt(K_BLK_CNT, 0);
-  uint8_t firstBlk = prefs.getInt(K_FIRST_BLK, 0);
-  uint8_t lastHour = prefs.getInt(K_LAST_HOUR, 0);
-
-  Serial.printf("has_state: %s\n", hasState ? "true" : "false");
-  Serial.printf("day_key:   %s\n", dayKey.c_str());
-  Serial.printf("epoch:     %lu\n", (unsigned long)saveEpoch);
-  Serial.printf("blk_cnt:   %d\n", blkCnt);
-  Serial.printf("first_blk: %d\n", firstBlk);
-  Serial.printf("last_hour: %d\n", lastHour);
-
-  // Dump arrays
-  if (blkCnt > 0) {
-    uint32_t gal[NUM_4HR_BLOCKS] = {0};   
-    uint32_t cyc[NUM_4HR_BLOCKS] = {0};
-
-    size_t needGal = sizeof(gal);
-    size_t needCyc = sizeof(cyc);
-
-    size_t gotGal = prefs.getBytes(K_GAL4HR, gal, needGal);
-    size_t gotCyc = prefs.getBytes(K_CYC4HR, cyc, needCyc);
-
-    Serial.printf("GAL4HR bytes: %u\n", (unsigned)gotGal);
-    Serial.printf("CYC4HR bytes: %u\n", (unsigned)gotCyc);
-
-    for (int i = 0; i < NUM_4HR_BLOCKS; i++) {
-      Serial.printf("  Block %d: gal=%lu cyc=%lu\n",
-                    i,
-                    (unsigned long)gal[i],
-                    (unsigned long)cyc[i]);
+  void setValue(char* dest, const char* src) {
+    if (src) {
+        strncpy(dest, src, DIAG_BUF_SIZE - 1);
+        dest[DIAG_BUF_SIZE - 1] = '\0';
+    } else {
+        dest[0] = ' ';
+        dest[1] = '\0';
     }
   }
 
-  prefs.end();
-  Serial.println("----- NVM PUMP DUMP END -----");
-}
-
-void nvmDumpBootState()
-{
-  Serial.println("----- NVM BOOT DUMP BEGIN -----");
-
-  if (!prefs.begin(NS_BOOT, true)) {
-    Serial.println("NVM dump failed: prefs.begin(NS_BOOT) failed");
-    return;
+  void setValueLong(char* dest, const char* src) {
+      if (src) {
+          strncpy(dest, src, DIAG_BUF_LONG - 1);
+          dest[DIAG_BUF_LONG - 1] = '\0';
+      } else {
+          dest[0] = ' ';
+          dest[1] = '\0';
+      }
   }
 
-  uint32_t bootCount = prefs.getUInt(K_BOOT_COUNT, 0);
-  uint32_t lastBoot  = prefs.getUInt(K_LAST_BOOT_EPOCH, 0);
-  uint32_t prevBoot  = prefs.getUInt(K_PREV_BOOT_EPOCH, 0);
-
-  Serial.printf("boot_count:      %lu\n", (unsigned long)bootCount);
-  Serial.printf("last_boot_epoch: %lu\n", (unsigned long)lastBoot);
-  Serial.printf("prev_boot_epoch: %lu\n", (unsigned long)prevBoot);
-
-  prefs.end();
-  Serial.println("----- NVM BOOT DUMP END -----");
-}
-
-//-------------------------------------------------
-// DAILY SUMMARY
-//-------------------------------------------------
-
-bool nvmSaveQueuedDailySummary(
-  const char* dayKey,
-  uint32_t gallons,
-  uint32_t cycles,
-  float rainMm,
-  bool hasRain,
-  float lastCycleEnergy,
-  const uint32_t* gal4hr, size_t galCount,
-  const uint32_t* cyc4hr, size_t cycCount
-) {
-  if (!dayKey || !gal4hr || !cyc4hr) return false;
-  if (galCount == 0 || cycCount == 0) return false;
-
-  if (!prefs.begin(NS_QUEUE, false)) return false;
-
-  bool ok = true;
-
-  ok &= prefs.putBool(K_Q_HAS, true);
-  ok &= (prefs.putString(K_Q_DAY_KEY, dayKey) > 0);
-
-  ok &= (prefs.putUInt(K_Q_GAL, gallons) > 0);
-  ok &= (prefs.putUInt(K_Q_CYC, cycles) > 0);
-
-  ok &= (prefs.putFloat(K_Q_RAIN, rainMm) > 0);
-  ok &= prefs.putBool(K_Q_HAS_RAIN, hasRain);
-
-  ok &= (prefs.putFloat(K_Q_LAST_ENERGY, lastCycleEnergy) > 0);
-
-  ok &= (prefs.putBytes(K_Q_GAL4HR, gal4hr, galCount * sizeof(uint32_t)) ==
-         galCount * sizeof(uint32_t));
-
-  ok &= (prefs.putBytes(K_Q_CYC4HR, cyc4hr, cycCount * sizeof(uint32_t)) ==
-         cycCount * sizeof(uint32_t));
-
-  prefs.end();
-  return ok;
-}
-
-bool nvmLoadQueuedDailySummary(
-  char* outDayKey, size_t dayKeyLen,
-  uint32_t* outGallons,
-  uint32_t* outCycles,
-  float* outRainMm,
-  bool* outHasRain,
-  float* outLastCycleEnergy,
-  uint32_t* outGal4hr, size_t galCount,
-  uint32_t* outCyc4hr, size_t cycCount
-) {
-  if (!outDayKey || dayKeyLen == 0 ||
-      !outGallons || !outCycles ||
-      !outRainMm || !outHasRain ||
-      !outLastCycleEnergy ||
-      !outGal4hr || !outCyc4hr) {
-    return false;
+  void setDefault(char* dest) {
+      dest[0] = '\0';
   }
+};
 
-  if (galCount == 0 || cycCount == 0) return false;
-
-  if (!prefs.begin(NS_QUEUE, true)) return false;
-
-  const bool has = prefs.getBool(K_Q_HAS, false);
-  if (!has) {
-    prefs.end();
-    return false;
-  }
-
-  String dayKey = prefs.getString(K_Q_DAY_KEY, "");
-  if (dayKey.length() == 0) {
-    prefs.end();
-    return false;
-  }
-
-  snprintf(outDayKey, dayKeyLen, "%s", dayKey.c_str());
-
-  *outGallons = prefs.getUInt(K_Q_GAL, 0);
-  *outCycles  = prefs.getUInt(K_Q_CYC, 0);
-
-  *outRainMm  = prefs.getFloat(K_Q_RAIN, 0.0f);
-  *outHasRain = prefs.getBool(K_Q_HAS_RAIN, false);
-
-  *outLastCycleEnergy = prefs.getFloat(K_Q_LAST_ENERGY, 0.0f);
-
-  const size_t needGal = galCount * sizeof(uint32_t);
-  const size_t needCyc = cycCount * sizeof(uint32_t);
-
-  const size_t gotGal = prefs.getBytes(K_Q_GAL4HR, outGal4hr, needGal);
-  const size_t gotCyc = prefs.getBytes(K_Q_CYC4HR, outCyc4hr, needCyc);
-
-  prefs.end();
-
-  return (gotGal == needGal) && (gotCyc == needCyc);
-}
-
-void nvmClearQueuedDailySummary() {
-  if (!prefs.begin(NS_QUEUE, false)) return;
-
-  prefs.remove(K_Q_HAS);
-  prefs.remove(K_Q_DAY_KEY);
-  prefs.remove(K_Q_GAL);
-  prefs.remove(K_Q_CYC);
-  prefs.remove(K_Q_RAIN);
-  prefs.remove(K_Q_HAS_RAIN);
-  prefs.remove(K_Q_LAST_ENERGY);
-  prefs.remove(K_Q_GAL4HR);
-  prefs.remove(K_Q_CYC4HR);
-
-  prefs.end();
-}
-
-void nvmDumpQueuedDailySummary() {
-  Serial.println("----- NVM QUEUED DAILY SUMMARY BEGIN -----");
-
-  if (!prefs.begin(NS_QUEUE, true)) {
-    Serial.println("NVM queue dump failed: prefs.begin(NS_QUEUE) failed");
-    return;
-  }
-
-  bool has = prefs.getBool(K_Q_HAS, false);
-  String dayKey = prefs.getString(K_Q_DAY_KEY, "");
-  uint32_t gallons = prefs.getUInt(K_Q_GAL, 0);
-  uint32_t cycles = prefs.getUInt(K_Q_CYC, 0);
-  float rainMm = prefs.getFloat(K_Q_RAIN, 0.0f);
-  bool hasRain = prefs.getBool(K_Q_HAS_RAIN, false);
-  float lastEnergy = prefs.getFloat(K_Q_LAST_ENERGY, 0.0f);
-
-  Serial.printf("has_daily:   %s\n", has ? "true" : "false");
-  Serial.printf("day_key:     %s\n", dayKey.c_str());
-  Serial.printf("gallons:     %lu\n", (unsigned long)gallons);
-  Serial.printf("cycles:      %lu\n", (unsigned long)cycles);
-  Serial.printf("rain_mm:     %.1f\n", rainMm);
-  Serial.printf("has_rain:    %s\n", hasRain ? "true" : "false");
-  Serial.printf("last_energy: %.2f\n", lastEnergy);
-
-  uint32_t gal[NUM_4HR_BLOCKS] = {0};
-  uint32_t cyc[NUM_4HR_BLOCKS] = {0};
-
-  size_t gotGal = prefs.getBytes(K_Q_GAL4HR, gal, sizeof(gal));
-  size_t gotCyc = prefs.getBytes(K_Q_CYC4HR, cyc, sizeof(cyc));
-
-  Serial.printf("GAL4HR bytes: %u\n", (unsigned)gotGal);
-  Serial.printf("CYC4HR bytes: %u\n", (unsigned)gotCyc);
-
-  for (int i = 0; i < NUM_4HR_BLOCKS; i++) {
-    Serial.printf("  Block %d: gal=%lu cyc=%lu\n",
-                  i,
-                  (unsigned long)gal[i],
-                  (unsigned long)cyc[i]);
-  }
-
-  prefs.end();
-  Serial.println("----- NVM QUEUED DAILY SUMMARY END -----");
-}
+extern Diag diagState;
 ```
 
-## File: Pump_Monitor/firebaseClient.cpp
+## File: datalogger/eventData.cpp
 ```cpp
-#include "FirebaseClient.h"
-#include "global.h"
-#include "firebase.h"
+#include "eventData.h"
 
-// Helpers
+#include <string.h>
+#include <time.h>
 
-static const char* safeCStr(const char* p) {
-  return p ? p : "<null>";
-}
+#include "ntp.h"
 
-static void dumpNetAndMem(const char* where, unsigned long sinceLastOk, unsigned long dt) {
-  IPAddress ip = WiFi.localIP();
-  const uint8_t* bssid = WiFi.BSSID();
+namespace {
 
-  Serial.printf(
-    "[%s] ms=%lu since=%lu dt=%lu WiFi=%d RSSI=%d IP=%u.%u.%u.%u heap=%u minheap=%u psram=%u\n",
-    safeCStr(where),
-    millis(),
-    sinceLastOk,
-    dt,
-    (int)WiFi.status(),
-    (int)WiFi.RSSI(),
-    ip[0], ip[1], ip[2], ip[3],
-    (unsigned)ESP.getFreeHeap(),
-    (unsigned)ESP.getMinFreeHeap(),
-    (unsigned)ESP.getFreePsram()
-  );
+class EventData {
+public:
+  static const int MAX_EVENTS = 250;
+  static const uint32_t WINDOW_MINUTES = 24U * 60U;
 
-  if (bssid) {
-    Serial.printf(
-      "[wifi] BSSID=%02X:%02X:%02X:%02X:%02X:%02X CH=%d\n",
-      bssid[0], bssid[1], bssid[2],
-      bssid[3], bssid[4], bssid[5],
-      WiFi.channel()
-    );
-  } else {
-    Serial.printf("[wifi] BSSID=-- CH=%d\n", WiFi.channel());
-  }
-}
-
-static bool wifiHealthyForFirebase() {
-  if (WiFi.status() != WL_CONNECTED) return false;
-  if (WiFi.RSSI() == 0) return false;
-  if (WiFi.BSSIDstr().length() == 0) return false;
-  return true;
-}
-
-//-------------------------------------------------
-// Client Class
-//-------------------------------------------------
-
-FirebaseClient::FirebaseClient() {}
-
-bool FirebaseClient::begin(const char* apiKey, const char* dbUrl, uint32_t timeoutMs) {
-  lastErr = "";
-
-  if (!initialized) {
-    fbdo.setResponseSize(2048);
-    initialized = true;
+  EventData() {
+    clear();
   }
 
-  config = FirebaseConfig();
-  auth = FirebaseAuth();
-
-  config.api_key = apiKey;
-  config.database_url = dbUrl;
-
-  config.timeout.serverResponse = 10 * 1000;
-  config.timeout.wifiReconnect  = 10 * 1000;
-
-  if (!Firebase.signUp(&config, &auth, "", "")) {
-    lastErr = config.signer.signupError.message.c_str();
-    return false;
+  void clear() {
+    memset(eventMinute_, 0, sizeof(eventMinute_));
+    head_ = 0;
+    count_ = 0;
   }
 
-  Firebase.begin(&config, &auth);
-  Firebase.reconnectWiFi(true);
+  bool addNow() {
+    if (!validClockNow()) return false;
 
-  uint32_t waitMs = (timeoutMs == 0) ? 2000 : timeoutMs;
-  const uint32_t t0 = millis();
+    const uint32_t minute2026 = getMinutesSince2026Now();
+    if (minute2026 == 0) return false;
 
-  while (!Firebase.ready() && millis() - t0 < waitMs) {
-    delay(50);
-  }
-
-  if (!Firebase.ready()) {
-    lastErr = fbdo.errorReason();
-    if (lastErr.length() == 0) lastErr = "Firebase not ready";
-  }
-
-  return Firebase.ready();
-}
-
-bool FirebaseClient::ready() const { return Firebase.ready(); }
-
-// Build "<base><field>" into a reusable String buffer
-const String& FirebaseClient::mkKey(const String& base, const char* field) {
-  const size_t need = base.length() + strlen(field);
-  _keyBuf.reserve(need + 8);   // Heltec core: don't touch capacity(); reserve is fine
-
-  _keyBuf = base;
-  _keyBuf += field;
-  return _keyBuf;
-}
-
-bool FirebaseClient::writeInt(const String& path, int v) {
-  const uint32_t start = millis();
-
-  const bool ok = Firebase.RTDB.setInt(&fbdo, path, v);
-
-  lastDT = millis() - start;
-
-  if (ok) {
-    lastHttpCode = 200;
-    lastErr = "";
-  } else {
-    lastErr = fbdo.errorReason();
-    lastHttpCode = fbdo.httpCode();  // use -1 if this method doesn't exist
-  }
-
-  return ok;
-}
-
-bool FirebaseClient::writeFloat(const String& path, float v) {
-  const uint32_t start = millis();
-
-  const bool ok = Firebase.RTDB.setFloat(&fbdo, path, v);
-
-  lastDT = millis() - start;
-
-  if (ok) {
-    lastHttpCode = 200;
-    lastErr = "";
-  } else {
-    lastErr = fbdo.errorReason();
-    lastHttpCode = fbdo.httpCode();  // use -1 if this method doesn't exist
-  }
-
-  return ok;
-}
-
-bool FirebaseClient::writeString(const String& path, const String& v) {
-  const uint32_t start = millis();
-
-  const bool ok = Firebase.RTDB.setString(&fbdo, path, v);
-
-  lastDT = millis() - start;
-
-  if (ok) {
-    lastHttpCode = 200;
-    lastErr = "";
-  } else {
-    lastErr = fbdo.errorReason();
-    lastHttpCode = fbdo.httpCode();  // use -1 if this method doesn't exist
-  }
-
-  return ok;
-}
-
-// New overloads: base + field
-bool FirebaseClient::writeInt(const String& base, const char* field, int v) {
-  return writeInt(mkKey(base, field), v);
-}
-
-bool FirebaseClient::writeFloat(const String& base, const char* field, float v) {
-  return writeFloat(mkKey(base, field), v);
-}
-
-bool FirebaseClient::writeString(const String& base, const char* field, const String& v) {
-  return writeString(mkKey(base, field), v);
-}
-
-// Write JSON - MAIN FUNCTION
-bool FirebaseClient::writeJSON(const String& path, FirebaseJson& json) {
-  String out;
-  json.toString(out, true);
-  Serial.printf("JSON bytes: %u\n", (unsigned)out.length());
-
-  const uint32_t start = millis();
-
-  const bool ok = Firebase.RTDB.updateNode(&fbdo, path, &json);
-
-  lastDT = millis() - start;
-
-  if (ok) {
-    lastHttpCode = 200;
-    lastErr = "";
-  } else {
-    lastErr = fbdo.errorReason();
-    lastHttpCode = fbdo.httpCode();
-  }
-
-  return ok;
-}
-
-bool FirebaseClient::readJSON(const String& path, FirebaseJson& json) {
-  if (!wifiHealthyForFirebase()) {
-    if (LOG_FIREBASE) {
-      String bssid = WiFi.BSSIDstr();
-      Serial.printf("FB skip: WiFi=%d RSSI=%d BSSID=%s\n",
-              WiFi.status(),
-              WiFi.RSSI(),
-              bssid.c_str());
-    }
-    lastErr = "wifi unhealthy";
-    return false;
-  }
-
-  static unsigned long lastOkMs = 0;
-  unsigned long sinceLastOk = lastOkMs ? (millis() - lastOkMs) : 0;
-  if (LOG_FIREBASE) Serial.printf("\nFB read start: sinceLastOk=%lums\n", sinceLastOk);
-
-  uint32_t t0 = millis();
-
-  json.clear();
-  bool ok = Firebase.RTDB.getJSON(&fbdo, path);
-
-  uint32_t dt = millis() - t0;
-
-  lastDT = (uint16_t)dt;
-  lastReadMs = (uint16_t)dt;   // if you track this; otherwise reuse lastDT only
-  lastErr = fbdo.errorReason();
-  lastHttpCode = fbdo.httpCode();
-
-  const bool success = ok && (lastHttpCode == 200);
-
-  if (success) {
-    // Copy payload out of fbdo into caller-provided json
-    json.setJsonData(fbdo.jsonString());
-
-    if (LOG_FIREBASE) {
-      Serial.printf("FB readJSON OK (%lums) http=%s\n",
-                    dt, fbHttpText(lastHttpCode));
-    }
-
-    lastOkMs = millis();
+    addMinute(minute2026);
     return true;
   }
 
-  if (LOG_FIREBASE) {
-    Serial.printf("FB readJSON FAIL (%lums) http=%s err=%s\n",
-                  dt,
-                  fbHttpText(lastHttpCode),
-                  safeCStr(lastErr.c_str()));
-  }
-  if (LOG_FIREBASE) {
-    dumpNetAndMem("FB FAIL", sinceLastOk, dt);
-  }
-
-  return false;
-}
-
-
-// Optional convenience exposure
-const String& FirebaseClient::mkKeyPublic(const String& base, const char* field) {
-  return mkKey(base, field);
-}
-```
-
-## File: Pump_Monitor/pumpData.cpp
-```cpp
-#include "global.h"
-#include "eventData.h"
-#include "pumpData.h"
-#include <string.h>
-
-// ################################################################################################
-// CLASS PumpData
-// ################################################################################################
-
-PumpData::PumpData() {
-  DELTA_SEC = 6000;  // default 10mins
-  DELTA_MIN = 10;    // default 10 mins
-  AVG_PUMP_CUR_COUNT = 6 * COUNT_PER_AMP;  // Initialize at 6A (will adjust quickly)
-  PUMP_EVENT_COUNT = 0;
-  LAST_PUMP_ON_TIME_LOOPS = 0;
-  PUMP_ON_TIME_LOOPS = 0;
-  LAST_PUMP_EVENT = 0;
-  PUMP_CPH = 0;
-  PUMP_GPD = 0;
-  LAST_PUMP_EVENT_CUR_TEXT = "";
-  LAST_PUMP_EVENT_SS_CUR_TEXT = "";
-
-  // Initialize History
-  CycData.init(50, "sec");
-  CycData10.init(10, "sec");
-
-  // Initialize Daily History
-  GPDDailyHistory.init(20, "GPD");
-  CycleDailyHistory.init(20, 2, "min");
-  CPHDailyHistory.init(20, 1, "Cyc");
-  CurrentDailyHistory.init(20, 2, "Amp");
-
-  // Initialize new 365-day ring
-  Daily365.begin();
-
-  // waveform buffers
-  curWaveCount = 0;
-  lastWaveCount = 0;
-  for (int i = 0; i < CUR_WAVE_MAX; i++) {
-    curWave[i] = 0;
-    lastWave[i] = 0;
-  }
-
-  if (TEST_MODE) {
-    const int scale = random(1, 11);
-    //seedTestModeDailyTotals(scale);
-    //seedTestModeDailyTotalsFromHistory(scale);
-  }
-}
-
-float PumpData::getAvgCycleMin() { return float(CycData10.avg() / 60.0); }
-float PumpData::getStDevCycleMin() { return float(CycData10.stdev() / 60.0); }
-float PumpData::getDeltaSec() { return DELTA_SEC; }
-float PumpData::getDeltaMin() { return DELTA_MIN; }
-float PumpData::getCPH() { return PUMP_CPH; }
-int PumpData::getGPD() { return PUMP_GPD; }
-int PumpData::getPumpEventCount() { return PUMP_EVENT_COUNT; }
-int PumpData::getLastPumpOnTimeLoops() { return LAST_PUMP_ON_TIME_LOOPS; }
-uint32_t PumpData::getLastPumpEventLoops() { return LAST_PUMP_EVENT; }
-uint32_t PumpData::getPumpOnTimeLoops() { return PUMP_ON_TIME_LOOPS; }
-
-float PumpData::getPumpCur() {
-  return (float)AVG_PUMP_CUR_COUNT / (float)COUNT_PER_AMP;
-}
-
-int PumpData::getPumpCurCount() { return AVG_PUMP_CUR_COUNT; }
-
-String PumpData::getPumpCurText() {
-  return String((float)AVG_PUMP_CUR_COUNT / (float)COUNT_PER_AMP, 1) + "A";
-}
-
-void PumpData::getPumpCurText(char* out, size_t outSize) {
-  if (!out || outSize == 0) return;
-
-  const float amps = (float)getPumpCur();
-  snprintf(out, outSize, "%.1fA", amps);
-}
-
-String PumpData::getPumpCurTextFull() {
-  const float amps = (float)AVG_PUMP_CUR_COUNT / (float)COUNT_PER_AMP;
-  return String(amps, 1) + "A [" + String(AVG_PUMP_CUR_COUNT) + "]";
-}
-
-String PumpData::getCycleDataText() { return CycData.dataText(); }
-
-// Keep old behavior for now; switch later if you want this to reflect Daily365
-int PumpData::getDailyCount() { return GPDDailyHistory.getTotalCount(); }
-
-float PumpData::getLastCycleEnergyAmpSeconds() const {
-  const int n = getLastCycleCurrentSamplesCount();
-  if (n < 10) return 0.0f;
-
-  const int start = 10;
-  const int end = (n - 1 < 49) ? (n - 1) : 49;
-
-  float sumAmps = 0.0f;
-  for (int i = start; i <= end; i++) {
-    sumAmps += getLastCycleCurrentSampleAmps(i);
-  }
-
-  // Samples are at 100ms cadence => 0.1s per sample => divide by 10 to get amp-seconds
-  return sumAmps / 10.0f;
-}
-
-// -------------------------------------------------------
-// TEST_MODE PreLoad
-// -------------------------------------------------------
-void PumpData::seedTestModeDailyTotals(int scale) {
-  Daily365.clearDailyHistory();
-
-  for (int day = 0; day < 250; day++) {
-    float trend = 40 + 15 * sin(day * 0.15f);   // smooth wave
-    int cycles = (int)trend + random(-5, 6);
-    int gallons = cycles * 10 * scale;
-    float rain = random(0, 100) / 10.0f;
-
-    Daily365.recordDailySummary(cycles, gallons, rain);
-  }
-}
-
-void PumpData::seedTestModeDailyTotalsFromHistory(int scale) {
-  Daily365.clearDailyHistory();
-
-  // Simulate loader behavior:
-  // start from newest historical day and append older days behind it
-  for (int day = 30; day >= 1; day--) {
-    const int cycles  = 30 + (day % 10) + random(0, 6);
-    const int gallons = (10 * cycles) * scale;
-    const float rainMm = random(0, 200) / 10.0f;
-
-    if (day == 30) {
-      // first record can seed ring either way
-      Daily365.recordDailySummary(cycles, gallons, rainMm);
-    } else {
-      Daily365.appendOlderDailyRecord(cycles, gallons, rainMm);
-    }
-  }
-}
-
-String PumpData::getLastEventCurText() { return LAST_PUMP_EVENT_CUR_TEXT; }
-String PumpData::getLastEventSSCurText() { return LAST_PUMP_EVENT_SS_CUR_TEXT; }
-
-// -------------------------
-// Waveform accessors
-// -------------------------
-int PumpData::getLastCycleCurrentSamplesCount() const {
-  return lastWaveCount;
-}
-
-int PumpData::getLastCycleCurrentSampleCounts(int idx) const {
-  if (lastWaveCount <= 0) return 0;
-  if (idx < 0) idx = 0;
-  if (idx >= lastWaveCount) idx = lastWaveCount - 1;
-  return lastWave[idx];
-}
-
-float PumpData::getLastCycleCurrentSampleAmps(int idx) const {
-  const int c = getLastCycleCurrentSampleCounts(idx);
-  return (float)c / (float)COUNT_PER_AMP;
-}
-
-float PumpData::getLastCycleCurrentAvgAmps() const {
-  if (lastWaveCount <= 0) return 0.0f;
-  uint32_t sum = 0;
-  for (int i = 0; i < lastWaveCount; i++) sum += (uint32_t)lastWave[i];
-  const float avgCounts = (float)sum / (float)lastWaveCount;
-  return avgCounts / (float)COUNT_PER_AMP;
-}
-
-float PumpData::getLastCycleCurrentMinAmps() const {
-  if (lastWaveCount <= 0) return 0.0f;
-  int mn = lastWave[0];
-  for (int i = 1; i < lastWaveCount; i++) {
-    if (lastWave[i] < mn) mn = lastWave[i];
-  }
-  return (float)mn / (float)COUNT_PER_AMP;
-}
-
-float PumpData::getLastCycleCurrentMaxAmps() const {
-  if (lastWaveCount <= 0) return 0.0f;
-  int mx = lastWave[0];
-  for (int i = 1; i < lastWaveCount; i++) {
-    if (lastWave[i] > mx) mx = lastWave[i];
-  }
-  return (float)mx / (float)COUNT_PER_AMP;
-}
-
-String PumpData::getLastCycleCurrentSummaryText() const {
-  String s;
-  s.reserve(24);
-  s += String(lastWaveCount);
-  s += " | ";
-  s += String(getLastCycleCurrentAvgAmps(), 2);
-  s += "A";
-  return s;
-}
-
-void PumpData::processPumpOnEvent(uint32_t loopCount) {
-  PUMP_EVENT_COUNT++;
-  DELTA_SEC = (loopCount - LAST_PUMP_EVENT) / LOOPS_PER_SEC;
-  DELTA_MIN = DELTA_SEC / 60.0f;
-  LAST_PUMP_EVENT = loopCount;
-
-  // Save Event Data for Graph
-  eventDataAddNow();
-
-  if (DELTA_SEC > 0) {
-    PUMP_CPH = 3600.0f / DELTA_SEC;
-  } else {
-    PUMP_CPH = 0;
-  }
-
-  if (PUMP_EVENT_COUNT > 1) {
-    updateAvgCycleTime();
-    if (TEST_MODE) {
-      updateTestModeHistoryData();
-    }
-  } else {
-    TLog("Ignore first cycle when updating averages");
-  }
-}
-
-void PumpData::processPumpOffEvent(int pumpOnTimeLoops) {
-  //TLog("Pump OFF Event - On Time: %.1f sec", float(pumpOnTimeLoops / 10.0));
-
-  // snapshot current waveform for Details graph
-  lastWaveCount = curWaveCount;
-  if (lastWaveCount > CUR_WAVE_MAX) lastWaveCount = CUR_WAVE_MAX;
-
-  for (int i = 0; i < lastWaveCount; i++) {
-    lastWave[i] = curWave[i];
-  }
-
-  // reset for next cycle
-  curWaveCount = 0;
-
-  // Capture waveform-based steady-state current (±20% filter)
-  float ssCounts = Current.ssAvg(0.2f);
-  float ssAmps   = ssCounts / (float)COUNT_PER_AMP;
-
-  LAST_PUMP_EVENT_SS_CUR_TEXT = String(ssAmps, 1) + "A";
-  LAST_PUMP_EVENT_CUR_TEXT = Current.dataText();
-  LAST_PUMP_ON_TIME_LOOPS = pumpOnTimeLoops;
-  PUMP_ON_TIME_LOOPS += pumpOnTimeLoops;
-  Current.reset();
-}
-
-void PumpData::updateAvgCurrent(int adcCount) {
-  int adjCurrent = adcCount;
-  int maxCurrent = int(AVG_PUMP_CUR_COUNT + 1 * COUNT_PER_AMP);
-  int minCurrent = int(AVG_PUMP_CUR_COUNT - 2 * COUNT_PER_AMP);
-
-  if (adjCurrent > maxCurrent) adjCurrent = maxCurrent;
-  if (adjCurrent < minCurrent) adjCurrent = minCurrent;
-
-  if (PUMP_EVENT_COUNT < 3) {
-    float newAvgCurrent = 0.90f * AVG_PUMP_CUR_COUNT + 0.10f * adjCurrent;
-    AVG_PUMP_CUR_COUNT = int(newAvgCurrent);
-  } else {
-    float newAvgCurrent = 0.98f * AVG_PUMP_CUR_COUNT + 0.02f * adjCurrent;
-    AVG_PUMP_CUR_COUNT = int(newAvgCurrent);
-  }
-
-  // capture waveform sample (raw counts) for current cycle
-  if (curWaveCount < CUR_WAVE_MAX) {
-    curWave[curWaveCount++] = adcCount;
-  }
-
-  Current.addData(adcCount);
-}
-
-void PumpData::updateAvgCycleTime() {
-  CycData.addData(DELTA_SEC);
-  CycData10.addData(DELTA_SEC);
-}
-
-void PumpData::updateTestModeHistoryData() {
-  int gpd = random(100, 300);
-  float cph = (gpd / 24.0f) / 5.0f;
-  float current = random(900, 1100) / 100.0f;
-  GPDDailyHistory.addData(gpd);
-  CPHDailyHistory.addData(cph);
-  CurrentDailyHistory.addData(current);
-  CycleDailyHistory.addData(DELTA_SEC);
-}
-```
-
-## File: Pump_Monitor/weather.cpp
-```cpp
-#include "weather.h"
-
-#include <WiFi.h>
-#include <WiFiClient.h>
-#include <Firebase_ESP_Client.h>   // FirebaseJson
-#include "ntp.h"                   // getTimelog()
-#include "firebase.h"              // delayFirebase
-
-// --------------------------------------------------
-// Config
-// --------------------------------------------------
-
-static constexpr float WEATHER_LAT = 42.5051f;
-static constexpr float WEATHER_LON = -83.4072f;
-
-static constexpr uint32_t WEATHER_INTERVAL_MS = 60UL * 60UL * 1000UL;   // 1 hour
-static constexpr uint32_t WEATHER_STALE_MS    = 60UL * 60UL * 1000UL;   // 1 hour
-
-static volatile bool g_forceWeather = false;
-
-// Cached weather
-static WeatherSnapshot g_weather = {0,0,0,0,0,0,0,0,0,false};
-static bool g_weatherValid = false;
-static uint32_t g_lastWeatherOkMs = 0;
-
-// Daily averages
-static float tempSum = 0.0f;
-static float windSum = 0.0f;
-static uint8_t weatherSamples = 0;
-
-// Timestamp of last successful reading
-static char weatherTimestamp[24] = "";
-
-// --------------------------------------------------
-// Internal helpers
-// --------------------------------------------------
-
-static void setWeatherTimestamp(const char* text) {
-  if (!text) {
-    weatherTimestamp[0] = '\0';
-    return;
-  }
-
-  strncpy(weatherTimestamp, text, sizeof(weatherTimestamp) - 1);
-  weatherTimestamp[sizeof(weatherTimestamp) - 1] = '\0';
-}
-
-static bool skipHttpHeaders(WiFiClient &client, uint32_t timeoutMs) {
-  uint32_t start = millis();
-  int match = 0;
-
-  while (millis() - start < timeoutMs) {
-    while (client.available()) {
-      char c = (char)client.read();
-
-      if ((match == 0 && c == '\r') ||
-          (match == 1 && c == '\n') ||
-          (match == 2 && c == '\r') ||
-          (match == 3 && c == '\n')) {
-        match++;
-        if (match == 4) return true;
-      } else {
-        match = (c == '\r') ? 1 : 0;
+  void addMinute(uint32_t minute2026) {
+    // De-dupe: ignore repeated events in same minute
+    if (count_ > 0) {
+      uint32_t newestMinute = 0;
+      if (get(count_ - 1, newestMinute) && newestMinute == minute2026) {
+        purgeOld(minute2026);
+        return;
       }
     }
-    delay(1);
-  }
-  return false;
-}
 
-static String buildWeatherPath(float lat, float lon) {
-  String path;
-  path.reserve(384);
+    eventMinute_[head_] = minute2026;
+    head_ = (head_ + 1) % MAX_EVENTS;
 
-  path  = "/v1/forecast?latitude=";
-  path += String(lat, 4);
-  path += "&longitude=";
-  path += String(lon, 4);
-  path += "&hourly=temperature_2m,wind_speed_10m,wind_direction_10m,wind_gusts_10m,rain,snowfall";
-  path += "&past_days=1";
-  path += "&forecast_days=1";
-  path += "&temperature_unit=fahrenheit";
-  path += "&wind_speed_unit=mph";
-  path += "&timezone=auto";
-
-  return path;
-}
-
-static bool openMeteoGetBody(const String &path, String &body, uint32_t timeoutMs = 8000) {
-  const char *HOST = "api.open-meteo.com";
-  const uint16_t PORT = 80;
-
-  WiFiClient client;
-  client.setTimeout(timeoutMs / 1000);
-
-  // Serial.printf("[WEATHER] connect host=%s port=%u path=%s\n", HOST, PORT, path.c_str());
-
-  if (!client.connect(HOST, PORT)) {
-    Serial.println("[WEATHER] connect FAIL");
-    return false;
-  }
-
-  client.print(F("GET "));
-  client.print(path);
-  client.print(F(" HTTP/1.0\r\nHost: "));
-  client.print(HOST);
-  client.print(F("\r\nConnection: close\r\nUser-Agent: esp32\r\n\r\n"));
-
-  if (!skipHttpHeaders(client, timeoutMs)) {
-    Serial.println("[WEATHER] header skip FAIL");
-    client.stop();
-    return false;
-  }
-
-  body = "";
-  body.reserve(16000);
-
-  uint32_t start = millis();
-  while (millis() - start < timeoutMs) {
-    while (client.available()) {
-      body += (char)client.read();
+    if (count_ < MAX_EVENTS) {
+      count_++;
     }
 
-    if (!client.connected()) break;
-    delay(1);
+    purgeOld(minute2026);
   }
 
-  client.stop();
+  void purgeOld(uint32_t nowMinute2026) {
+    while (count_ > 0) {
+      const int idx = oldestIndex();
+      const uint32_t eventMinute = eventMinute_[idx];
 
-  if (body.length() == 0) {
-    Serial.println("[WEATHER] empty body");
-    return false;
-  }
+      // Guard bad clock jumps
+      if (eventMinute > nowMinute2026) {
+        break;
+      }
 
-  // DEBUG ONLY - Print JSON body
-  //Serial.println(body.substring(0, 800)); 
-  return true;
-}
+      const uint32_t ageMinutes = nowMinute2026 - eventMinute;
+      if (ageMinutes <= WINDOW_MINUTES) {
+        break;
+      }
 
-static bool getHourlyArray(FirebaseJson &json, const char *path, FirebaseJsonArray &arr) {
-  FirebaseJsonData data;
-  if (!json.get(data, path)) return false;
-  data.getArray(arr);
-  return true;
-}
-
-static int getCurrentHourIndex(FirebaseJsonArray &timeArr) {
-  size_t n = timeArr.size();
-  if (n == 0) return -1;
-
-  const int hourNow = (int)getHourInt();   // local hour from NTP, 0..23
-  if (hourNow < 0 || hourNow > 23) return -1;
-
-  // With past_days=1 and forecast_days=1:
-  // index 0..23   = yesterday
-  // index 24..47  = today
-  int idx = 24 + hourNow;
-
-  if (idx < 0 || idx >= (int)n) return -1;
-  return idx;
-}
-
-static bool getFloatAtIndex(FirebaseJsonArray &arr, int idx, float &outValue) {
-  outValue = 0.0f;
-
-  size_t n = arr.size();
-  if (n == 0) return false;
-  if (idx < 0 || idx >= (int)n) return false;
-
-  FirebaseJsonData item;
-  arr.get(item, idx);
-  if (!item.success) return false;
-
-  outValue = item.to<float>();
-  return true;
-}
-
-static bool sumLastNEndingAtIndex(FirebaseJsonArray &arr, int endIdx, size_t count, float &outValue) {
-  outValue = 0.0f;
-
-  size_t n = arr.size();
-  if (n == 0) return false;
-  if (endIdx < 0 || endIdx >= (int)n) return false;
-
-  int first = endIdx - (int)count + 1;
-  if (first < 0) first = 0;
-
-  FirebaseJsonData item;
-  for (int i = first; i <= endIdx; i++) {
-    arr.get(item, i);
-    if (item.success) {
-      outValue += item.to<float>();
+      count_--;
     }
   }
 
-  return true;
-}
-
-static bool avgLastNEndingAtIndex(FirebaseJsonArray &arr, int endIdx, size_t count, float &outValue) {
-  outValue = 0.0f;
-  size_t n = arr.size();
-  if (n == 0) return false;
-  if (endIdx < 0 || endIdx >= (int)n) return false;
-
-  int first = endIdx - (int)count + 1;
-  if (first < 0) first = 0;
-
-  FirebaseJsonData item;
-  float sum = 0.0f;
-  int samples = 0;
-
-  for (int i = first; i <= endIdx; i++) {
-    arr.get(item, i);
-    if (item.success) {
-      sum += item.to<float>();
-      samples++;
-    }
+  int count() const {
+    return count_;
   }
 
-  if (samples == 0) return false;
-  outValue = sum / samples;
-  return true;
-}
-
-static bool fetchWeatherByLatLon(float lat, float lon, WeatherSnapshot &out) {
-  out.tempF = 0.0f;
-  out.avgTemp24hF = 0.0f;
-  out.windMph = 0.0f;
-  out.windDirDeg = 0.0f;
-  out.gustMph = 0.0f;
-  out.rain1hMm = 0.0f;
-  out.rain24hMm = 0.0f;
-  out.snow1hCm = 0.0f;
-  out.snow24hCm = 0.0f;
-
-  out.ok = false;
-
-  if (WiFi.status() != WL_CONNECTED) {
-    return false;
+  bool empty() const {
+    return count_ == 0;
   }
 
-  String body;
-  if (!openMeteoGetBody(buildWeatherPath(lat, lon), body, 8000)) {
-    return false;
+  bool get(int logicalIndex, uint32_t& outMinute2026) const {
+    if (logicalIndex < 0 || logicalIndex >= count_) return false;
+
+    outMinute2026 = eventMinute_[physicalIndex(logicalIndex)];
+    return true;
   }
 
-  FirebaseJson json;
-  json.setJsonData(body);
-
-  FirebaseJsonArray tempArr;
-  FirebaseJsonArray windArr;
-  FirebaseJsonArray dirArr;
-  FirebaseJsonArray gustArr;
-  FirebaseJsonArray rainArr;
-  FirebaseJsonArray snowArr;
-
-  if (!getHourlyArray(json, "/hourly/temperature_2m", tempArr)) return false;
-  if (!getHourlyArray(json, "/hourly/wind_speed_10m", windArr)) return false;
-  if (!getHourlyArray(json, "/hourly/wind_direction_10m", dirArr)) return false;
-  if (!getHourlyArray(json, "/hourly/wind_gusts_10m", gustArr)) return false;
-  if (!getHourlyArray(json, "/hourly/rain", rainArr)) return false;
-  if (!getHourlyArray(json, "/hourly/snowfall", snowArr)) return false;
-
-  // Time Array
-  FirebaseJsonArray timeArr;
-  if (!getHourlyArray(json, "/hourly/time", timeArr)) return false;
-
-  int idxNow = getCurrentHourIndex(timeArr);
-  if (idxNow < 0) return false;
-
-  // Temp
-  if (!getFloatAtIndex(tempArr, idxNow, out.tempF)) return false;
-  if (!avgLastNEndingAtIndex(tempArr, idxNow, 24, out.avgTemp24hF)) return false;
-
-  // Wind
-  if (!getFloatAtIndex(windArr, idxNow, out.windMph)) return false;
-  if (!getFloatAtIndex(dirArr, idxNow, out.windDirDeg)) return false;
-  if (!getFloatAtIndex(gustArr, idxNow, out.gustMph)) return false;
-
-  // Rain and Snow
-  if (!getFloatAtIndex(rainArr, idxNow, out.rain1hMm)) return false;
-  if (!sumLastNEndingAtIndex(rainArr, idxNow, 24, out.rain24hMm)) return false;
-  if (!getFloatAtIndex(snowArr, idxNow, out.snow1hCm)) return false;
-  if (!sumLastNEndingAtIndex(snowArr, idxNow, 24, out.snow24hCm)) return false;
-
-  FirebaseJsonData tItem;
-  timeArr.get(tItem, idxNow);
-
-  Serial.printf("[WEATHER] sample time=%s temp=%.1f wind=%.1f gust=%.1f\n",
-              tItem.to<const char*>(),
-              out.tempF,
-              out.windMph,
-              out.gustMph);
-
-  out.ok = true;
-  return true;
-}
-
-// --------------------------------------------------
-// Public weather polling / cache
-// --------------------------------------------------
-
-void forceWeatherRefresh() {
-  g_forceWeather = true;
-}
-
-void checkWeather(bool force) {
-  static uint32_t lastCheckMs = 0;
-
-  if (g_forceWeather) {
-    g_forceWeather = false;
-    force = true;
+  static bool validClockNow() {
+    return validClock() && getCurrentEpoch() > 0;
   }
 
-  uint32_t nowMs = millis();
-  bool due = force || (lastCheckMs == 0) || ((nowMs - lastCheckMs) >= WEATHER_INTERVAL_MS);
-  if (!due) return;
+  static uint32_t getMinutesSince2026Now() {
+    const uint32_t nowEpoch = getCurrentEpoch();
+    if (nowEpoch == 0) return 0;
 
-  // Start Check
-  lastCheckMs = nowMs;
+    struct tm baseTm;
+    memset(&baseTm, 0, sizeof(baseTm));
+    baseTm.tm_year = 2026 - 1900;
+    baseTm.tm_mon = 0;
+    baseTm.tm_mday = 1;
 
-  WeatherSnapshot wx;
-  bool ok = fetchWeatherByLatLon(WEATHER_LAT, WEATHER_LON, wx);
-  if (!ok) {
-    Serial.println("Weather Check Failed");
-    return;   // keep last good cached values
+    const time_t baseEpoch = mktime(&baseTm);
+    if (baseEpoch <= 0) return 0;
+    if (nowEpoch <= (uint32_t)baseEpoch) return 0;
+
+    return (nowEpoch - (uint32_t)baseEpoch) / 60U;
   }
 
-  g_weather = wx;
-  g_weatherValid = true;
-  g_lastWeatherOkMs = nowMs;
+private:
+  uint32_t eventMinute_[MAX_EVENTS];
+  int head_;
+  int count_;
 
-  setWeatherTimestamp(getTimelog());
-
-  accumulateDailyWeather(wx);
-  // ---- Serial diagnostic log ----
-  Serial.printf(
-    "Weather OK: T=%.1fF AvgT=%.1fF Wind=%.1f mph Gust=%.1f Dir=%s Rain1h=%.2f Rain24h=%.2f Snow1h=%.2f Snow24h=%.2f\n",
-    wx.tempF,
-    wx.avgTemp24hF,
-    wx.windMph,
-    wx.gustMph,
-    windDirText(wx.windDirDeg),
-    wx.rain1hMm,
-    wx.rain24hMm,
-    wx.snow1hCm,
-    wx.snow24hCm
-  );
-  delayFirebase();
-}
-
-bool weatherValid() {
-  return g_weatherValid;
-}
-
-uint32_t weatherAgeMs() {
-  if (!g_weatherValid) return 0xFFFFFFFFu;
-  return millis() - g_lastWeatherOkMs;
-}
-
-bool weatherIsStale() {
-  if (!g_weatherValid) return true;
-  return weatherAgeMs() > WEATHER_STALE_MS;
-}
-
-// --------------------------------------------------
-// Cached getters
-// --------------------------------------------------
-
-bool getTempF(float &outTempF) {
-  if (!g_weatherValid) return false;
-  outTempF = g_weather.tempF;
-  return true;
-}
-
-bool getWindMph(float &outWindMph) {
-  if (!g_weatherValid) return false;
-  outWindMph = g_weather.windMph;
-  return true;
-}
-
-bool getWindDirDeg(float &outWindDirDeg) {
-  if (!g_weatherValid) return false;
-  outWindDirDeg = g_weather.windDirDeg;
-  return true;
-}
-
-bool getWindGustMph(float &outGustMph) {
-  if (!g_weatherValid) return false;
-  outGustMph = g_weather.gustMph;
-  return true;
-}
-
-bool getRainLast1h(float &outRainMm) {
-  if (!g_weatherValid) return false;
-  outRainMm = g_weather.rain1hMm;
-  return true;
-}
-
-bool getRainLast24h(float &outRainMm) {
-  if (!g_weatherValid) return false;
-  outRainMm = g_weather.rain24hMm;
-  return true;
-}
-
-bool getSnowLast1h(float &outSnowCm) {
-  if (!g_weatherValid) return false;
-  outSnowCm = g_weather.snow1hCm;
-  return true;
-}
-
-bool getSnowLast24h(float &outSnowCm) {
-  if (!g_weatherValid) return false;
-  outSnowCm = g_weather.snow24hCm;
-  return true;
-}
-
-float getAvgTempF() {
-  // Computed Avg Temp
-  return (weatherSamples > 0) ? (tempSum / weatherSamples) : 0.0f;
-}
-
-float getAvgTemp24hF() {
-  return g_weatherValid ? g_weather.avgTemp24hF : 0.0f;
-}
-
-float getAvgWindMph() {
-  // Computed Avg Wind
-  return (weatherSamples > 0) ? (windSum / weatherSamples) : 0.0f;
-}
-
-// --------------------------------------------------
-// Daily accumulation
-// --------------------------------------------------
-
-void accumulateDailyWeather(const WeatherSnapshot &wx) {
-  float temp = wx.tempF;
-  float wind = wx.windMph;
-
-  if (temp > -40.0f && temp < 120.0f &&
-      wind >= 0.0f && wind < 80.0f) {
-    tempSum += temp;
-    windSum += wind;
-    weatherSamples++;
+  int oldestIndex() const {
+    return (head_ - count_ + MAX_EVENTS) % MAX_EVENTS;
   }
-}
 
-void resetDailyWeatherStats() {
-  tempSum = 0.0f;
-  windSum = 0.0f;
-  weatherSamples = 0;
-}
-
-// --------------------------------------------------
-// Timestamp getter
-// --------------------------------------------------
-
-const char* getWeatherTimestamp() {
-  return weatherTimestamp;
-}
-
-// --------------------------------------------------
-// Wind direction text helper
-// --------------------------------------------------
-
-const char* windDirText(float deg) {
-  while (deg < 0.0f) deg += 360.0f;
-  while (deg >= 360.0f) deg -= 360.0f;
-
-  if (deg < 22.5f)   return "N";
-  if (deg < 67.5f)   return "NE";
-  if (deg < 112.5f)  return "E";
-  if (deg < 157.5f)  return "SE";
-  if (deg < 202.5f)  return "S";
-  if (deg < 247.5f)  return "SW";
-  if (deg < 292.5f)  return "W";
-  if (deg < 337.5f)  return "NW";
-  return "N";
-}
-```
-
-## File: Pump_Monitor/weather.h
-```c
-#pragma once
-
-#include <Arduino.h>
-
-struct WeatherSnapshot {
-  float tempF;
-  float avgTemp24hF;
-  float windMph;
-  float windDirDeg;
-  float gustMph;
-  float rain1hMm;
-  float rain24hMm;
-  float snow1hCm;
-  float snow24hCm;
-  bool ok;
+  int physicalIndex(int logicalIndex) const {
+    return (oldestIndex() + logicalIndex) % MAX_EVENTS;
+  }
 };
 
-// Weather polling / cache
-void checkWeather(bool force = false);
-void forceWeatherRefresh();
+static EventData gEventData;
 
-// Cache status
-bool weatherValid();
-bool weatherIsStale();
-uint32_t weatherAgeMs();
+} // namespace
 
-// Cached getters
-bool getTempF(float &outTempF);
-float getAvgTemp24hF();
-bool getWindMph(float &outWindMph);
-bool getWindDirDeg(float &outWindDirDeg);
-bool getWindGustMph(float &outGustMph);
-bool getRainLast1h(float &outRainMm);
-bool getRainLast24h(float &outRainMm);
-bool getSnowLast1h(float &outSnowCm);
-bool getSnowLast24h(float &outSnowCm);
+// ---- Public API ----
 
-// Daily weather accumulation
-void accumulateDailyWeather(const WeatherSnapshot &wx);
-void resetDailyWeatherStats();
-float getAvgTempF();
-float getAvgWindMph();
+void eventDataInit() {
+  gEventData.clear();
+}
 
-// Timestamp of last successful reading
-const char* getWeatherTimestamp();
+void eventDataClear() {
+  gEventData.clear();
+}
 
-// Optional helper
-const char* windDirText(float deg);
+bool eventDataAddNow() {
+  return gEventData.addNow();
+}
+
+void eventDataAddMinute(uint32_t minute2026) {
+  gEventData.addMinute(minute2026);
+}
+
+int eventDataCount() {
+  return gEventData.count();
+}
+
+bool eventDataEmpty() {
+  return gEventData.empty();
+}
+
+bool eventDataGetMinute(int index, uint32_t& outMinute2026) {
+  return gEventData.get(index, outMinute2026);
+}
+
+bool eventDataValidClock() {
+  return EventData::validClockNow();
+}
+
+uint32_t eventDataGetMinutesSince2026() {
+  return EventData::getMinutesSince2026Now();
+}
+
+void eventDataPurgeNow() {
+  uint32_t now = EventData::getMinutesSince2026Now();
+  if (now == 0) return;
+
+  gEventData.purgeOld(now);
+}
 ```
 
-## File: Pump_Monitor/ntp.h
+## File: datalogger/eventData.h
 ```c
 #pragma once
 
-void setupNTP();
-void updateNTP();
-bool validClock();
-void updateDate();
-void ensureTimeHealthy();
-
-// Getters
-const char* getClock();
-const char* getDate();
-const char* getTimestamp();
-const char* getTimelog();
-const char* getHourStr();
-const char* getMinStr();
-const char* getSecStr();
-const char* getDayStr();
-const char* getMonthStr();
-const char* getYearStr();
-
-unsigned int getHourInt();
-unsigned int getMinInt();
-unsigned int getSecInt();
-unsigned int getDayInt();
-unsigned int getMonthInt();
-unsigned int getYearInt();
-unsigned int getDateKeyInt();
-
-// Unique to Pump (MERGE LATER)
-void getCurrentDayKey(char* buf, size_t len);
-uint32_t getCurrentEpoch();
-```
-
-## File: Pump_Monitor/nvm.h
-```c
-// nvm.h
-#pragma once
 #include <stdint.h>
-#include <stddef.h>
 
-#define INVALID_BLOCK 255
+// Lifecycle
+void eventDataInit();
+void eventDataClear();
 
-typedef enum : uint8_t {
-  NVM_RESTORE_OK = 0,
-  NVM_RESTORE_BAD_ARGS,
-  NVM_RESTORE_PREFS_FAIL,
-  NVM_RESTORE_NO_STATE,
-  NVM_RESTORE_DAY_MISMATCH,
-  NVM_RESTORE_SAVED_EPOCH_ZERO,
-  NVM_RESTORE_NOW_EPOCH_ZERO,
-  NVM_RESTORE_TOO_OLD,
-  NVM_RESTORE_BYTES_MISMATCH
-} NvmRestoreResult;
-
-// ---- Lifecycle ----
-void nvmInit();   // optional; safe to call once in setup()
-
-// ---- 4-hour block state ----
-// Saves: has_state, day_key, save_epoch, block_count first_block, GAL_4HR[6], CYCLE_4HR[6]
-bool nvmSave4hrState(
-  const char* dayKey,           // "YYYY_MM_DD"
-  uint32_t saveEpoch,           // epoch seconds (0 ok, but restore-window won't work)
-  uint8_t idx,
-  const uint32_t* gal4hr, size_t gal4hrCount,
-  const uint32_t* cyc4hr, size_t cyc4hrCount
-);
-
-// Restores if:
-// - saved state exists
-// - dayKey matches
-// - and (nowEpoch - saveEpoch) <= maxAgeSeconds  (if both epochs non-zero)
-NvmRestoreResult nvmRestore4hrStateIfFresh(
-  const char* dayKey,
-  uint32_t nowEpoch,
-  uint32_t maxAgeSeconds,
-  uint32_t* outGal4hr, size_t gal4hrCount,
-  uint32_t* outCyc4hr, size_t cyc4hrCount
-);
-
-// Summary Data
-bool nvmSaveQueuedDailySummary(
-  const char* dayKey,
-  uint32_t gallons,
-  uint32_t cycles,
-  float rainMm,
-  bool hasRain,
-  float lastCycleEnergy,
-  const uint32_t* gal4hr, size_t galCount,
-  const uint32_t* cyc4hr, size_t cycCount
-);
-
-bool nvmLoadQueuedDailySummary(
-  char* outDayKey, size_t dayKeyLen,
-  uint32_t* outGallons,
-  uint32_t* outCycles,
-  float* outRainMm,
-  bool* outHasRain,
-  float* outLastCycleEnergy,
-  uint32_t* outGal4hr, size_t galCount,
-  uint32_t* outCyc4hr, size_t cycCount
-);
+// Add events
+bool eventDataAddNow();
+void eventDataAddMinute(uint32_t minute2026);
+void eventDataPurgeNow();
 
 
-//  Block Methods
-void nvmClear4hrState();
-void nvmDumpPumpState();
-bool nvmSetZeroBlocks();
+// Info
+int eventDataCount();
+bool eventDataEmpty();
 
-// Getters
-uint32_t getTotalBlockWriteCount();
-uint8_t getLastStoredBlockHour();
-uint8_t getFirst4hrBlockIdx();
-uint8_t getStoredDailyBlockCount();
+// Access (0 = oldest, count-1 = newest)
+bool eventDataGetMinute(int index, uint32_t& outMinute2026);
 
-// Daily Summary Method
-void nvmClearQueuedDailySummary();
-void nvmDumpQueuedDailySummary();
-
-void logNVMFailure(NvmRestoreResult result);
-
-// ---- Boot stats (update once per reboot) ----
-// Increments boot_count and updates last_boot_epoch / prev_boot_epoch.
-void nvmUpdateBootStats(uint32_t nowEpoch);
-
-// Read boot stats (optional convenience)
-uint32_t nvmGetBootCount();
-uint32_t nvmGetLastBootEpoch();
-uint32_t nvmGetPrevBootEpoch();
+// Helpers
+bool eventDataValidClock();
+uint32_t eventDataGetMinutesSince2026();
 ```
 
-## File: Pump_Monitor/export.cpp
+## File: datalogger/export.cpp
 ```cpp
 // export.cpp
 
@@ -6361,16 +1814,12 @@ uint32_t nvmGetPrevBootEpoch();
 
 // Project Headers
 #include "global.h"
-#include "firebase.h"
-#include "history.h"
 #include "ntp.h"
 #include "nvm.h"
 #include "pumpData.h"
-#include "pumpFBRepo.h"
 #include "pumpFunc.h"
 #include "ramlog.h"
 #include "utils.h"
-#include "weather.h"
 
 // External Data
 extern uint16_t ADAPTIVE_DELAY;
@@ -6451,6 +1900,7 @@ static void renderExportMainMetrics(WiFiClient &client) {
   client.print(F("gallons_today,"));
   client.println(GAL_TODAY);
 
+
   client.print(F("yesterday_was_zero,"));
   client.println(gYesterdayWasZero ? F("1") : F("0"));
 
@@ -6459,45 +1909,24 @@ static void renderExportMainMetrics(WiFiClient &client) {
 }
 
 // -----------------------------------------------------------------------------
-// 4HR BLOCK EXPORT
+// BLOCK EXPORT
 // -----------------------------------------------------------------------------
 static void renderExportBlockData(WiFiClient &client) {
-  addTitle(client, F("[TODAYS 4HR BLOCKS]"));
+  addTitle(client, F("[BLOCKS]"));
 
-  client.print(F("total_4hr_block_writes,"));
+  client.print(F("total_block_writes,"));
   client.printf("%u / 6\n", getTotalBlockWriteCount());
-  client.print(F("first_4hr_block_idx,"));
-  client.println(getFirst4hrBlockIdx());
 
-  // Last 4 hr block
-  client.print(F("last_4hr_block_hour,"));
-  uint8_t hr = getLastStoredBlockHour();
-  const char* suffix;
-  uint8_t displayHr;
-  if (hr == 0) {displayHr = 12; suffix = "AM";} 
-  else if (hr < 12) {displayHr = hr;suffix = "AM";}
-  else if (hr == 12) {displayHr = 12; suffix = "PM";}
-  else {displayHr = hr - 12;suffix = "PM";}
-  client.printf("%u %s\n", displayHr, suffix);
-
-  client.print(F("daily_4hr_block_day,"));
+  client.print(F("daily_block_day,"));
   client.println(blockDayKey);
-  client.print(F("4hr_blocks_today,"));
-  client.println(getStoredDailyBlockCount());
 
-  for (int i = 0; i < NUM_4HR_BLOCKS; i++) {
-    const int blockNum = i + 1;
+  client.print(F("cycles"));
+  client.print(F(","));
+  client.println(CYCLE);
 
-    client.print(F("cycles_4hr_"));
-    client.print(blockNum);
-    client.print(F(","));
-    client.println(CYCLE_4HR[i]);
-
-    client.print(F("gallons_4hr_"));
-    client.print(blockNum);
-    client.print(F(","));
-    client.println(GAL_4HR[i]);
-  }
+  client.print(F("gallons"));
+  client.print(F(","));
+  client.println(GAL);
 
   client.print(F("cycles_today,"));
   client.println(CYCLE_TODAY);
@@ -6534,7 +1963,7 @@ static void renderExportSystemInfo(WiFiClient &client) {
 // -----------------------------------------------------------------------------
 static void renderExportTrendInfo(WiFiClient &client) {
   addTitle(client, F("[TREND INFO]"));
-  client.println(F("date,cycles_per_day,gallons_per_day,rain_mm"));
+  client.println(F("date,cycles_per_day,gallons_per_day"));
 
   const int recordCount = Pump.Daily365.dailyValidCount();
   for (int i = recordCount - 1; i >= 0; i--) {
@@ -6549,131 +1978,7 @@ static void renderExportTrendInfo(WiFiClient &client) {
     client.print(record.cyclesPerDay);
     client.print(',');
     client.print(record.gallonsPerDay);
-    client.print(',');
-    client.println(record.rainMm, 1);
   }
-}
-
-// -----------------------------------------------------------------------------
-// WEATHER EXPORT
-// -----------------------------------------------------------------------------
-static void renderExportWeather(WiFiClient &client) {
-  addTitle(client, F("[WEATHER]"));
-
-  float windMPH;
-  float avgWindMPH;
-  bool windMphValid = getWindMph(windMPH);
-  avgWindMPH = getAvgWindMph();
-
-  if (!windMphValid) {
-    client.print(F("wind_speed_mph,"));
-    client.println(F("***"));
-    client.print(F("avg_wind_speed_mph,"));
-    client.println(F("***"));
-  } else {
-    client.print(F("wind_speed_mph,"));
-    client.println(windMPH, 1);
-    client.print(F("avg_wind_speed_mph,"));
-    client.println(avgWindMPH, 1);
-  }
-
-  float windGustMPH = 0.0f;
-  bool windGustValid = getWindGustMph(windGustMPH);
-
-  client.print(F("wind_gust_mph,"));
-  if (windGustValid) client.println(windGustMPH, 1);
-  else               client.println(F("***"));
-
-  float temp;
-  float avgTemp;
-  bool tempValid = getTempF(temp);
-  avgTemp = getAvgTemp24hF();
-
-  if (!tempValid) {
-    client.print(F("temp_f,"));
-    client.println(F("***"));
-    client.print(F("avg_temp_f,"));
-    client.println(F("***"));
-  } else {
-    client.print(F("temp_f,"));
-    client.println(temp, 1);
-    client.print(F("avg_temp_f,"));
-    client.println(avgTemp, 1);
-  }
-
-  float rain24hMm = 0.0f;
-  bool rainValid = getRainLast24h(rain24hMm);
-
-  client.print(F("rain_24h_mm,"));
-  if (rainValid) client.println(rain24hMm, 1);
-  else           client.println(F("***"));
-
-  float snow24hCm = 0.0f;
-  bool snowValid = getSnowLast24h(snow24hCm);
-
-  client.print(F("snow_24h_cm,"));
-  if (snowValid) client.println(snow24hCm, 1);
-  else           client.println(F("***"));
-
-  char wts[32];
-  snprintf(wts, sizeof(wts), "%s", getWeatherTimestamp());
-  size_t len = strlen(wts);
-  if (len > 3) {
-    wts[len - 3] = '\0';
-  }
-
-  client.print(F("weather_timestamp,"));
-  if (wts[0] == '\0') csvPrintQuoted(client, "***");
-  else                csvPrintQuoted(client, wts);
-  client.println();
-
-  client.print(F("wind_valid,"));
-  client.println(windMphValid ? F("1") : F("0"));
-
-  client.print(F("temp_valid,"));
-  client.println(tempValid ? F("1") : F("0"));
-}
-
-// -----------------------------------------------------------------------------
-// HISTORY EXPORT
-// -----------------------------------------------------------------------------
-static void renderExportHistoryInfo(WiFiClient &client) {
-  addTitle(client, F("[HISTORY INFO]"));
-
-  client.print(F("history_enabled,"));
-  client.println(historyLoaderIsEnabled() ? F("1") : F("0"));
-
-  client.print(F("history_in_progress,"));
-  client.println(historyLoaderIsInProgress() ? F("1") : F("0"));
-
-  client.print(F("history_complete,"));
-  client.println(historyLoaderIsComplete() ? F("1") : F("0"));
-
-  client.print(F("history_loaded_count,"));
-  client.println(historyLoaderLoadedCount());
-
-  client.print(F("history_target_count,"));
-  client.println(historyLoaderTargetCount());
-
-  const int remaining = historyLoaderTargetCount() - historyLoaderLoadedCount();
-  client.print(F("history_remaining_count,"));
-  client.println(remaining > 0 ? remaining : 0);
-
-  client.print(F("history_current_key,"));
-  csvPrintQuoted(client, historyLoaderCurrentKey());
-  client.println();
-
-  client.print(F("history_status,"));
-  csvPrintQuoted(client, historyLoaderGetStatusText());
-  client.println();
-
-  client.print(F("history_progress,"));
-  csvPrintQuoted(client, historyLoaderProgressText());
-  client.println();
-
-  client.print(F("earliest_history_key,"));
-  csvPrintQuoted(client, getEarliestHistoryKey());
-  client.println();
 }
 
 // -----------------------------------------------------------------------------
@@ -6742,91 +2047,6 @@ static void renderExportClockInfo(WiFiClient &client) {
   client.println(getDateKeyInt());
 }
 
-// -----------------------------------------------------------------------------
-// FIREBASE INFO EXPORT
-// -----------------------------------------------------------------------------
-static void renderExportFirebaseInfo(WiFiClient &client) {
-  addTitle(client, F("[FIREBASE INFO]"));
-
-  client.print(F("firebase_ok,"));
-  client.println(firebaseOK() ? F("1") : F("0"));
-
-  client.print(F("firebase_state,"));
-  csvPrintQuoted(client, getFirebaseStateText(getFirebaseState()));
-  client.println();
-
-  client.print(F("firebase_next_state_timeout,"));
-  csvPrintQuoted(client, getNextFirebaseStateTimeout());
-  client.println();
-
-  client.print(F("firebase_canary_count,"));
-  client.println(getFirebaseCanaryCount());
-
-  client.print(F("firebase_write_allowed,"));
-  client.println(firebaseWriteAllowed() ? F("1") : F("0"));
-
-  client.print(F("firebase_read_allowed,"));
-  client.println(firebaseReadAllowed() ? F("1") : F("0"));
-
-  client.print(F("firebase_connect_err,"));
-  client.println(FB_CONNECT_ERR);
-
-  client.print(F("firebase_write_err,"));
-  client.println(FB_WRITE_ERR);
-
-  client.print(F("daily_summary_write_count,"));
-  client.println(getDailySummaryWriteCount());
-
-  client.print(F("last_daily_write_timestamp,"));
-  csvPrintQuoted(client, getLastDailyWriteTimestamp());
-  client.println();
-
-  client.print(F("last_daily_write_status,"));
-  csvPrintQuoted(client, getLastDailyWriteStatus());
-  client.println();
-}
-
-// -----------------------------------------------------------------------------
-// ESTIMATED DAILY SUMMARY EXPORT
-// -----------------------------------------------------------------------------
-static void renderExportEstimatedDailySummary(WiFiClient &client) {
-  addTitle(client, F("[ESTIMATED DAILY SUMMARY]"));
-
-  unsigned int totalGallons = 0;
-  unsigned int totalCycles = 0;
-
-  for (int i = 0; i < NUM_4HR_BLOCKS; i++) {
-    totalGallons += GAL_4HR[i];
-    totalCycles += CYCLE_4HR[i];
-  }
-
-  unsigned int estGallons = totalGallons;
-  unsigned int estCycles = totalCycles;
-
-  uint8_t blockCount = getStoredDailyBlockCount();
-  if (blockCount > 0 && blockCount < NUM_4HR_BLOCKS) {
-    estGallons = (NUM_4HR_BLOCKS * totalGallons) / blockCount;
-    estCycles  = (NUM_4HR_BLOCKS * totalCycles)  / blockCount;
-  }
-
-  client.print(F("daily_4hr_block_count,"));
-  client.println(blockCount);
-
-  client.print(F("raw_cycles_observed,"));
-  client.println(totalCycles);
-
-  client.print(F("raw_gallons_observed,"));
-  client.println(totalGallons);
-
-  client.print(F("est_cycles_per_day,"));
-  client.println(estCycles);
-
-  client.print(F("est_gallons_per_day,"));
-  client.println(estGallons);
-
-  client.print(F("estimation_scaled,"));
-  client.println((blockCount > 0 && blockCount < NUM_4HR_BLOCKS) ? F("1") : F("0"));
-}
 
 // -----------------------------------------------------------------------------
 // NVM EXPORT
@@ -6865,220 +2085,6 @@ static void renderExportRamLog(WiFiClient& client) {
   }
 }
 
-// -----------------------------------------------------------------------------
-// QUEUED INFO EXPORT
-// -----------------------------------------------------------------------------
-static void renderExportQueuedInfo(WiFiClient &client) {
-  addTitle(client, F("[QUEUED INFO]"));
-
-  client.print(F("queued_daily_pending,"));
-  client.println(pumpRepo.hasQueuedDailySummary() ? F("1") : F("0"));
-
-  client.print(F("queued_daily_count,"));
-  client.println(pumpRepo.getSummaryQueueCount());
-
-  const char* queuedDayKey = pumpRepo.getQueuedDailySummaryDayKey();
-  client.print(F("queued_daily_day_key,"));
-  csvPrintQuoted(client, (queuedDayKey && queuedDayKey[0] != '\0') ? queuedDayKey : "");
-  client.println();
-
-  client.print(F("queued_daily_attempts,"));
-  client.println(pumpRepo.getQueuedDailySummaryAttempts());
-
-  client.print(F("queued_weather_pending,"));
-  client.println(pumpRepo.hasQueuedWeather() ? F("1") : F("0"));
-
-  client.print(F("queued_weather_attempts,"));
-  client.println(pumpRepo.getQueuedWeatherAttempts());
-
-  const char* queuedWeatherTs = pumpRepo.getQueuedWeatherTimestamp();
-  client.print(F("queued_weather_timestamp,"));
-  csvPrintQuoted(client, (queuedWeatherTs && queuedWeatherTs[0] != '\0') ? queuedWeatherTs : "");
-  client.println();
-}
-
-
-// -----------------------------------------------------------------------------
-// QUEUE PAYLOAD EXPORT
-// -----------------------------------------------------------------------------
-static void renderExportQueuePayload(WiFiClient &client) {
-  addTitle(client, F("[QUEUE PAYLOAD]"));
-  client.println(F("index,day_key,payload"));
-
-  const int qCount = pumpRepo.getSummaryQueueCount();
-
-  for (int i = 0; i < qCount; i++) {
-    PumpFBRepo::SummaryQueueItem item;
-
-    if (!pumpRepo.getSummaryQueueItem(i, item)) continue;
-
-    client.print(i);
-    client.print(',');
-
-    csvPrintQuoted(client, item.dayKey);
-    client.print(',');
-
-    csvPrintQuoted(client, item.payload.c_str());
-    client.println();
-  }
-}
-
-// -----------------------------------------------------------------------------
-// NVM queued daily summary export
-// -----------------------------------------------------------------------------
-static void renderExportNVMDailySummary(WiFiClient &client) {
-  char dayKey[16] = {0};
-  uint32_t gallons = 0;
-  uint32_t cycles = 0;
-  float rainMm = 0.0f;
-  bool hasRain = false;
-  uint32_t timestamp = 0;
-  float lastCycleEnergy = 0.0f;
-  uint32_t gal4hr[NUM_4HR_BLOCKS] = {0};
-  uint32_t cyc4hr[NUM_4HR_BLOCKS] = {0};
-
-  addTitle(client, F("[NVM LAST DAILY SUMMARY]"));
-
-  bool ok = nvmLoadQueuedDailySummary(
-    dayKey, sizeof(dayKey),
-    &gallons,
-    &cycles,
-    &rainMm,
-    &hasRain,
-    &lastCycleEnergy,
-    gal4hr, NUM_4HR_BLOCKS,
-    cyc4hr, NUM_4HR_BLOCKS
-  );
-
-  if (!ok) {
-    client.println(F("has_summary,false"));
-    client.println();
-    return;
-  }
-
-  client.println(F("has_summary,true"));
-
-  client.print(F("day_key,"));
-  client.println(dayKey);
-
-  client.print(F("timestamp,"));
-  client.println(timestamp);
-
-  client.print(F("gallons,"));
-  client.println(gallons);
-
-  client.print(F("cycles,"));
-  client.println(cycles);
-
-  client.print(F("has_rain,"));
-  client.println(hasRain ? F("true") : F("false"));
-
-  client.print(F("rain_mm,"));
-  client.println(rainMm, 2);
-
-  client.print(F("last_cycle_energy,"));
-  client.println(lastCycleEnergy, 2);
-
-  for (int i = 0; i < NUM_4HR_BLOCKS; i++) {
-    client.print(F("gallon"));
-    client.print(i + 1);
-    client.print(',');
-    client.println(gal4hr[i]);
-
-    client.print(F("cycle"));
-    client.print(i + 1);
-    client.print(',');
-    client.println(cyc4hr[i]);
-  }
-
-  client.println();
-}
-
-//-----------------------------------------------------
-// JSON
-//-----------------------------------------------------
-
-// -----------------------------------------------------------------------------
-// Export queued daily summary from NVM as JSON
-// Matches pump-export.json format
-// -----------------------------------------------------------------------------
-void renderExportQueuedDailySummaryJson(WiFiClient &client) {
-  char dayKey[16] = {0};
-  char tsBuf[24] = {0};
-  uint32_t totalGallons = 0;
-  uint32_t totalCycles = 0;
-  float rainMm = 0.0f;
-  bool hasRain = false;
-  uint32_t timestamp = 0;
-  float lastCycleEnergy = 0.0f;
-  uint32_t gal4hr[NUM_4HR_BLOCKS] = {0};
-  uint32_t cyc4hr[NUM_4HR_BLOCKS] = {0};
-
-  const bool ok = nvmLoadQueuedDailySummary(
-    dayKey, sizeof(dayKey),
-    &totalGallons,
-    &totalCycles,
-    &rainMm,
-    &hasRain,
-    &lastCycleEnergy,
-    gal4hr, NUM_4HR_BLOCKS,
-    cyc4hr, NUM_4HR_BLOCKS
-  );
-
-  snprintf(tsBuf, sizeof(tsBuf), "%sT23:00:00", dayKey);  // need dayKey from load
-
-  if (!ok) {
-    client.println(F("{"));
-    client.println(F("  \"has_summary\": false"));
-    client.println(F("}"));
-    return;
-  }
-
-  client.println(F("{"));
-
-  for (int i = 0; i < NUM_4HR_BLOCKS; i++) {
-    client.print(F("  \"cycle"));
-    client.print(i + 1);
-    client.print(F("\": "));
-    client.print(cyc4hr[i]);
-    client.println(F(","));
-  }
-
-  for (int i = 0; i < NUM_4HR_BLOCKS; i++) {
-    client.print(F("  \"gallon"));
-    client.print(i + 1);
-    client.print(F("\": "));
-    client.print(gal4hr[i]);
-    client.println(F(","));
-  }
-
-  client.print(F("  \"last_cycle_energy\": "));
-  client.print(lastCycleEnergy, 5);
-  client.println(F(","));
-
-  client.print(F("  \"rain_mm\": "));
-  client.print(hasRain ? rainMm : 0.0f, 2);
-  client.println(F(","));
-
-  client.print(F("  \"timestamp\": \""));
-  client.print(tsBuf);
-  client.println(F("\","));
-
-  client.print(F("  \"total_cycles\": "));
-  client.print(totalCycles);
-  client.println(F(","));
-
-  client.print(F("  \"total_gallons\": "));
-  client.print(totalGallons);
-  client.println(F(","));
-
-  client.print(F("  \"data_source\": "));
-  client.print(F("system"));
-  client.println();  // last item, no comma
-
-  client.println(F("}"));
-}
-
 //------------------------------------------------------
 // RENDER
 //------------------------------------------------------
@@ -7099,435 +2105,1500 @@ void renderExportCsv(WiFiClient &client) {
   renderExportMainMetrics(client);
   renderExportBlockData(client);
   renderExportSystemInfo(client);
-  renderExportWeather(client);
-  renderExportHistoryInfo(client);
   renderExportClockInfo(client);
-  renderExportFirebaseInfo(client);
-  renderExportEstimatedDailySummary(client);
   renderExportNvmInfo(client);
-  renderExportNVMDailySummary(client);
-  renderExportQueuedInfo(client);
   renderExportTrendInfo(client);
   renderExportRamLog(client);
-  renderExportQueuePayload(client);
-  exportFBHistoryCSV(client);
-  
-  // JSON
-  addTitle(client, F("[JSON]"));
-  renderExportQueuedDailySummaryJson(client);
+
 }
 ```
 
-## File: Pump_Monitor/pumpFunc.cpp
-```cpp
-// Libraries
-#include <event.h>
+## File: datalogger/export.h
+```c
+#pragma once
 
-// Local files
+#include <WiFi.h>
+
+// Main export entry point
+void renderExportCsv(WiFiClient &client);
+void renderExportJson(WiFiClient &client);
+```
+
+## File: datalogger/global.h
+```c
+// global.h
+#pragma once
+
+#include <Arduino.h>
+
+class Diag;   // forward declaration
+
+// external vaiables
+extern int ADC1_COUNT;
+//extern float ADC1_VOLT; 
+extern const char* CONN_STATUS;
+extern uint32_t LOOP_COUNT;
+extern uint32_t LOOP_TIME;
+extern int WIFI_ERR;
+extern const char APP_VERSION[];     // (don’t put PROGMEM on the extern)
+
+// Configurations
+
+//---------------------------------
+#define TEST_MODE 1
+//---------------------------------
+
+// Logging /Debug
+#define VERBOSE 0
+#define LOG_TIME 0  // serial log for execution times
+#define ALLOW_WEBPAGE_POLLING 0
+
+// Constants
+#define OFF 0
+#define ON 1
+#define FALSE 0
+#define TRUE 1
+
+#define SENSOR_AMP_PER_VOLT 10
+#define LOOPS_PER_SEC 10
+
+// OLED MAIN MENU MODE
+#define MAIN_TIMEOUT_SEC (900 * LOOPS_PER_SEC)  // 15 min
+
+// PIN MAPPINGS
+#define ADC1_PIN 35
+#define BTN_PIN 0
+#define D1_PIN 0
+//#define ISR_PIN 35
+#define LED_PIN 25 // OLD Board 25, new board 35
+#define TS1_PIN 14  // Touch Switch
+#define ISR_PIN 35
+
+// Computed Values (DO NOT EDIT)
+#define PROD_MODE (TEST_MODE == 0)
+
+// Needs to be last
+#include "utils.h"
+```
+
+## File: datalogger/ledFunc.cpp
+```cpp
 #include "global.h"
 #include "ledFunc.h"
+
+uint8_t LED_STATE = LED_OFF;
+
+void toggleLED() {
+  LED_STATE = !LED_STATE;
+  setLED();
+}
+
+void LEDOn() {
+  LED_STATE = LED_ON;
+  setLED();
+}
+
+void LEDOff() {
+  LED_STATE = LED_OFF;
+  setLED();
+}
+
+void setLED() {
+  digitalWrite(LED_PIN, LED_STATE);  // LED
+}
+```
+
+## File: datalogger/ledFunc.h
+```c
+#pragma once
+
+#define LED_ON 1
+#define LED_OFF 0
+
+extern uint8_t LED_STATE;
+
+void toggleLED();
+void LEDOn();
+void LEDOff();
+void setLED();
+```
+
+## File: datalogger/ntp.cpp
+```cpp
+#include <time.h>
+#include <sys/time.h>
+
+// Project Files
+#include "global.h"
+#include "diag.h"
 #include "ntp.h"
-#include "firebase.h"
+
+//--------------------------------------------------------
+// NTP / Local Time Variables
+//--------------------------------------------------------
+
+unsigned int Month = 0;
+unsigned int Day = 0;
+unsigned int Year = 0;
+
+// US Eastern Time with automatic DST
+// Standard: EST (UTC-5)
+// Daylight: EDT (UTC-4)
+// DST starts: 2nd Sunday in March at 2:00
+// DST ends:   1st Sunday in November at 2:00
+static const char* TZ_INFO = "EST5EDT,M3.2.0/2,M11.1.0/2";
+
+//--------------------------------------------------------
+// Internal Helpers
+//--------------------------------------------------------
+
+static bool getLocalTm(struct tm* outTm) {
+  if (!outTm) return false;
+
+  time_t now = time(nullptr);
+  if (now <= 0) return false;
+
+  localtime_r(&now, outTm);
+  return true;
+}
+
+static bool getGmTm(struct tm* outTm) {
+  if (!outTm) return false;
+
+  time_t now = time(nullptr);
+  if (now <= 0) return false;
+
+  gmtime_r(&now, outTm);
+  return true;
+}
+
+//--------------------------------------------------------
+// NTP Functions
+//--------------------------------------------------------
+
+void setupNTP() {
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+  setenv("TZ", TZ_INFO, 1);
+  tzset();
+}
+
+void updateNTP() {
+  // With configTzTime(), SNTP refresh happens in the background.
+  // We just refresh cached date fields when time is valid.
+  if (validClock()) {
+    updateDate();
+  }
+}
+
+const char* getClock() {
+  static char buf[9];  // "HH:MM:SS" + null
+  struct tm tmv;
+
+  if (!getLocalTm(&tmv)) {
+    snprintf(buf, sizeof(buf), "--:--:--");
+    return buf;
+  }
+
+  snprintf(buf, sizeof(buf), "%02d:%02d:%02d",
+           tmv.tm_hour,
+           tmv.tm_min,
+           tmv.tm_sec);
+  return buf;
+}
+
+void updateDate() {
+  struct tm tmv;
+  if (!getLocalTm(&tmv)) return;
+
+  Month = (unsigned int)(tmv.tm_mon + 1);
+  Day   = (unsigned int)tmv.tm_mday;
+  Year  = (unsigned int)(tmv.tm_year + 1900);
+}
+
+const char* getDate() {
+  static char ts[16];
+  snprintf(ts, sizeof(ts), "%s.%s.%s",
+           getYearStr(), getMonthStr(), getDayStr());
+  return ts;
+}
+
+const char* getTimestamp() {
+  // Format 2026.03.16T18:47:57
+  static char ts[24];
+  snprintf(ts, sizeof(ts), "%s.%s.%sT%s:%s:%s",
+           getYearStr(), getMonthStr(), getDayStr(),
+           getHourStr(), getMinStr(), getSecStr());
+  return ts;
+}
+
+const char* getTimelog() {
+  // Format 2026_03_16T18_47_57
+  static char ts[24];
+  snprintf(ts, sizeof(ts), "%s_%s_%sT%s_%s_%s",
+           getYearStr(), getMonthStr(), getDayStr(),
+           getHourStr(), getMinStr(), getSecStr());
+  return ts;
+}
+
+const char* getHourStr() {
+  static char hh[3];
+  struct tm tmv;
+
+  if (!getLocalTm(&tmv)) {
+    snprintf(hh, sizeof(hh), "00");
+    return hh;
+  }
+
+  snprintf(hh, sizeof(hh), "%02d", tmv.tm_hour);
+  return hh;
+}
+
+const char* getMinStr() {
+  static char mm[3];
+  struct tm tmv;
+
+  if (!getLocalTm(&tmv)) {
+    snprintf(mm, sizeof(mm), "00");
+    return mm;
+  }
+
+  snprintf(mm, sizeof(mm), "%02d", tmv.tm_min);
+  return mm;
+}
+
+const char* getSecStr() {
+  static char ss[3];
+  struct tm tmv;
+
+  if (!getLocalTm(&tmv)) {
+    snprintf(ss, sizeof(ss), "00");
+    return ss;
+  }
+
+  snprintf(ss, sizeof(ss), "%02d", tmv.tm_sec);
+  return ss;
+}
+
+const char* getYearStr() {
+  static char yyyy[6];
+  struct tm tmv;
+
+  if (!getLocalTm(&tmv)) {
+    snprintf(yyyy, sizeof(yyyy), "0000");
+    return yyyy;
+  }
+
+  snprintf(yyyy, sizeof(yyyy), "%04d", tmv.tm_year + 1900);
+  return yyyy;
+}
+
+const char* getMonthStr() {
+  static char mm[3];
+  struct tm tmv;
+
+  if (!getLocalTm(&tmv)) {
+    snprintf(mm, sizeof(mm), "00");
+    return mm;
+  }
+
+  snprintf(mm, sizeof(mm), "%02d", tmv.tm_mon + 1);
+  return mm;
+}
+
+const char* getDayStr() {
+  static char dd[3];
+  struct tm tmv;
+
+  if (!getLocalTm(&tmv)) {
+    snprintf(dd, sizeof(dd), "00");
+    return dd;
+  }
+
+  snprintf(dd, sizeof(dd), "%02d", tmv.tm_mday);
+  return dd;
+}
+
+uint8_t getHourInt() {
+  struct tm tmv;
+  if (!getLocalTm(&tmv)) return 0;
+  return (uint8_t)tmv.tm_hour;
+}
+
+uint8_t getMinInt() {
+  struct tm tmv;
+  if (!getLocalTm(&tmv)) return 0;
+  return (uint8_t)tmv.tm_min;
+}
+
+uint8_t getSecInt() {
+  struct tm tmv;
+  if (!getLocalTm(&tmv)) return 0;
+  return (uint8_t)tmv.tm_sec;
+}
+
+uint8_t getDayInt() {
+  struct tm tmv;
+  if (!getLocalTm(&tmv)) return 0;
+  return (uint8_t)tmv.tm_mday;
+}
+
+uint8_t getMonthInt() {
+  struct tm tmv;
+  if (!getLocalTm(&tmv)) return 0;
+  return (uint8_t)(tmv.tm_mon + 1);
+}
+
+uint16_t getYearInt() {
+  struct tm tmv;
+  if (!getLocalTm(&tmv)) return 0;
+  return (uint16_t)(tmv.tm_year + 1900);
+}
+
+// NOTE: getDateKeyInt currently returns MMDD (no year).
+// Safe for current system due to daily reset + validity filtering.
+// Can be upgraded to YYYYMMDD in future without changing callers.
+uint32_t getDateKeyInt() {
+  return 100*getMonthInt() + getDayInt();
+}
+
+bool validClock() {
+  time_t now = time(nullptr);
+  return (now > 1767225600 && now < 2556144000); // 2026 - 2050
+}
+
+// UNIQUE TO PUMP - MERGE LATER
+
+void getCurrentDayKey(char* buf, size_t len) {
+  snprintf(buf, len, "%s_%s_%s",
+           getYearStr(),
+           getMonthStr(),
+           getDayStr());
+}
+
+uint32_t getCurrentEpoch() {
+  time_t now = time(nullptr);
+  if (now <= 1000000000) {  // crude "time not set" guard (~2001)
+    return 0;
+  }
+  return (uint32_t)now;
+}
+
+//-----------------------------------------------
+// Validation Helpers
+//-----------------------------------------------
+
+bool isTimezoneApplied() {
+  time_t now = time(nullptr);
+
+  // If time isn't valid yet, don't evaluate
+  if (now <= 1000000000) return true;
+
+  struct tm localTm, gmTm;
+  localtime_r(&now, &localTm);
+  gmtime_r(&now, &gmTm);
+
+  int diffHours = localTm.tm_hour - gmTm.tm_hour;
+
+  // Normalize to [-12, +12]
+  if (diffHours > 12) diffHours -= 24;
+  if (diffHours < -12) diffHours += 24;
+
+  // Eastern should be:
+  // -5 hours (EST) or -4 hours (EDT)
+  return (diffHours == -5 || diffHours == -4);
+}
+
+void ensureTimeHealthy() {
+  if (!validClock()) return;
+
+  if (!isTimezoneApplied()) {
+    Serial.println("⚠️ Timezone not applied — fixing");
+
+    setenv("TZ", TZ_INFO, 1);
+    tzset();
+    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+  }
+}
+```
+
+## File: datalogger/ntp.h
+```c
+#pragma once
+
+void setupNTP();
+void updateNTP();
+bool validClock();
+void updateDate();
+void ensureTimeHealthy();
+
+// Getters
+const char* getClock();
+const char* getDate();
+const char* getTimestamp();
+const char* getTimelog();
+const char* getHourStr();
+const char* getMinStr();
+const char* getSecStr();
+const char* getDayStr();
+const char* getMonthStr();
+const char* getYearStr();
+
+uint8_t getHourInt();
+uint8_t getMinInt();
+uint8_t getSecInt();
+uint8_t getDayInt();
+uint8_t getMonthInt();
+uint16_t getYearInt();
+uint32_t getDateKeyInt();
+
+// Unique to Pump (MERGE LATER)
+void getCurrentDayKey(char* buf, size_t len);
+uint32_t getCurrentEpoch();
+```
+
+## File: datalogger/nvm.cpp
+```cpp
+// nvm.cpp
+#include <Preferences.h>
+#include <string.h>
+#include "global.h"
+#include "ntp.h"
 #include "nvm.h"
-#include "pumpData.h"
 #include "pumpFunc.h"
-#include "test_mode.h"
-#include "weather.h"
-#include "wifiFunc.h"  // timeValid()
+
+static Preferences prefs;
+
+// Namespaces
+static const char* NS_PUMP = "pump";
+static const char* NS_BOOT = "boot";
+
+// Keys (pump namespace)
+static const char* K_HAS_STATE  = "has_state";
+static const char* K_DAY_KEY    = "day_key";
+static const char* K_SAVE_EPOCH = "save_epoch";
+static const char* K_GAL        = "gal";
+static const char* K_CYC        = "cyc";
+static const char* K_WRITE_COUNT = "write_count";  // Export this one
+
+// Keys (boot namespace)
+static const char* K_BOOT_COUNT     = "boot_count";
+static const char* K_LAST_BOOT_EPOCH = "last_boot_epoch";
+static const char* K_PREV_BOOT_EPOCH = "prev_boot_epoch";
 
 
-// Pump Object
-PumpData Pump;
-
-// Events
-Event sim4HrEvent;
-
-// PUMP Variables
-int PUMP_EVENT = FALSE;
-long AVG_COUNT = 0;
-uint32_t PUMP_EVENT_ON_TIME_LOOPS = 0;
-int cycleLockoutCount = 0;
-
-// History
-uint32_t GAL_4HR[NUM_4HR_BLOCKS];
-uint32_t CYCLE_4HR[NUM_4HR_BLOCKS];
-uint32_t GAL_TODAY = 0;
-uint32_t CYCLE_TODAY = 0;
-bool gYesterdayWasZero = false;
-char blockDayKey[16] = {0};
-
-
-void processPumpEvent() {
-  // Check for new pump event
-  if (PUMP_EVENT && !cycleLockoutCount) {
-    Pump.processPumpOnEvent(LOOP_COUNT);
-    Serial.println("[PUMP] ON");
-
-    cycleLockoutCount = LOCKOUT_TIME_LOOPS;
-    LEDOn();
-  }
-
-  // Clear Event
-  PUMP_EVENT = 0;
-
-  // Check for lockout timeout
-  if (cycleLockoutCount == 1) {
-    LEDOff();
-    int onLoops = (int)PUMP_EVENT_ON_TIME_LOOPS;
-    if (onLoops > 10) onLoops -= 1;   // Compensate off threshold-read latency of one extra count
-    Pump.processPumpOffEvent(onLoops);
-    int cycles = Pump.getPumpEventCount();
-    float monitorMin = float(LOOP_COUNT / 60.0 / LOOPS_PER_SEC);
-    float lastOnTime = float(Pump.getLastPumpOnTimeLoops()) / 10.0f;
-    Serial.printf("\n[PUMP] Event: %d | ts: %.1f min | onTime: %.1f sec\n",
-      cycles, monitorMin, lastOnTime);
-
-    cycleLockoutCount = 0;
-    PUMP_EVENT_ON_TIME_LOOPS = 0;
-  } 
-  else if (cycleLockoutCount > 1) cycleLockoutCount--;
+void nvmInit() {
+  // Nothing required. Preferences/NVS is ready by default on ESP32.
+  // This exists just to give you a clean "init hook".
 }
 
-void checkForPumpEvent() {
-  int offLevel = int(4 * COUNT_PER_AMP);
-  // compute adapative off level after the inrush period
-  if (Pump.getPumpEventCount() > 10) offLevel = int(Pump.getPumpCurCount() * 0.80);
-
-  // Only consider on time above the 80 % threshold
-  if (ADC1_COUNT > offLevel) {
-    PUMP_EVENT = TRUE;
-    PUMP_EVENT_ON_TIME_LOOPS++;
-    VLog("Event Detected");
-  }
+static bool safeStrEq(const String& a, const char* b) {
+  return b && a.equals(b);
 }
 
-void initPump() {
-  if (TEST_MODE) {
-    initPumpSim();
-    sim4HrEvent.setMin(3);  // First write after 3 mins in test mode
-  } 
-}
+//-------------------------------------------------
+// 4 Hour Blocks
+//-------------------------------------------------
 
-static void persist4HrStateToNvm(uint8_t idx)
-{
-  if (!timeValid()) return;
+bool nvmSaveState(
+  const char* dayKey,
+  uint32_t saveEpoch,
+  uint32_t gal,
+  uint32_t cyc
+) {
+  if (!dayKey) return false;
 
-  char dayKey[16]; 
-  const uint32_t nowEpoch = getCurrentEpoch();
-  getCurrentDayKey(dayKey, sizeof(dayKey));
-
-  nvmSave4hrState(
-    dayKey,
-    nowEpoch,
-    idx,
-    (uint32_t*)GAL_4HR, NUM_4HR_BLOCKS,
-    (uint32_t*)CYCLE_4HR, NUM_4HR_BLOCKS
-  );
-}
-
-void clearDailyPumpData() {
-  for (int n = 0; n < NUM_4HR_BLOCKS; n++) {
-    GAL_4HR[n] = 0;
-    CYCLE_4HR[n] = 0;
-  }
-  GAL_TODAY = 0;
-  CYCLE_TODAY = 0;
-  blockDayKey[0] = '\0';
-}
-
-void processFBWriteEvent() {
-  static int8_t lastHour = -1;
+  if (!prefs.begin(NS_PUMP, false)) return false;
+  
+  // Get updated write counts
+  uint32_t oldWriteCount = prefs.getULong(K_WRITE_COUNT, 0);
+  uint32_t newWriteCount = oldWriteCount + 1;  // incremenet explicitly
   uint8_t hour = getHourInt();
 
-  // --- 4HR measured delta snapshots ---
-  static uint64_t last4HrPumpOnLoops = 0;
-  static uint64_t last4HrPumpEventCount = 0;
-  static bool snapshotsInit = false;
+  bool ok = true;
+  ok &= prefs.putBool(K_HAS_STATE, true);
+  ok &= (prefs.putString(K_DAY_KEY, dayKey) > 0);
+  ok &= (prefs.putULong(K_SAVE_EPOCH, (unsigned long)saveEpoch) > 0);
+  ok &= (prefs.putULong(K_WRITE_COUNT, newWriteCount) > 0);
+  ok &= (prefs.putULong(K_GAL, gal) > 0);
+  ok &= (prefs.putULong(K_CYC, cyc) > 0);
 
-  if (!snapshotsInit) {
-    last4HrPumpOnLoops     = (uint64_t)Pump.getPumpOnTimeLoops();
-    last4HrPumpEventCount  = (uint64_t)Pump.getPumpEventCount();
-    snapshotsInit = true;
+  prefs.end();
+
+  if (ok) snprintf(blockDayKey, BLOCK_DAY_KEY_SIZE, "%s", dayKey);
+  return ok;
+}
+
+void nvmClearState() {  
+  if (!prefs.begin(NS_PUMP, false)) return;
+
+  // Dont remove K_WRITE_COUNT
+  prefs.remove(K_HAS_STATE);
+  prefs.remove(K_DAY_KEY);
+  prefs.remove(K_SAVE_EPOCH);
+  prefs.remove(K_GAL);
+  prefs.remove(K_CYC);
+  prefs.end();
+}
+
+bool nvmSetZeroBlocks() {
+  bool ok = true;
+
+  if (!prefs.begin(NS_PUMP, false)) {
+    return false;
   }
 
-  // -----------------------
-  // TEST MODE
-  // -----------------------
-  if (TEST_MODE) {
-    const int FB_TEST_MODE_WRITE_TIME_MIN = 4;
+  // Default / clean values
+  char dayKey[BLOCK_DAY_KEY_SIZE]; 
+  const uint32_t nowEpoch = getCurrentEpoch();
+  getCurrentDayKey(dayKey, sizeof(dayKey));
+  const uint32_t zeroGal = 0;
+  const uint32_t zeroCyc = 0;
 
-    if (sim4HrEvent.check()) {
-      // Snapshot current cumulative counters ONLY at the block boundary
-      uint64_t curOnLoops = (uint64_t)Pump.getPumpOnTimeLoops();
-      uint64_t curEvents  = (uint64_t)Pump.getPumpEventCount();
+  ok &= prefs.putBool(K_HAS_STATE, true);
 
-      // Deltas since last 4HR boundary
-      uint64_t deltaOnLoops =
-        (curOnLoops >= last4HrPumpOnLoops) ? (curOnLoops - last4HrPumpOnLoops) : 0ULL;
+  ok &= (prefs.putString(K_DAY_KEY, dayKey) > 0);
+  ok &= (prefs.putULong(K_SAVE_EPOCH, nowEpoch) > 0);
 
-      uint64_t deltaCycles =
-        (curEvents >= last4HrPumpEventCount) ? (curEvents - last4HrPumpEventCount) : 0ULL;
+  // Dont change K_WRITE_COUNT
 
-      // Convert ON time to gallons
-      float deltaOnMin = ((float)deltaOnLoops / (float)LOOPS_PER_SEC) / 60.0f;
-      uint32_t deltaGallons = (uint32_t)(deltaOnMin * (float)GAL_PER_MIN + 0.5f);
+  ok &= (prefs.putULong(K_GAL, zeroGal) > 0);
+  ok &= (prefs.putULong(K_CYC, zeroCyc) > 0);
 
-      uint32_t totalGallons = (uint32_t)deltaGallons;
-      uint32_t totalCycles  = (uint32_t)deltaCycles;
-      float lastCycleEnergy = Pump.getLastCycleEnergyAmpSeconds();
-      char dayKey[16];
-      getCurrentDayKey(dayKey, sizeof(dayKey));
+  prefs.end();
+  return ok;
+}
 
-      uint8_t idx = getStoredDailyBlockCount() + 1 % NUM_4HR_BLOCKS;
+//-------------------------------------------------
+// NVM Getters
+//-------------------------------------------------
 
-      // Store 4HR block
-      GAL_4HR[idx]   = totalGallons;
-      CYCLE_4HR[idx] = totalCycles;
-      GAL_TODAY   += totalGallons;
-      CYCLE_TODAY += totalCycles;
+uint32_t getTotalBlockWriteCount() {
+  if (!prefs.begin(NS_PUMP, true)) {return 0;}
+  const uint32_t v = (uint32_t)prefs.getULong(K_WRITE_COUNT, 0);
+  prefs.end();
+  return v;
+}
 
-      // Advance baseline snapshot for next block
-      last4HrPumpOnLoops    = curOnLoops;
-      last4HrPumpEventCount = curEvents;
+//-------------------------------------------------
+// BOOT INFO
+//-------------------------------------------------
 
-      // Next test-mode write cadence
-      sim4HrEvent.setMin(FB_TEST_MODE_WRITE_TIME_MIN);
+void nvmUpdateBootStats(uint32_t nowEpoch) {
+  if (!prefs.begin(NS_BOOT, false)) return;
 
-      persist4HrStateToNvm(idx);
-      Serial.printf("4HR BLOCK SAVED TO NVM: blocks=%u day=%04u_%02u_%02u epoch=%lu gal=%lu cyc=%lu\n",
-        getStoredDailyBlockCount(),
-        getYearInt(), getMonthInt(), getDayInt(),
-        (uint32_t)time(nullptr),
-        GAL_4HR[idx],
-        CYCLE_4HR[idx]);
+  const uint32_t bootCount = (uint32_t)prefs.getUInt(K_BOOT_COUNT, 0);
+  const uint32_t lastBoot  = (uint32_t)prefs.getUInt(K_LAST_BOOT_EPOCH, 0);
 
-      nvmDumpPumpState();
+  prefs.putUInt(K_BOOT_COUNT, bootCount + 1);
+  prefs.putUInt(K_PREV_BOOT_EPOCH, lastBoot);
+  prefs.putUInt(K_LAST_BOOT_EPOCH, nowEpoch);
 
-      // Daily rollover after last block of the day
-      if (getStoredDailyBlockCount() >= NUM_4HR_BLOCKS) {
-        float rainMm = 0.0f;
-        bool hasRain = getRainLast24h(rainMm);
-        
-        // Save Queue Data to NVM
-        nvmSaveQueuedDailySummary(
-          dayKey, GAL_TODAY, CYCLE_TODAY, rainMm, hasRain, lastCycleEnergy, 
-          GAL_4HR, NUM_4HR_BLOCKS, CYCLE_4HR, NUM_4HR_BLOCKS);
+  prefs.end();
+}
 
-        // Add to Queue
-        pumpRepo.queueDailySummary();
+uint32_t nvmGetBootCount() {
+  if (!prefs.begin(NS_BOOT, true)) return 0;
+  const uint32_t v = (uint32_t)prefs.getUInt(K_BOOT_COUNT, 0);
+  prefs.end();
+  return v;
+}
 
-        // Add to 365 Chart Data
-        Pump.Daily365.recordDailySummary((int)CYCLE_TODAY, (int)GAL_TODAY, hasRain ? rainMm : -1.0f);
-        gYesterdayWasZero = (CYCLE_TODAY == 0);
+uint32_t nvmGetLastBootEpoch() {
+  if (!prefs.begin(NS_BOOT, true)) return 0;
+  const uint32_t v = (uint32_t)prefs.getUInt(K_LAST_BOOT_EPOCH, 0);
+  prefs.end();
+  return v;
+}
 
-        clearDailyPumpData();
-        nvmSetZeroBlocks();
-      }
+uint32_t nvmGetPrevBootEpoch() {
+  if (!prefs.begin(NS_BOOT, true)) return 0;
+  const uint32_t v = (uint32_t)prefs.getUInt(K_PREV_BOOT_EPOCH, 0);
+  prefs.end();
+  return v;
+}
+
+void nvmDumpPumpState()
+{
+  Serial.println("----- NVM PUMP DUMP BEGIN -----");
+
+  if (!prefs.begin(NS_PUMP, true)) {
+    Serial.println("NVM dump failed: prefs.begin(NS_PUMP) failed");
+    return;
+  }
+
+  bool hasState = prefs.getBool(K_HAS_STATE, false);
+  String dayKey = prefs.getString(K_DAY_KEY, "");
+  uint32_t saveEpoch = (uint32_t)prefs.getULong(K_SAVE_EPOCH, 0);
+
+  Serial.printf("has_state: %s\n", hasState ? "true" : "false");
+  Serial.printf("day_key:   %s\n", dayKey.c_str());
+  Serial.printf("epoch:     %lu\n", (unsigned long)saveEpoch);
+
+  uint32_t gal = prefs.getULong(K_GAL, 0);
+  uint32_t cyc = prefs.getULong(K_CYC, 0);
+  Serial.printf("  gal=%lu cyc=%lu\n", gal, cyc);
+  prefs.end();
+
+  Serial.println("----- NVM PUMP DUMP END -----");
+}
+
+void nvmDumpBootState()
+{
+  Serial.println("----- NVM BOOT DUMP BEGIN -----");
+
+  if (!prefs.begin(NS_BOOT, true)) {
+    Serial.println("NVM dump failed: prefs.begin(NS_BOOT) failed");
+    return;
+  }
+
+  uint32_t bootCount = prefs.getUInt(K_BOOT_COUNT, 0);
+  uint32_t lastBoot  = prefs.getUInt(K_LAST_BOOT_EPOCH, 0);
+  uint32_t prevBoot  = prefs.getUInt(K_PREV_BOOT_EPOCH, 0);
+
+  Serial.printf("boot_count:      %lu\n", (unsigned long)bootCount);
+  Serial.printf("last_boot_epoch: %lu\n", (unsigned long)lastBoot);
+  Serial.printf("prev_boot_epoch: %lu\n", (unsigned long)prevBoot);
+
+  prefs.end();
+  Serial.println("----- NVM BOOT DUMP END -----");
+}
+```
+
+## File: datalogger/nvm.h
+```c
+// nvm.h
+#pragma once
+#include <stdint.h>
+#include <stddef.h>
+
+#define INVALID_BLOCK 0  // WANT THIS TO BE 255
+
+// ---- Lifecycle ----
+void nvmInit();   // optional; safe to call once in setup()
+
+// ----  block state ----
+// Saves: has_state, day_key, save_epoch,  GAL, CYCLE
+bool nvmSaveState(
+  const char* dayKey,           // "YYYY_MM_DD"
+  uint32_t saveEpoch,           // epoch seconds (0 ok, but restore-window won't work)
+  uint32_t gal, 
+  uint32_t cyc
+);
+
+
+//  Block Methods
+void nvmClearState();
+void nvmDumpPumpState();
+bool nvmSetZeroBlocks();
+
+// Getters
+uint32_t getTotalBlockWriteCount();
+
+
+// ---- Boot stats (update once per reboot) ----
+// Increments boot_count and updates last_boot_epoch / prev_boot_epoch.
+void nvmUpdateBootStats(uint32_t nowEpoch);
+
+// Read boot stats (optional convenience)
+uint32_t nvmGetBootCount();
+uint32_t nvmGetLastBootEpoch();
+uint32_t nvmGetPrevBootEpoch();
+```
+
+## File: datalogger/oled.cpp
+```cpp
+// Library Files
+#include <Wire.h>
+#include "HT_SSD1306Wire.h"
+#include "global.h"
+#include "oled.h"
+#include "ntp.h"
+#include "pumpData.h"
+#include "pumpFunc.h"
+#include "wifiFunc.h"
+
+// Just in case
+#include <stdio.h>
+#include <string.h>
+
+// Global Variables
+#include "global.h"
+
+// Display
+SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED);  // addr , freq , i2c group , resolution , rst
+
+// OLED State
+unsigned int OLED_MODE;
+static char PopupText[32] = "";
+static char PopupDetails[64] = "";
+uint32_t PopupTimer = 0;
+uint32_t MainTimer = 0;
+uint32_t MainTimeout = OLED_MODE_NO_TIMEOUT;
+
+#define MIN_MODE_CYCLE_TIME (5 * LOOPS_PER_SEC)
+
+//-------------------------------------------
+// HELPERS
+//-------------------------------------------
+
+void VextON(void) {
+  pinMode(Vext, OUTPUT);
+  digitalWrite(Vext, LOW);
+}
+
+void VextOFF(void)  //Vext default OFF
+{
+  pinMode(Vext, OUTPUT);
+  digitalWrite(Vext, HIGH);
+}
+
+void initDisplay() {
+  display.init();
+  OLED_MODE = OLED_OFF;
+  VextON();
+}
+
+void displayText() {
+  static unsigned int cnt = 0;
+  static unsigned int horOffset = 0;
+  static unsigned int vertOffset = 0;
+  static unsigned int vertOffsetMain = 0;
+
+  // Local scratch buffers
+  char line0[48];
+  char line1[48];
+  char line2[48];
+  char line3[48];
+  char line4[48];
+  char line5[48];
+
+  horOffset = (cnt / (60 * LOOPS_PER_SEC)) % 10;  // Every 60 seconds, span = 10 pixels  
+
+  if (OLED_MODE == OLED_MAIN) {
+    display.clear();
+    display.setTextAlignment(TEXT_ALIGN_LEFT);
+    display.setFont(ArialMT_Plain_10);
+
+    // Line 0: HEADER
+    if (TEST_MODE) snprintf(line0, sizeof(line0), "SHAH LOG %s T", APP_VERSION);
+    else           snprintf(line0, sizeof(line0), "SHAH LOG %s", APP_VERSION);
+    display.drawString(horOffset, vertOffsetMain, line0);
+
+    // Line 1: Last Cycle
+    float lastCycle = Pump.getDeltaMin();
+    if (lastCycle <= 0.1f) {
+      snprintf(line1, sizeof(line1), "Last Cycle: --");
+    } else {
+      snprintf(line1, sizeof(line1), "Last Cycle: %.1fm", lastCycle);
+    }
+    display.drawString(horOffset, 10 + vertOffsetMain, line1);
+
+    // Line 2: CPH / CPD
+    float avgCycleMin = Pump.getAvgCycleMin();
+    float cph = 0.0f;
+    int cpd = 0;
+
+    if (avgCycleMin > 0.1f) {
+      cph = 60.0f / avgCycleMin;
+      cpd = (int)(cph * 24.0f);
+    }
+    char curText[12];
+    Pump.getPumpCurText(curText, sizeof(curText));
+
+    snprintf(line2, sizeof(line2), "CPH: %.1f  CPD: %d", cph, cpd);
+    display.drawString(horOffset, 20 + vertOffsetMain, line2);
+
+
+    // Line 3: Gallons - Current
+    int gallonsPerDay = 0;
+    if (avgCycleMin > 0.1f) {
+      gallonsPerDay = (int)(5 * 60 * 24 / avgCycleMin);
+    }
+    if (avgCycleMin <= 0.1f) {
+      snprintf(line3, sizeof(line3), "GPD: --  I: %s", curText);
+    } else {
+      snprintf(line3, sizeof(line3), "GPD: %d  I: %s", gallonsPerDay, curText);
+    }
+    display.drawString(horOffset, 30 + vertOffsetMain, line3);
+
+
+    /////////////////////////////////////////
+    // Line 4: Revolving Line
+    /////////////////////////////////////////
+    const float TimePerStage = 2.0; // Seconds
+    const int Stages = 3;
+    const int TotalTime = LOOPS_PER_SEC * TimePerStage * Stages;
+    const int TimePerStageLoops = int(TimePerStage * LOOPS_PER_SEC);
+
+    if (LOOP_COUNT % TotalTime < TimePerStageLoops) {
+      // Pct ON / OFF
+      snprintf(line4, sizeof(line4), "<RESERVED 1>");
+    }
+    else if (LOOP_COUNT % TotalTime < 2 * TimePerStageLoops) {
+      // WiFi status
+      if (wifiRadioOn())
+        snprintf(line4, sizeof(line4), "WIFI: %s", CONN_STATUS);
+      else
+        snprintf(line4, sizeof(line4), "WIFI: RADIO OFF");
+    }
+    else {
+      snprintf(line4, sizeof(line4), "<RESERVED 2>");
+    }
+
+    display.drawString(horOffset, 40 + vertOffsetMain, line4);
+
+    // Line 5: On Time / Clock
+    float hours = cnt / 36000.0f;
+    if (hours < 24.0f) {
+      snprintf(line5, sizeof(line5), "UP:%.1fh | CLK:%s", hours, getClock());
+    } else {
+      float days = hours / 24.0f;
+      snprintf(line5, sizeof(line5), "UP:%.1fd | CLK:%s", days, getClock());
+    }
+    display.drawString(horOffset, 50 + vertOffsetMain, line5);
+
+    // write the buffer to the display
+    display.display();
+
+    // Update timers and change state as needed
+    if (MainTimer > 0) MainTimer--;
+    if (MainTimeout != OLED_MODE_NO_TIMEOUT && MainTimer == 0) {
+      OLED_MODE = OLED_MINIMIZED;  
     }
   }
 
-  // -----------------------
-  // NORMAL MODE
-  // -----------------------
-  else {
-    const float hoursSinceBoot = ((float)LOOP_COUNT / (float)LOOPS_PER_SEC) / 3600.0f; 
-    bool writeBlock = false;
+else if (OLED_MODE == OLED_MINIMIZED) {
+  float deltaMin = Pump.getAvgCycleMin();
+  if (deltaMin < 0.1f) deltaMin = 5.0f;
 
-    // Snapshot current cumulative counters ONLY at the block boundary
-    uint64_t curOnLoops = (uint64_t)Pump.getPumpOnTimeLoops();
-    uint64_t curEvents  = (uint64_t)Pump.getPumpEventCount();
+  uint32_t gallonsPerDay = (uint32_t)(5 * 60 * 24 / deltaMin);
 
-    // Block totals since last 4HR boundary
-    uint64_t blockOnLoops =
-      (curOnLoops >= last4HrPumpOnLoops) ? (curOnLoops - last4HrPumpOnLoops) : 0ULL;
+  char cycMin[10];
+  snprintf(cycMin, sizeof(cycMin), "%.1f", deltaMin);
 
-    uint64_t blockCycles =
-      (curEvents >= last4HrPumpEventCount) ? (curEvents - last4HrPumpEventCount) : 0ULL;
+  const unsigned int CYCLE_COUNT = 8;
+  unsigned int mode = (cnt / MIN_MODE_CYCLE_TIME) % CYCLE_COUNT;
 
-    // Convert ON time to gallons
-    float blockOnMin = ((float)blockOnLoops / (float)LOOPS_PER_SEC) / 60.0f;
-    uint32_t blockGallons = (uint32_t)(blockOnMin * (float)GAL_PER_MIN + 0.5f);
+  display.clear();
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  display.setFont(ArialMT_Plain_10);
 
-    uint8_t idx = 100;
-    if      (hour == 3)  idx = 0;
-    else if (hour == 7)  idx = 1;
-    else if (hour == 11) idx = 2;
-    else if (hour == 15) idx = 3;
-    else if (hour == 19) idx = 4;
-    else if (hour == 23) idx = 5;
-
-    bool validBlock = (idx >= 0 && idx < NUM_4HR_BLOCKS);
-
-    if (hour != lastHour && validBlock) {
-      // Compute Block Data
-
-      // 1) try observed-rate estimate if enough current-block coverage
-      if (hoursSinceBoot >= 3.5f) {
-          writeBlock = true;
-      }
-      // 2) else use prior completed block if it exists
-      else if (getStoredDailyBlockCount() > 0 && idx > 0) { 
-          uint8_t prev = idx - 1 ;
-          blockGallons = GAL_4HR[prev];
-          blockCycles  = CYCLE_4HR[prev];
-          writeBlock = true;
-      }
-      // 3) else leave empty, do not increment count
-      else {
-          writeBlock = false;
-      }
-
-      // Save the data if appropriate
-      if (writeBlock) {
-        // Store 4HR block
-        GAL_4HR[idx]   = blockGallons;
-        CYCLE_4HR[idx] = blockCycles;
-        GAL_TODAY     += blockGallons;
-        CYCLE_TODAY   += blockCycles;
-
-        persist4HrStateToNvm(idx);
-        Serial.printf("4HR BLOCK WRITTEN: idx=%u day=%04u_%02u_%02u epoch=%lu gal=%lu cyc=%lu\n",
-          (uint8_t)idx,
-          getYearInt(), getMonthInt(), getDayInt(),
-          (uint32_t)time(nullptr),
-          GAL_4HR[idx],
-          CYCLE_4HR[idx]);
-
-        if (hour == 23) {
-          uint32_t sumGal = GAL_TODAY;
-          uint32_t sumCyc = CYCLE_TODAY;
-          float rainMm = 0.0f;
-          bool hasRain = getRainLast24h(rainMm);
-          float lastCycleEnergy = Pump.getLastCycleEnergyAmpSeconds();
-          char dayKey[16];
-          getCurrentDayKey(dayKey, sizeof(dayKey));
-
-          // Save Queue Data to NVM
-          nvmSaveQueuedDailySummary(
-            dayKey, GAL_TODAY, CYCLE_TODAY, rainMm, hasRain, lastCycleEnergy, 
-            GAL_4HR, NUM_4HR_BLOCKS, CYCLE_4HR, NUM_4HR_BLOCKS);
-
-          // Add to Queue
-          pumpRepo.queueDailySummary();
-
-          // Write Data to 365 Day Buffer        
-          Pump.Daily365.recordDailySummary((int)sumCyc, (int)sumGal, hasRain ? rainMm : -1.0f);
-
-          gYesterdayWasZero = (CYCLE_TODAY == 0);
-          clearDailyPumpData();
-          nvmSetZeroBlocks();
-        }
-      }  // end of write block
-
-      // Advance baseline snapshot for next block
-      last4HrPumpOnLoops    = curOnLoops;
-      last4HrPumpEventCount = curEvents;
-
-    } // end of new 4 hour check
-
-    lastHour = hour;
+  if (mode == 0) {
+    if (TEST_MODE) snprintf(line0, sizeof(line0), "*TEST MODE* %s", APP_VERSION);
+    else           snprintf(line0, sizeof(line0), "DATA APP %s", APP_VERSION);
+    display.drawString(horOffset, vertOffset, line0);
   }
+  else if (mode == 1) {
+    snprintf(line2, sizeof(line2), "ON: %u%c [%u%c]",
+            (unsigned)(cnt / LOOPS_PER_SEC), 's',
+            (unsigned)(cnt / 864000), 'd');
+    display.drawString(horOffset, vertOffset, line2);
+  }
+  else if (mode == 2) {
+    snprintf(line2, sizeof(line2), "CYC: %sm %ld GPD", cycMin, gallonsPerDay);
+    display.drawString(horOffset, vertOffset, line2);
+  }
+  else if (mode == 3) {
+    snprintf(line2, sizeof(line2), "CLOCK: %s", getClock());
+    display.drawString(horOffset, vertOffset, line2);
+  }
+  else if (mode == 4) {
+    snprintf(line2, sizeof(line2), "DATE: %s", getDate());
+    display.drawString(horOffset, vertOffset, line2);
+  }
+  else if (mode == 5) {
+    snprintf(line2, sizeof(line2), "YEAR: %s", getYearStr());
+    display.drawString(horOffset, vertOffset, line2);
+  }
+  else if (mode == 6) {
+    snprintf(line2, sizeof(line2), "Wifi: %s", CONN_STATUS);
+    display.drawString(horOffset, vertOffset, line2);
+  }
+  else {
+    display.drawString(horOffset, vertOffset, "Press TOP Button");
+  }
+
+  if (cnt % (120 * LOOPS_PER_SEC) == 0) vertOffset = random(0, 50);
+
+  display.display();
+}
+
+  cnt++;  // shared counter for all modes
+}
+
+void displayPopupScreen(const char* text, const char* details) {
+  strncpy(PopupText, text, sizeof(PopupText) - 1);
+  PopupText[sizeof(PopupText) - 1] = '\0';
+
+  strncpy(PopupDetails, details, sizeof(PopupDetails) - 1);
+  PopupDetails[sizeof(PopupDetails) - 1] = '\0';
+
+  PopupTimer = 0;
+  OLED_MODE = OLED_POPUP;
+  updatePopupScreen();
+}
+
+void updatePopupScreen() {
+  if (OLED_MODE == OLED_POPUP) {
+    display.clear();
+    display.setTextAlignment(TEXT_ALIGN_LEFT);
+    display.setFont(ArialMT_Plain_16);
+    display.drawString(0, 0, PopupText);
+    display.setFont(ArialMT_Plain_10);
+    display.drawString(0, 16, PopupDetails);
+
+    // write the buffer to the display
+    display.display();
+
+    PopupTimer++;
+  }
+}
+
+void newPopupScreen(const char* text, const char* details) {
+  displayPopupScreen(text,details);
+  updatePopupScreen();
+}
+
+void oledMain(uint32_t duration) {
+  OLED_MODE = OLED_MAIN;
+  MainTimer = duration;
+  MainTimeout = duration;
+}
+
+void oledMinimized() {
+  OLED_MODE = OLED_MINIMIZED;
+}
+
+void oledOff() {
+  OLED_MODE = OLED_OFF;
 }
 ```
 
-## File: Pump_Monitor/pumpFunc.h
+## File: datalogger/oled.h
 ```c
 #pragma once
 
-#define BLOCK_DAY_KEY_SIZE 16
+void initDisplay();
+void displayText();
+void displayPopupScreen(const char* text, const char* details);
+void newPopupScreen(const char* text, const char* details);
+void updatePopupScreen();
+void oledMain(uint32_t duration);
+void oledMinimized();
+void oledOff();
 
+#define OLED_OFF 0
+#define OLED_MAIN 1
+#define OLED_POPUP 2
+#define OLED_MINIMIZED 3
 
-// external pump variables
-extern int PUMP_EVENT;
-extern float PUMP_CPH;
-extern int PUMP_GPD;
-extern int cycleLockoutCount;
-extern uint32_t GAL_TODAY;
-extern uint32_t CYCLE_TODAY;
-extern uint32_t GAL_4HR[];
-extern uint32_t CYCLE_4HR[];
-extern bool gYesterdayWasZero;
-extern char blockDayKey[BLOCK_DAY_KEY_SIZE];
-
-// Pump Defines
-#define LOCKOUT_TIME_LOOPS 10 * LOOPS_PER_SEC  // 10 sec [No second pump event during this time]
-#define TEST_NEXT_EVT_MIN_SEC 50   
-#define TEST_NEXT_EVT_MAX_SEC 70   
-
-// Pump Functions
-void processPumpEvent();
-void checkForPumpEvent();
-void initPump();
-void processFBWriteEvent();
+#define OLED_MODE_NO_TIMEOUT 0
 ```
 
-## File: Pump_Monitor/firebase.h
+## File: datalogger/ota.cpp
+```cpp
+// ota.cpp
+#include <ArduinoOTA.h>
+#include <ESPmDNS.h>
+#include "ota.h"
+#include "global.h"
+#include "wifiFunc.h"
+
+static bool _otaInProgress = false;
+static unsigned int otaState = OTA_OFF;
+
+unsigned int getOtaState() {return otaState;}
+void reinitOta() {otaState = OTA_INIT;}
+
+void initOTA(const char* hostname)
+{
+  if (!MDNS.begin(hostname)) {
+    Serial.println("mDNS failed");
+  } else {
+    Serial.println("mDNS started");
+  }
+  ArduinoOTA.setHostname(hostname);
+  ArduinoOTA.setPort(3232);
+
+  // Optional but strongly recommended
+  //ArduinoOTA.setPassword("pumpOTA123");   // change this!
+
+  ArduinoOTA.onStart([]() {
+    _otaInProgress = true;
+    Serial.println("OTA Start");
+  });
+
+  ArduinoOTA.onEnd([]() {
+    Serial.println("OTA End");
+    _otaInProgress = false;
+  });
+
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    static int16_t lastPct = -5;
+
+    int pct = (progress * 100) / total;
+
+    if (pct - lastPct >= 5 || pct == 100) {
+      Serial.printf("OTA Progress: %u%%\n", pct);
+      lastPct = pct;
+    }
+  });
+
+  ArduinoOTA.onError([](ota_error_t error) {
+    Serial.printf("OTA Error[%u]: ", error);
+      if (error == OTA_AUTH_ERROR) Serial.println("Auth Failed");
+      else if (error == OTA_BEGIN_ERROR) Serial.println("Begin Failed");
+      else if (error == OTA_CONNECT_ERROR) Serial.println("Connect Failed");
+      else if (error == OTA_RECEIVE_ERROR) Serial.println("Receive Failed");
+      else if (error == OTA_END_ERROR) Serial.println("End Failed");
+      else Serial.println("Unknown");
+      _otaInProgress = false;
+    });
+
+  ArduinoOTA.begin();
+  Serial.printf("[OTA] Host: %s\n", hostname);
+  Serial.println("[OTA] Ready");
+}
+
+void updateOTAState() {
+  bool wifiStable = wifiLinkReady();  
+
+  switch (otaState) {
+    case OTA_OFF:
+      if (wifiStable) {
+        Serial.println("[OTA] OFF -> ON");
+        initOTA(TEST_MODE ? "pump-test" : "pump-prod");
+        otaState = OTA_ON;
+      }
+      break;
+
+    case OTA_ON:
+      if (!wifiStable) {
+        Serial.println("[OTA] ON -> INIT");
+        otaState = OTA_INIT;
+      }
+      break;
+
+    case OTA_INIT:
+      if (wifiStable) {
+        Serial.println("[OTA] INIT -> ON");
+        initOTA(TEST_MODE ? "pump-test" : "pump-prod");
+        otaState = OTA_ON;
+      }
+      break;
+  }
+}
+
+void handleOTA()
+{
+  ArduinoOTA.handle();
+}
+
+bool otaInProgress()
+{
+  return _otaInProgress;
+}
+```
+
+## File: datalogger/ota.h
+```c
+// OTA.h
+#pragma once
+
+#define OTA_OFF 0
+#define OTA_INIT 1
+#define OTA_ON 2
+#define OTA_FLASHING 3
+
+// OTA Handler
+void initOTA(const char* hostname);
+void handleOTA();
+bool otaInProgress();
+
+// OTA State
+unsigned int getOtaState();
+void reinitOta();
+void updateOTAState();
+```
+
+## File: datalogger/pump365.h
 ```c
 #pragma once
 #include <Arduino.h>
-#include "pumpFBRepo.h"
+#include <string.h>
 
-// =======================
-// EXISTING (unchanged)
-// =======================
-bool setupFirebase();
-int firebaseOK();
-void clearDailyFBWriteCount();
-void test_firebase();
-void resetFirebase();
-
-extern PumpFBRepo pumpRepo;
-
-// =======================
-// NEW: Firebase State Machine API
-// =======================
-
-enum FBState {
-  FB_STATE_DISABLED,
-  FB_STATE_PRE_INIT,
-  FB_STATE_INITIALIZING,
-  FB_STATE_TEST_DELAY,
-  FB_STATE_TEST_RUN,
-  FB_STATE_PAUSED,
-  FB_STATE_CONNECTED
+struct PumpDailyRecord {
+  int cyclesPerDay;
+  int gallonsPerDay;
 };
 
-// lifecycle
-void initFirebaseHealth();
-void updateFirebaseState();
+class Pump365Data {
+public:
+  static const int DAILY_DAYS = 365;
 
-// gating
-bool firebaseReadAllowed();
-bool firebaseWriteAllowed();
+  void begin() {
+    clearDailyHistory();
+  }
 
-// control
-void disarmFirebase();
-void delayFirebase();
+  void clearDailyHistory() {
+    memset(_dailyCyclesPerDay, 0, sizeof(_dailyCyclesPerDay));
+    memset(_dailyGallonsPerDay, 0, sizeof(_dailyGallonsPerDay));
+    _dailyHead = -1;
+    _dailyValidCount = 0;
+  }
 
-// actions
-void onFirebaseOpSuccess();
-void onFirebaseOpFailure(int httpCode);
+  int dailyValidCount() const {
+    return _dailyValidCount;
+  }
 
-// state info
-FBState getFirebaseState();
-const char* getFirebaseStateText(FBState fbState);
-int getFirebaseCanaryCount();
-const char* getNextFirebaseStateTimeout();
+  void recordDailySummary(int cyclesPerDay, int gallonsPerDay) {
+    _dailyHead = (_dailyHead + 1) % DAILY_DAYS;
+    _dailyCyclesPerDay[_dailyHead]  = sanitizeInt(cyclesPerDay);
+    _dailyGallonsPerDay[_dailyHead] = sanitizeInt(gallonsPerDay);
 
-// Pump Repo Wrappers
-int getDailySummaryWriteCount();
-const char* getLastDailyWriteTimestamp();
-const char* getLastDailyWriteStatus();
+    if (_dailyValidCount < DAILY_DAYS) {
+      _dailyValidCount++;
+    }
+  }
 
-// -----------------------------------------------------------------------------
-// Diagnostics / logging
-// -----------------------------------------------------------------------------
-void exportFBHistoryCSV(WiFiClient& client);
-const char* fbHttpText(int code);
-void logFBResult(uint8_t type, int httpCode, uint16_t dtMs);
+  bool getDailyRecordAgo(int daysAgo, PumpDailyRecord& out) const {
+    if (_dailyHead < 0) return false;
+    if (daysAgo < 0 || daysAgo >= _dailyValidCount) return false;
+
+    const int idx = dailyIndexFromDaysAgo(daysAgo);
+    out.cyclesPerDay  = _dailyCyclesPerDay[idx];
+    out.gallonsPerDay = _dailyGallonsPerDay[idx];
+    return true;
+  }
+
+  bool getDailyRecordAgo(int daysAgo, int& outCycles, int& outGallons) const {
+    if (_dailyHead < 0) return false;
+    if (daysAgo < 0 || daysAgo >= _dailyValidCount) return false;
+
+    const int idx = dailyIndexFromDaysAgo(daysAgo);
+    outCycles  = _dailyCyclesPerDay[idx];
+    outGallons = _dailyGallonsPerDay[idx];
+    return true;
+  }
+
+  bool appendOlderDailyRecord(int cyclesPerDay, int gallonsPerDay) {
+    if (_dailyValidCount >= DAILY_DAYS) return false;
+
+    if (_dailyHead < 0) {
+      _dailyHead = 0;
+      _dailyCyclesPerDay[_dailyHead]  = sanitizeInt(cyclesPerDay);
+      _dailyGallonsPerDay[_dailyHead] = sanitizeInt(gallonsPerDay);
+      _dailyValidCount = 1;
+      return true;
+    }
+
+    int oldestValidIdx = (_dailyHead - (_dailyValidCount - 1)) % DAILY_DAYS;
+    if (oldestValidIdx < 0) oldestValidIdx += DAILY_DAYS;
+
+    int newOldestIdx = (oldestValidIdx - 1) % DAILY_DAYS;
+    if (newOldestIdx < 0) newOldestIdx += DAILY_DAYS;
+
+    _dailyCyclesPerDay[newOldestIdx]  = sanitizeInt(cyclesPerDay);
+    _dailyGallonsPerDay[newOldestIdx] = sanitizeInt(gallonsPerDay);
+    _dailyValidCount++;
+    return true;
+  }
+
+  bool appendOlderMissingDailyRecord() {
+    return appendOlderDailyRecord(-1, -1);
+  }
+
+  bool getDailySample(int offsetOldestDay, PumpDailyRecord& out) const {
+    if (_dailyHead < 0) return false;
+    if (offsetOldestDay < 0 || offsetOldestDay >= _dailyValidCount) return false;
+
+    int oldestValidIdx = (_dailyHead - (_dailyValidCount - 1)) % DAILY_DAYS;
+    if (oldestValidIdx < 0) oldestValidIdx += DAILY_DAYS;
+
+    int idx = (oldestValidIdx + offsetOldestDay) % DAILY_DAYS;
+
+    out.cyclesPerDay  = _dailyCyclesPerDay[idx];
+    out.gallonsPerDay = _dailyGallonsPerDay[idx];
+    return true;
+  }
+
+private:
+  int   _dailyCyclesPerDay[DAILY_DAYS];
+  int   _dailyGallonsPerDay[DAILY_DAYS];
+
+  int _dailyHead = -1;
+  int _dailyValidCount = 0;
+
+  static int sanitizeInt(int v) {
+    return (v < 0) ? -1 : v;
+  }
+
+  int dailyIndexFromDaysAgo(int daysAgo) const {
+    int idx = (_dailyHead - daysAgo) % DAILY_DAYS;
+    if (idx < 0) idx += DAILY_DAYS;
+    return idx;
+  }
+};
 ```
 
-## File: Pump_Monitor/pumpData.h
+## File: datalogger/pumpData.cpp
+```cpp
+#include "global.h"
+#include "eventData.h"
+#include "pumpData.h"
+#include <string.h>
+
+// ################################################################################################
+// CLASS PumpData
+// ################################################################################################
+
+PumpData::PumpData() {
+  DELTA_SEC = 6000;  // default 10mins
+  DELTA_MIN = 10;    // default 10 mins
+  AVG_PUMP_CUR_COUNT = 0;
+  PUMP_EVENT_COUNT = 0;
+  LAST_PUMP_ON_TIME_LOOPS = 0;
+  PUMP_ON_TIME_LOOPS = 0;
+  LAST_PUMP_EVENT = 0;
+  PUMP_CPH = 0;
+  PUMP_GPD = 0;
+  LAST_PUMP_EVENT_CUR_TEXT = "";
+  LAST_PUMP_EVENT_SS_CUR_TEXT = "";
+
+  // Initialize History
+  CycData.init(50, "sec");
+  CycData10.init(10, "sec");
+
+  // Initialize Daily History
+  GPDDailyHistory.init(20, "GPD");
+  CycleDailyHistory.init(20, 2, "min");
+  CPHDailyHistory.init(20, 1, "Cyc");
+  CurrentDailyHistory.init(20, 2, "Amp");
+
+  // Initialize new 365-day ring
+  Daily365.begin();
+
+  // waveform buffers
+  curWaveCount = 0;
+  lastWaveCount = 0;
+  for (int i = 0; i < CUR_WAVE_MAX; i++) {
+    curWave[i] = 0;
+    lastWave[i] = 0;
+  }
+
+  if (TEST_MODE) {
+    const int scale = random(1, 11);
+  }
+}
+
+float PumpData::getAvgCycleMin() { return float(CycData10.avg() / 60.0); }
+float PumpData::getStDevCycleMin() { return float(CycData10.stdev() / 60.0); }
+float PumpData::getDeltaSec() { return DELTA_SEC; }
+float PumpData::getDeltaMin() { return DELTA_MIN; }
+float PumpData::getCPH() { return PUMP_CPH; }
+int PumpData::getGPD() { return PUMP_GPD; }
+int PumpData::getPumpEventCount() { return PUMP_EVENT_COUNT; }
+int PumpData::getLastPumpOnTimeLoops() { return LAST_PUMP_ON_TIME_LOOPS; }
+uint32_t PumpData::getLastPumpEventLoops() { return LAST_PUMP_EVENT; }
+uint32_t PumpData::getPumpOnTimeLoops() { return PUMP_ON_TIME_LOOPS; }
+
+float PumpData::getPumpCur() {
+  return 0;
+}
+
+int PumpData::getPumpCurCount() { return AVG_PUMP_CUR_COUNT; }
+
+String PumpData::getPumpCurText() {
+  return String(0.0, 1) + "A";
+}
+
+void PumpData::getPumpCurText(char* out, size_t outSize) {
+  if (!out || outSize == 0) return;
+
+  const float amps = (float)getPumpCur();
+  snprintf(out, outSize, "%.1fA", amps);
+}
+
+String PumpData::getPumpCurTextFull() {
+  const float amps = 0.0f;
+  return String(amps, 1) + "A [" + String(AVG_PUMP_CUR_COUNT) + "]";
+}
+
+String PumpData::getCycleDataText() { return CycData.dataText(); }
+
+// Keep old behavior for now; switch later if you want this to reflect Daily365
+int PumpData::getDailyCount() { return GPDDailyHistory.getTotalCount(); }
+
+float PumpData::getLastCycleEnergyAmpSeconds() const {
+  const int n = getLastCycleCurrentSamplesCount();
+  if (n < 10) return 0.0f;
+
+  const int start = 10;
+  const int end = (n - 1 < 49) ? (n - 1) : 49;
+
+  float sumAmps = 0.0f;
+  for (int i = start; i <= end; i++) {
+    sumAmps += getLastCycleCurrentSampleAmps(i);
+  }
+
+  // Samples are at 100ms cadence => 0.1s per sample => divide by 10 to get amp-seconds
+  return sumAmps / 10.0f;
+}
+
+// -------------------------------------------------------
+// TEST_MODE PreLoad
+// -------------------------------------------------------
+
+
+String PumpData::getLastEventCurText() { return LAST_PUMP_EVENT_CUR_TEXT; }
+String PumpData::getLastEventSSCurText() { return LAST_PUMP_EVENT_SS_CUR_TEXT; }
+
+// -------------------------
+// Waveform accessors
+// -------------------------
+int PumpData::getLastCycleCurrentSamplesCount() const {
+  return lastWaveCount;
+}
+
+int PumpData::getLastCycleCurrentSampleCounts(int idx) const {
+  if (lastWaveCount <= 0) return 0;
+  if (idx < 0) idx = 0;
+  if (idx >= lastWaveCount) idx = lastWaveCount - 1;
+  return lastWave[idx];
+}
+
+float PumpData::getLastCycleCurrentSampleAmps(int idx) const {
+  const int c = getLastCycleCurrentSampleCounts(idx);
+  return 0.0f;
+}
+
+float PumpData::getLastCycleCurrentAvgAmps() const {
+  if (lastWaveCount <= 0) return 0.0f;
+  uint32_t sum = 0;
+  for (int i = 0; i < lastWaveCount; i++) sum += (uint32_t)lastWave[i];
+  const float avgCounts = (float)sum / (float)lastWaveCount;
+  return 0;
+}
+
+float PumpData::getLastCycleCurrentMinAmps() const {
+  if (lastWaveCount <= 0) return 0.0f;
+  int mn = lastWave[0];
+  for (int i = 1; i < lastWaveCount; i++) {
+    if (lastWave[i] < mn) mn = lastWave[i];
+  }
+  return 0.0f;
+}
+
+float PumpData::getLastCycleCurrentMaxAmps() const {
+  if (lastWaveCount <= 0) return 0.0f;
+  int mx = lastWave[0];
+  for (int i = 1; i < lastWaveCount; i++) {
+    if (lastWave[i] > mx) mx = lastWave[i];
+  }
+  return 0.0f;
+}
+
+String PumpData::getLastCycleCurrentSummaryText() const {
+  String s;
+  s.reserve(24);
+  s += String(lastWaveCount);
+  s += " | ";
+  s += String(getLastCycleCurrentAvgAmps(), 2);
+  s += "A";
+  return s;
+}
+
+void PumpData::processPumpOnEvent(uint32_t loopCount) {
+  PUMP_EVENT_COUNT++;
+  DELTA_SEC = (loopCount - LAST_PUMP_EVENT) / LOOPS_PER_SEC;
+  DELTA_MIN = DELTA_SEC / 60.0f;
+  LAST_PUMP_EVENT = loopCount;
+
+  // Save Event Data for Graph
+  eventDataAddNow();
+
+  if (DELTA_SEC > 0) {
+    PUMP_CPH = 3600.0f / DELTA_SEC;
+  } else {
+    PUMP_CPH = 0;
+  }
+
+  if (PUMP_EVENT_COUNT > 1) {
+    updateAvgCycleTime();
+    if (TEST_MODE) {
+      updateTestModeHistoryData();
+    }
+  } else {
+    TLog("Ignore first cycle when updating averages");
+  }
+}
+
+void PumpData::processPumpOffEvent(int pumpOnTimeLoops) {
+  //TLog("Pump OFF Event - On Time: %.1f sec", float(pumpOnTimeLoops / 10.0));
+
+  // snapshot current waveform for Details graph
+  lastWaveCount = curWaveCount;
+  if (lastWaveCount > CUR_WAVE_MAX) lastWaveCount = CUR_WAVE_MAX;
+
+  for (int i = 0; i < lastWaveCount; i++) {
+    lastWave[i] = curWave[i];
+  }
+
+  // reset for next cycle
+  curWaveCount = 0;
+
+  // Capture waveform-based steady-state current (±20% filter)
+  float ssCounts = Current.ssAvg(0.2f);
+  float ssAmps   = 0.0f;
+
+  LAST_PUMP_EVENT_SS_CUR_TEXT = String(ssAmps, 1) + "A";
+  LAST_PUMP_EVENT_CUR_TEXT = Current.dataText();
+  LAST_PUMP_ON_TIME_LOOPS = pumpOnTimeLoops;
+  PUMP_ON_TIME_LOOPS += pumpOnTimeLoops;
+  Current.reset();
+}
+
+void PumpData::updateAvgCurrent(int adcCount) {
+  int adjCurrent = adcCount;
+  int maxCurrent = 0;
+  int minCurrent = 0;
+
+  if (adjCurrent > maxCurrent) adjCurrent = maxCurrent;
+  if (adjCurrent < minCurrent) adjCurrent = minCurrent;
+
+  if (PUMP_EVENT_COUNT < 3) {
+    float newAvgCurrent = 0.90f * AVG_PUMP_CUR_COUNT + 0.10f * adjCurrent;
+    AVG_PUMP_CUR_COUNT = int(newAvgCurrent);
+  } else {
+    float newAvgCurrent = 0.98f * AVG_PUMP_CUR_COUNT + 0.02f * adjCurrent;
+    AVG_PUMP_CUR_COUNT = int(newAvgCurrent);
+  }
+
+  // capture waveform sample (raw counts) for current cycle
+  if (curWaveCount < CUR_WAVE_MAX) {
+    curWave[curWaveCount++] = adcCount;
+  }
+
+  Current.addData(adcCount);
+}
+
+void PumpData::updateAvgCycleTime() {
+  CycData.addData(DELTA_SEC);
+  CycData10.addData(DELTA_SEC);
+}
+
+void PumpData::updateTestModeHistoryData() {
+  int gpd = random(100, 300);
+  float cph = (gpd / 24.0f) / 5.0f;
+  float current = random(900, 1100) / 100.0f;
+  GPDDailyHistory.addData(gpd);
+  CPHDailyHistory.addData(cph);
+  CurrentDailyHistory.addData(current);
+  CycleDailyHistory.addData(DELTA_SEC);
+}
+```
+
+## File: datalogger/pumpData.h
 ```c
 #pragma once
 #include "datastore.h"
@@ -7560,8 +3631,6 @@ class PumpData {
     String getLastEventCurText();
     String getLastEventSSCurText();
     int getDailyCount();
-    void seedTestModeDailyTotals(int scale);
-    void seedTestModeDailyTotalsFromHistory(int scale);
 
     DataStoreInt GPDDailyHistory;
     DataStoreFloat CycleDailyHistory;
@@ -7615,697 +3684,217 @@ class PumpData {
 extern PumpData Pump;
 ```
 
-## File: Pump_Monitor/pumpFBRepo.h
+## File: datalogger/pumpFunc.cpp
+```cpp
+// Libraries
+#include <event.h>
+
+// Local files
+#include "global.h"
+#include "ledFunc.h"
+#include "ntp.h"
+#include "nvm.h"
+#include "pumpData.h"
+#include "pumpFunc.h"
+#include "test_mode.h"
+#include "wifiFunc.h"  // timeValid()
+
+
+// Pump Object
+PumpData Pump;
+
+// Events
+Event simEvent;
+
+// PUMP Variables
+int PUMP_EVENT = FALSE;
+long AVG_COUNT = 0;
+uint32_t PUMP_EVENT_ON_TIME_LOOPS = 0;
+int cycleLockoutCount = 0;
+
+// History
+uint32_t GAL;
+uint32_t CYCLE;
+uint32_t GAL_TODAY = 0;
+uint32_t CYCLE_TODAY = 0;
+
+bool gYesterdayWasZero = false;
+char blockDayKey[16] = {0};
+
+
+// Methods
+void processPumpEvent() {
+  // Check for new pump event
+  if (PUMP_EVENT && !cycleLockoutCount) {
+    Pump.processPumpOnEvent(LOOP_COUNT);
+    Serial.println("[PUMP] ON");
+
+    cycleLockoutCount = LOCKOUT_TIME_LOOPS;
+    LEDOn();
+  }
+
+  // Clear Event
+  PUMP_EVENT = 0;
+
+  // Check for lockout timeout
+  if (cycleLockoutCount == 1) {
+    LEDOff();
+    int onLoops = (int)PUMP_EVENT_ON_TIME_LOOPS;
+    if (onLoops > 10) onLoops -= 1;   // Compensate off threshold-read latency of one extra count
+    Pump.processPumpOffEvent(onLoops);
+    int cycles = Pump.getPumpEventCount();
+    float monitorMin = float(LOOP_COUNT / 60.0 / LOOPS_PER_SEC);
+    float lastOnTime = float(Pump.getLastPumpOnTimeLoops()) / 10.0f;
+    Serial.printf("\n[PUMP] Event: %d | ts: %.1f min | onTime: %.1f sec\n",
+      cycles, monitorMin, lastOnTime);
+
+    cycleLockoutCount = 0;
+    PUMP_EVENT_ON_TIME_LOOPS = 0;
+  } 
+  else if (cycleLockoutCount > 1) cycleLockoutCount--;
+}
+
+void checkForPumpEvent() {
+  int offLevel = int(4 * 0);
+  // compute adapative off level after the inrush period
+  if (Pump.getPumpEventCount() > 10) offLevel = int(Pump.getPumpCurCount() * 0.80);
+
+  // Only consider on time above the 80 % threshold
+  if (ADC1_COUNT > offLevel) {
+    PUMP_EVENT = TRUE;
+    PUMP_EVENT_ON_TIME_LOOPS++;
+    VLog("Event Detected");
+  }
+}
+
+void initPump() {
+  if (TEST_MODE) {
+    initPumpSim();
+    simEvent.setMin(3);  // First write after 3 mins in test mode
+  } 
+}
+
+static void persistStateToNvm(uint8_t idx)
+{
+  if (!timeValid()) return;
+
+  char dayKey[16]; 
+  const uint32_t nowEpoch = getCurrentEpoch();
+  getCurrentDayKey(dayKey, sizeof(dayKey));
+
+  nvmSaveState(
+    dayKey,
+    nowEpoch,
+    GAL, 
+    CYCLE
+  );
+}
+
+void clearDailyPumpData() {
+  GAL = 0;
+  CYCLE = 0;
+
+  GAL_TODAY = 0;
+  CYCLE_TODAY = 0;
+  blockDayKey[0] = '\0';
+}
+```
+
+## File: datalogger/pumpFunc.h
 ```c
 #pragma once
 
-#include <Arduino.h>
-#include "FirebaseClient.h"
+#define BLOCK_DAY_KEY_SIZE 16
 
-class PumpFBRepo {
-public:
-  PumpFBRepo(FirebaseClient& c);
+// external pump variables
+extern int PUMP_EVENT;
+extern float PUMP_CPH;
+extern int PUMP_GPD;
+extern int cycleLockoutCount;
+extern uint32_t GAL_TODAY;
+extern uint32_t CYCLE_TODAY;
+extern uint32_t GAL;
+extern uint32_t CYCLE;
+extern bool gYesterdayWasZero;
+extern char blockDayKey[BLOCK_DAY_KEY_SIZE];
 
-  struct SummaryQueueItem {
-    bool inUse = false;
-    char dayKey[16] = {0};            // YYYY_MM_DD
-    char queuedTimestamp[32] = {0};   // local timestamp string
-    uint8_t attempts = 0;
-    String url;                       // full RTDB path
-    String payload;                   // serialized JSON
-  };
+// getters
 
-  struct WeatherQueueItem {
-    bool pending = false;
-    char queuedTimestamp[32] = {0};
-    uint8_t attempts = 0;
-    String url;
-    String payload;
-  };
 
-  // Main Entry
-  bool processSummaryQueueOnce();   // call from 1-hour loop
-  bool processWeatherQueueOnce();   // call from weather/hour loop
-  bool queueDailySummary();         
-  bool queueWeatherSnapshot();      // queue latest weather snapshot
+// setters
 
-  // Write operations
-  bool writeFirebaseCanary();
+// Pump Defines
+#define LOCKOUT_TIME_LOOPS 10 * LOOPS_PER_SEC  // 10 sec [No second pump event during this time]
+#define TEST_NEXT_EVT_MIN_SEC 50   
+#define TEST_NEXT_EVT_MAX_SEC 70   
 
-  // Read operations
-  bool readFirebaseDailySummary(
-    const String& dayKey,
-    bool& recordExists,
-    int& cyclesPerDay,
-    int& gallonsPerDay,
-    float& rainMm
-  );
-
-  // Daily write diagnostics
-  int getDailySummaryWriteCount() const;
-  const char* getLastDailyWriteTimestamp() const;
-  const char* getLastDailyWriteStatus() const;
-
-  // Daily summary queue status
-  bool hasQueuedDailySummary() const;
-  int getSummaryQueueCount() const;
-  const char* getQueuedDailySummaryDayKey() const;
-  int getQueuedDailySummaryAttempts() const;
-  int getSummaryQueueDroppedCount() const;
-  bool getSummaryQueueItem(int offset, SummaryQueueItem& out) const;
-
-  // Weather queue status
-  bool hasQueuedWeather() const;
-  int getQueuedWeatherAttempts() const;
-  const char* getQueuedWeatherTimestamp() const;
-
-  // Helpers
-  void setDailyWriteStatus(const char* status);
-  void setDailyWriteStatusf(const char* prefix, const char* detail);
-  void clearDailyFBWriteCount();
-
-  // Status
-  int firebaseOK();
-
-private:
-  static const int SUMMARY_QUEUE_SIZE = 5;
-
-  // Internal helpers
-  bool buildWeatherJson(FirebaseJson& json);
-  bool buildDailySummaryJson(FirebaseJson& json, char* dayKeyOut, size_t dayKeyLen);
-
-  bool enqueueDailySummary(const String& url, const char* dayKey, FirebaseJson& json);
-  void clearDailySummarySlot(int index);
-
-  bool queueWeatherPayload(const String& url, FirebaseJson& json);
-  void clearWeatherQueue();
-
-  int findOldestSummaryIndex() const;
-  int findNewestSummaryIndex() const;
-
-  FirebaseClient& fb;
-
-  // Existing counters / diagnostics
-  int writesToday = 0;
-  int dailySummaryWriteCount = 0;
-  char lastDailyWriteTimestamp[32] = {0};
-  char lastDailyWriteStatus[128] = {0};
-
-  // Daily summary queue
-  SummaryQueueItem summaryQueue[SUMMARY_QUEUE_SIZE];
-  int summaryHead = 0;   // next write slot
-  int summaryTail = 0;   // next process slot
-  int summaryCount = 0;
-  int summaryDroppedCount = 0;
-
-  // Weather queue (single latest snapshot)
-  WeatherQueueItem weatherQueue;
-};
+// Pump Functions
+void processPumpEvent();
+void checkForPumpEvent();
+void initPump();
 ```
 
-## File: Pump_Monitor/firebase.cpp
+## File: datalogger/ramlog.cpp
 ```cpp
-// firebase.cpp  (WRAPPER / INTEGRATION LAYER)
-
-#include <Arduino.h>
-#include <WiFi.h>
-
-// Local project headers
+#include "ramlog.h"
 #include "global.h"
-#include "oled.h"
-#include "ntp.h"
-#include "pumpData.h"
-#include "secrets.h"
-#include "weather.h"
-#include "wifiFunc.h"
 
-// Public API
-#include "firebase.h"
+extern char* getTimestamp();
 
-// New layers
-#include "FirebaseClient.h"
-#include "PumpFBRepo.h"
+char gLogMsg[LOG_LINES][LOG_LEN] = {{0}};
+char gLogTs[LOG_LINES][TS_LEN] = {{0}};
+uint8_t gLogIndex = 0;
+uint8_t gLogCount = 0;
 
-// -----------------------------------------------------------------------------
-// Instances
-// -----------------------------------------------------------------------------
-FirebaseClient fbClient;
-PumpFBRepo pumpRepo(fbClient);
+void ramLog(const char* msg) {
+  const char* ts = getTimestamp();
+  if (!ts) ts = "?";
 
-// =======================
-// Firebase State Machine
-// =======================
+  snprintf(gLogTs[gLogIndex], sizeof(gLogTs[gLogIndex]), "%s", ts);
+  snprintf(gLogMsg[gLogIndex], sizeof(gLogMsg[gLogIndex]), "%s", msg ? msg : "");
 
-static FBState fbState = FB_STATE_DISABLED;
-static uint32_t fbStateEnteredMs = 0;
-static uint32_t fbStateDelayMs = 0;
-
-static uint16_t fbCanarySuccessCount = 0;
-static uint16_t fbTransportFailureStreak = 0;
-
-static char fbTimeoutText[16] = "--:--";
-
-
-#if TEST_MODE
-  static const uint32_t FB_PRE_INIT_MS      = 2UL * 60000UL;  // 2 min
-  static const uint32_t FB_TEST_DELAY_MS    = 1UL * 60000UL;  // 1 min
-  static const uint32_t FB_INIT_RETRY_MS    = 1UL * 60000UL;  // 1 min
-  static const uint32_t FB_DISARM_DELAY_MS  = 1UL * 60000UL;  // 1 min
-  static const uint32_t FB_PAUSE_DELAY_MS   = 5UL * 60000UL;  // 5 min
-
-#else  // PROD_MODE
-  static const uint32_t FB_PRE_INIT_MS      = 15UL * 60000UL;  // 15 min
-  static const uint32_t FB_TEST_DELAY_MS    = 5UL * 60000UL;   // 5 min
-  static const uint32_t FB_INIT_RETRY_MS    = 10UL * 60000UL;  // 10 min
-  static const uint32_t FB_DISARM_DELAY_MS  = 15UL * 60000UL;  // 15 min
-  static const uint32_t FB_PAUSE_DELAY_MS   = 15UL * 60000UL;  // 15 min
-#endif
-
-// --------------------------------------------------
-// Firebase History Capture
-// --------------------------------------------------
-
-#define FB_HISTORY_SIZE 200
-#define FB_HISTORY_FIXED 100
-#define FB_HISTORY_ROLLING 100
-
-struct FBResult {
-  uint16_t date;
-  uint32_t ms;
-  uint16_t dtMs;
-  int16_t rssi;
-  int16_t httpCode;
-  uint8_t type;    // 0=canary,1=event(reserved),2=daily,3=retry, etc
-};
-
-FBResult fbHistory[FB_HISTORY_SIZE];
-int fbHistoryCount = 0;
-
-const char* fbTypeText(uint8_t t) {
-  switch (t) {
-    case 0: return "canary";
-    case 1: return "event"; // reserved for future use
-    case 2: return "daily queued";
-    case 3: return "daily summary";
-    case 4: return "tbd";
-    case 5: return "restart";
-    case 6: return "history load";
-  }
-  return "unknown";
+  gLogIndex = (gLogIndex + 1) % LOG_LINES;
+  if (gLogCount < LOG_LINES) gLogCount++;
 }
 
+void ramLogf(const char* fmt, ...) {
+  char msg[64];
 
-// -----------------------------------------------------------------------------
-// Public API (existing behavior)
-// -----------------------------------------------------------------------------
+  va_list args;
+  va_start(args, fmt);
+  vsnprintf(msg, sizeof(msg), fmt, args);
+  va_end(args);
 
-// Status
-int firebaseOK() {
-  return pumpRepo.firebaseOK();
-}
+  const char* ts = getTimestamp();
+  if (!ts) ts = "?";
 
-// Pump Repo Wrappers
-int getDailySummaryWriteCount() {
-  return pumpRepo.getDailySummaryWriteCount();
-}
+  snprintf(gLogTs[gLogIndex], sizeof(gLogTs[gLogIndex]), "%s", ts);
+  snprintf(gLogMsg[gLogIndex], sizeof(gLogMsg[gLogIndex]), "%s", msg);
 
-const char* getLastDailyWriteTimestamp() {
-  return pumpRepo.getLastDailyWriteTimestamp();
-}
-
-const char* getLastDailyWriteStatus() {
-  return pumpRepo.getLastDailyWriteStatus();
-}
-
-// Methods
-
-void clearDailyFBWriteCount() {
-  pumpRepo.clearDailyFBWriteCount();
-}
-
-void test_firebase() {
-  if (!firebaseOK()) {
-    Serial.println("Testing Firebase: NOT READY");
-    return;
-  }
-
-  bool ok = fbClient.writeInt("/test/loop_count", LOOP_COUNT);
-  if (!ok) {
-    Serial.println("Testing Firebase: ERROR");
-    Serial.println(fbClient.getLastError());
-  } else {
-    Serial.println("Testing Firebase: Success");
-  }
-}
-
-void resetFirebase() {
-  // future use
-}
-
-
-const char* getFirebaseStateText(FBState fbState) {
-  switch (fbState) {
-    case FB_STATE_DISABLED: return "DISABLED";
-    case FB_STATE_PRE_INIT: return "PRE_INIT";
-    case FB_STATE_INITIALIZING: return "INITIALIZING";
-    case FB_STATE_TEST_DELAY: return "TEST_DELAY";
-    case FB_STATE_TEST_RUN: return "TEST_RUN";
-    case FB_STATE_PAUSED: return "PAUSED";
-    case FB_STATE_CONNECTED: return "CONNECTED";
-    default: return "UNKNOWN";
-  }
-}
-
-
-static void setFirebaseState(FBState newState, uint32_t delayMs = 0) {
-  if (fbState != newState) {
-    Serial.printf("[FB STATE] %s -> %s (delay=%lu sec)\n",
-      getFirebaseStateText(fbState),
-      getFirebaseStateText(newState),
-      delayMs / 1000);
-  }
-
-  fbState = newState;
-  fbStateEnteredMs = millis();
-  fbStateDelayMs = delayMs;
-}
-
-// -----------------------------------------------------------------------------
-// setupFirebase()
-// -----------------------------------------------------------------------------
-bool setupFirebase() {
-  static bool inProgress = false;
-  if (inProgress) return false;
-  inProgress = true;
-
-  auto cleanup = [&]() {
-    oledMain(MAIN_TIMEOUT_SEC);
-    inProgress = false;
-  };
-
-  Serial.println("Setting up Firebase");
-
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("FB init aborted: WiFi not connected");
-    cleanup();
-    return false;
-  }
-
-  if (!validClock()) {
-    Serial.println("FB init aborted: system time not valid");
-    cleanup();
-    return false;
-  }
-
-  displayPopupScreen("FIREBASE...", "Connecting to Firebase");
-
-  uint32_t heap = ESP.getFreeHeap();
-  Serial.printf("Free heap: %u\n", heap);
-  if (heap < 80000) {
-    Serial.println("FB init aborted: heap too low for SSL");
-    cleanup();
-    return false;
-  }
-
-  yield();
-  delay(10);
-
-  bool ok = fbClient.begin(FIREBASE_API_KEY, FIREBASE_DB_URL, 5000);
-  if (!ok) {
-    Serial.printf("FB begin failed: %s\n", fbClient.getLastError().c_str());
-  }
-
-  cleanup();
-  return ok;
-}
-
-// Actions
-static bool isFBTransportFailure(int httpCode) {
-  return httpCode == -1 || httpCode == -4 || httpCode == -6;
-}
-
-void onFirebaseOpSuccess() {
-  fbTransportFailureStreak = 0;
-}
-
-void onFirebaseOpFailure(int httpCode) {
-  if (!isFBTransportFailure(httpCode)) {
-    return;
-  }
-
-  fbTransportFailureStreak++;
-
-  Serial.printf("[FB] transport failure code=%d streak=%d\n",
-                httpCode, fbTransportFailureStreak);
-
-  if (fbTransportFailureStreak >= 3) {
-    Serial.println("[FB] disarming after repeated transport failures");
-    disarmFirebase();
-  } else {
-    delayFirebase();
-  }
-}
-
-
-// -----------------------------------------------------------------------------
-// Helpers
-// -----------------------------------------------------------------------------
-
-
-static bool fbStateDelayElapsed() {
-  if (fbStateDelayMs == 0) return true;
-  return (millis() - fbStateEnteredMs) >= fbStateDelayMs;
-}
-
-static void updateFBTimeoutText() {
-  if (fbStateDelayMs == 0) {
-    strncpy(fbTimeoutText, "00:00", sizeof(fbTimeoutText));
-    return;
-  }
-
-  uint32_t elapsed = millis() - fbStateEnteredMs;
-
-  if (elapsed >= fbStateDelayMs) {
-    strncpy(fbTimeoutText, "00:00", sizeof(fbTimeoutText));
-    return;
-  }
-
-  uint32_t remain = (fbStateDelayMs - elapsed) / 1000;
-  uint32_t mm = remain / 60;
-  uint32_t ss = remain % 60;
-
-  snprintf(fbTimeoutText, sizeof(fbTimeoutText), "%02lu:%02lu", mm, ss);
-}
-
-
-// -----------------------------------------------------------------------------
-// Lifecycle
-// -----------------------------------------------------------------------------
-void initFirebaseHealth() {
-  fbCanarySuccessCount = 0;
-  fbTransportFailureStreak = 0;
-  setFirebaseState(FB_STATE_PRE_INIT, FB_PRE_INIT_MS);
-}
-
-static void processFBDisabled() {
-  return;
-}
-
-void processFBPreInit() {
-  if (DISABLE_FIREBASE_DEBUG) {
-    setFirebaseState(FB_STATE_DISABLED);
-    return;
-  }
-
-  static int8_t val = -1;
-  int newVal = 8*wifiLinkReady() + 4*validClock() + 2*dnsReady() + fbStateDelayElapsed();
-  if (newVal != val) {
-    Serial.printf("FB PRE_INIT guards: wifi:%d clk:%d dns:%d timer:%d\n", 
-      wifiLinkReady(),validClock(),dnsReady(),fbStateDelayElapsed());
-    val = newVal;
-  }
-
-  if (!wifiLinkReady()) return;
-  if (!validClock()) return;
-  if (!dnsReady()) return;
-  if (!fbStateDelayElapsed()) return;
-
-  setFirebaseState(FB_STATE_INITIALIZING);
-}
-
-static void processFBInitializing() {
-  if (!wifiLinkReady()) {
-    setFirebaseState(FB_STATE_PRE_INIT, FB_INIT_RETRY_MS);
-    return;
-  }
-
-  if (!validClock()) {
-    setFirebaseState(FB_STATE_PRE_INIT, FB_INIT_RETRY_MS);
-    return;
-  }
-
-  if (!dnsReady()) {
-    setFirebaseState(FB_STATE_PRE_INIT, FB_INIT_RETRY_MS);
-    return;
-  }
-
-  if (setupFirebase()) {
-    fbCanarySuccessCount = 0;
-    fbTransportFailureStreak = 0;
-    setFirebaseState(FB_STATE_TEST_DELAY, FB_TEST_DELAY_MS);
-    return;
-  }
-
-  setFirebaseState(FB_STATE_PRE_INIT, FB_INIT_RETRY_MS);
-}
-
-static void processFBTestDelay() {
-  if (!fbStateDelayElapsed()) {
-    return;
-  }
-
-  setFirebaseState(FB_STATE_TEST_RUN);
-}
-
-static void processFBTestRun() {
-  if (pumpRepo.writeFirebaseCanary()) {
-    fbCanarySuccessCount++;
-
-    if (fbCanarySuccessCount >= 2) {
-      setFirebaseState(FB_STATE_CONNECTED);
-    } else {
-      setFirebaseState(FB_STATE_TEST_DELAY, FB_TEST_DELAY_MS);
-    }
-
-    return;
-  }
-
-  fbCanarySuccessCount = 0;
-  setFirebaseState(FB_STATE_PRE_INIT, FB_INIT_RETRY_MS);
-}
-
-static void processFBPaused() {
-  if (!fbStateDelayElapsed()) {
-    return;
-  }
-
-  setFirebaseState(FB_STATE_TEST_DELAY, FB_TEST_DELAY_MS);
-}
-
-static void processFBConnected() {
-  static bool wroteWeatherOnFirstConnect = false;
-
-  // Go back to Init on Wifi Drop
-  if (!wifiLinkReady()) {
-    fbCanarySuccessCount = 0;
-    setFirebaseState(FB_STATE_PRE_INIT, FB_INIT_RETRY_MS);
-  }
-
-  // Check Weather when first enter CONNECTED
-  if (!wroteWeatherOnFirstConnect) {
-    Serial.println("[FB] Connected --> writing initial weather");
-    checkWeather(true);               // force fresh data
-    pumpRepo.queueWeatherSnapshot();  // pump feature only, and wont queue if there is no data
-    wroteWeatherOnFirstConnect = true;
-  }
-}
-
-void updateFirebaseState() {
-  updateFBTimeoutText();
-
-  if (!wifiLinkReady()) {
-    fbCanarySuccessCount = 0;
-    setFirebaseState(FB_STATE_PRE_INIT, FB_PRE_INIT_MS);
-    return;
-  }
-
-  switch (fbState) {
-    case FB_STATE_DISABLED: processFBDisabled(); break;
-    case FB_STATE_PRE_INIT:  processFBPreInit(); break;
-    case FB_STATE_INITIALIZING: processFBInitializing(); break;
-    case FB_STATE_TEST_DELAY: processFBTestDelay(); break;
-    case FB_STATE_TEST_RUN: processFBTestRun(); break;
-    case FB_STATE_PAUSED: processFBPaused(); break;
-    case FB_STATE_CONNECTED: processFBConnected(); break;
-  }
-}
-
-// -----------------------------------------------------------------------------
-// Gating
-// -----------------------------------------------------------------------------
-bool firebaseReadAllowed() {
-  return fbState == FB_STATE_CONNECTED;
-}
-
-bool firebaseWriteAllowed() {
-  return fbState == FB_STATE_CONNECTED;
-}
-
-// -----------------------------------------------------------------------------
-// Control
-// -----------------------------------------------------------------------------
-void disarmFirebase() {
-  fbCanarySuccessCount = 0;
-  setFirebaseState(FB_STATE_TEST_DELAY, FB_DISARM_DELAY_MS);
-}
-
-void delayFirebase() {
-  setFirebaseState(FB_STATE_PAUSED, FB_PAUSE_DELAY_MS);
-}
-
-// -----------------------------------------------------------------------------
-// State info
-// -----------------------------------------------------------------------------
-FBState getFirebaseState() {
-  return fbState;
-}
-
-int getFirebaseCanaryCount() {
-  return fbCanarySuccessCount;
-}
-
-const char* getNextFirebaseStateTimeout() {
-  updateFBTimeoutText();
-  return fbTimeoutText;
-}
-
-// --------------------------------------------------
-// Logging
-// --------------------------------------------------
-
-// Snapshot Logging methods
-void clearFBHistory() {
-  fbHistoryCount = 0;
-}
-
-void logFBResult(uint8_t type, int httpCode, uint16_t dtMs) {
-
-  if (fbHistoryCount >= FB_HISTORY_SIZE) {
-    const int rollingStart = FB_HISTORY_FIXED;          // 100
-    const int keepRecent = FB_HISTORY_ROLLING / 2;      // 50
-    const int srcStart = FB_HISTORY_SIZE - keepRecent;  // 150
-
-    memmove(&fbHistory[rollingStart],
-            &fbHistory[srcStart],
-            sizeof(FBResult) * keepRecent);
-
-    fbHistoryCount = rollingStart + keepRecent;         // 150
-  }
-
-  FBResult &r = fbHistory[fbHistoryCount++];
-
-  r.ms = millis();
-  r.dtMs = dtMs;
-  r.rssi = WiFi.RSSI();
-  r.httpCode = httpCode;
-  r.type = type;
-  r.date = getDateKeyInt();
-}
-
-const char* fbHttpText(int code) {
-  switch(code) {
-    // success
-    case 200: return "HTTP 200 OK";
-    case 204: return "HTTP 204 OK_NO_DATA";
-    
-    // fail
-    case 400: return "HTTP 400 BAD_REQ";
-    case 401: return "HTTP 401 AUTH";
-    case 403: return "HTTP 403 FORBID";
-    case 404: return "HTTP 404 NOTFOUND";
-    case 500: return "HTTP 500";
-    case 503: return "HTTP 503";
-
-    // Fake Data
-    case 999: return "QUEUE";
-    
-    // client level fail
-    case -1:  return "TLS_FAIL (-1)";
-    case -4:  return "CONN_LOST (-4)";
-    case -6:  return "TCP_REFUSED (-6)";
-
-    default: {
-      static char buf[24];
-      snprintf(buf, sizeof(buf), "HTTP ERR (%d)", code);
-      return buf;
-    }
-  }
-}
-
-static void getExportTimestamp(
-  float ts_min,
-  time_t nowEpoch,
-  float nowMinSinceBoot,
-  char* out,
-  size_t outSize
-) {
-  float deltaMin = nowMinSinceBoot - ts_min;
-  if (deltaMin < 0) deltaMin = 0;
-
-  time_t eventEpoch = nowEpoch - (time_t)lround(deltaMin * 60.0f);
-
-  struct tm tmv;
-  localtime_r(&eventEpoch, &tmv);
-
-  snprintf(out, outSize,
-    "%04d-%02d-%02dT%02d:%02d:%02d",
-    tmv.tm_year + 1900,
-    tmv.tm_mon + 1,
-    tmv.tm_mday,
-    tmv.tm_hour,
-    tmv.tm_min,
-    tmv.tm_sec
-  );
-}
-
-// Export Logs
-void exportFBHistoryCSV(WiFiClient& client) {
-  client.println(F("timestamp,ts_min,write_type,http_code,delta_t_ms,rssi_db"));
-
-  // Compute once
-  time_t nowEpoch = time(nullptr);
-  float nowMinSinceBoot = minutesSinceBoot();
-
-  for (int i = 0; i < fbHistoryCount; i++) {
-    const FBResult &r = fbHistory[i];
-
-    // --- timestamp ---
-    char tsBuf[32];
-    float tsMin = r.ms / 60000.0f;
-
-    getExportTimestamp(
-      tsMin,
-      nowEpoch,
-      nowMinSinceBoot,
-      tsBuf,
-      sizeof(tsBuf)
-    );
-
-    client.print(tsBuf);
-    client.print(',');
-
-    // --- existing fields ---
-    client.print(tsMin, 1);
-    client.print(',');
-
-    //client.print(r.date);
-    //client.print(',');
-
-    client.print(fbTypeText(r.type));
-    client.print(',');
-
-    client.print(fbHttpText(r.httpCode));
-    client.print(',');
-
-    client.print(r.dtMs);
-    client.print(',');
-
-    client.println(r.rssi);
-  }
+  gLogIndex = (gLogIndex + 1) % LOG_LINES;
+  if (gLogCount < LOG_LINES) gLogCount++;
 }
 ```
 
-## File: Pump_Monitor/server.cpp
+## File: datalogger/ramLog.h
+```c
+#pragma once
+#include "Arduino.h"
+
+#define LOG_LINES 100
+#define LOG_LEN   50
+#define TS_LEN    20
+
+extern char gLogMsg[LOG_LINES][LOG_LEN];
+extern char gLogTs[LOG_LINES][TS_LEN];
+extern uint8_t gLogIndex;
+extern uint8_t gLogCount;
+
+void ramLog(const char* msg);
+void ramLogf(const char* fmt, ...);
+```
+
+## File: datalogger/server.cpp
 ```cpp
 #include "global.h"
 
@@ -8315,10 +3904,7 @@ void exportFBHistoryCSV(WiFiClient& client) {
 #include "pumpData.h"
 #include "ntp.h"
 #include "nvm.h"
-#include "firebase.h"
-#include "pumpFBRepo.h"
 #include "pumpFunc.h"
-#include "weather.h"
 #include "utils.h"
 
 extern uint16_t ADAPTIVE_DELAY;
@@ -8334,8 +3920,6 @@ static const uint8_t PAGE_SYSTEMS = 1;
 static const uint8_t PAGE_CHARTS  = 2;
 static const uint8_t PAGE_CONN    = 3;
 static const uint8_t PAGE_BLOCK   = 4;
-static const uint8_t PAGE_WEATHER = 5;
-static const uint8_t PAGE_QUEUE   = 6;
 static const uint8_t PAGE_WIFI    = 7;
 
 // -------------------------
@@ -8559,13 +4143,7 @@ static const char CONN_TABLE_OPEN[] PROGMEM =
 "<table><tr><th>CONNECTIVITY DATA</th><th>VALUE</th></tr>";
 
 static const char BLOCK_TABLE_OPEN[] PROGMEM =
-"<table><tr><th>4HR BLOCK DATA</th><th>VALUE</th></tr>";
-
-static const char WEATHER_TABLE_OPEN[] PROGMEM =
-"<table><tr><th>WEATHER DATA</th><th>VALUE</th></tr>";
-
-static const char QUEUE_TABLE_OPEN[] PROGMEM =
-"<table><tr><th>QUEUE DATA</th><th>VALUE</th></tr>";
+"<table><tr><th>BLOCK DATA</th><th>VALUE</th></tr>";
 
 static const char WIFI_TABLE_OPEN[] PROGMEM =
 "<table><tr><th>WIFI DATA</th><th>VALUE</th></tr>";
@@ -8680,15 +4258,13 @@ static uint8_t parsePageParam(const char *path, size_t pathLen) {
   if (strncmp(p, "charts", 6) == 0)  return PAGE_CHARTS;
   if (strncmp(p, "conn", 4) == 0)    return PAGE_CONN;
   if (strncmp(p, "block", 5) == 0)   return PAGE_BLOCK;
-  if (strncmp(p, "wifi", 4) == 0)    return PAGE_WIFI;
-  if (strncmp(p, "weather", 7) == 0) return PAGE_WEATHER;
-  if (strncmp(p, "queue", 5) == 0)   return PAGE_QUEUE;  
+  if (strncmp(p, "wifi", 4) == 0)    return PAGE_WIFI; 
 
   return PAGE_PUMP;
 }
 
 // Navigation Buttons 
-// PUMP / SYS / CON / BLOCK / WEATHER / QUEUE / WIFI / CHART / EXPORT* / JSON* / REFERSH*)
+// PUMP / SYS / CON / BLOCK / WIFI / CHART / EXPORT* / JSON* / REFERSH*)
 static void renderNavButtons(WiFiClient &client, uint8_t active) {
   client.println(F("<div class=\"nav\">"));
 
@@ -8708,13 +4284,6 @@ static void renderNavButtons(WiFiClient &client, uint8_t active) {
   client.print(active == PAGE_BLOCK ? "active" : "white");
   client.println(F("\" onclick=\"setPage('block')\">BLOCK</button>"));
 
-  client.print(F("<button class=\"navbtn "));
-  client.print(active == PAGE_WEATHER ? "active" : "white");
-  client.println(F("\" onclick=\"setPage('weather')\">WEATHER</button>"));
-
-  client.print(F("<button class=\"navbtn "));
-  client.print(active == PAGE_QUEUE ? "active" : "white");
-  client.println(F("\" onclick=\"setPage('queue')\">QUEUE</button>"));
 
   client.print(F("<button class=\"navbtn "));
   client.print(active == PAGE_WIFI ? "active" : "white");
@@ -8835,10 +4404,6 @@ static void renderPumpTable(WiFiClient &client) {
   // Wifi Status
   printRow(client, F("Wifi Status"), CONN_STATUS);
 
-  // Firebase Status
-  const char* fbState = getFirebaseStateText(getFirebaseState());
-  if (!fbState) fbState = "?";
-  printRow(client, F("Firebase Status"), fbState);
 
   // Timestamp
   printRow(client, F("Timestamp"), getTimestamp());
@@ -8874,62 +4439,10 @@ static void renderSystemTable(WiFiClient &client) {
   renderNavButtons(client, PAGE_SYSTEMS);
 }
 
-static void printBlockRangeRow(
-  WiFiClient &client,
-  const __FlashStringHelper *label,
-  const uint32_t *values,
-  uint8_t startBlock,
-  uint8_t endBlock,
-  const char *unit
-) {
-  String text = "";
-
-  for (uint8_t i = startBlock; i <= endBlock; i++) {
-    if (i > startBlock) text += " | ";
-
-    if (i < NUM_4HR_BLOCKS) text += String(values[i]);
-    else text += "0";
-  }
-
-  if (unit && unit[0] != '\0') {
-    text += " ";
-    text += unit;
-  }
-
-  printRow(client, label, text);
-}
 
 static void renderConnTable(WiFiClient &client) {
   client.print((const __FlashStringHelper*)CONN_TABLE_OPEN);
 
-  // Firebase state machine info
-  printRow(client, F("Firebase State"), getFirebaseStateText(getFirebaseState()));
-  printRow(client, F("Canary Writes"), String(getFirebaseCanaryCount()));
-  printRow(client, F("FB Timeout"), getNextFirebaseStateTimeout());
-
-  // Daily Writes
-  const char* lastDailyWriteTs = getLastDailyWriteTimestamp();
-  if (!lastDailyWriteTs || lastDailyWriteTs[0] == '\0') {
-    printRow(client, F("Last Daily Write"), F("None"));
-  } else {
-    printRow(client, F("Last Daily Write"), lastDailyWriteTs);
-  }
-
-  char dailyWriteCountBuf[16];
-  snprintf(dailyWriteCountBuf, sizeof(dailyWriteCountBuf), "%d", getDailySummaryWriteCount());
-  printRow(client, F("Daily Summary Writes"), dailyWriteCountBuf);
-
-  const char* dailyWriteStatus = getLastDailyWriteStatus();
-  if (!dailyWriteStatus || dailyWriteStatus[0] == '\0') {
-    printRow(client, F("Daily Write Status"), F("None"));
-  } else {
-    printRow(client, F("Daily Write Status"), dailyWriteStatus);
-  }
-
-  printRow(client, F("FB Write Errors"), String(FB_WRITE_ERR));
-
-  client.print((const __FlashStringHelper*)HTML_TABLE_CLOSE);
-  
   // Nav Buttons
   renderNavButtons(client, PAGE_CONN);
 }
@@ -8937,148 +4450,18 @@ static void renderConnTable(WiFiClient &client) {
 static void renderBlockTable(WiFiClient &client) {
   client.print((const __FlashStringHelper*)BLOCK_TABLE_OPEN);
 
-  printRow(client, F("Todays 4Hr Block Count"), getStoredDailyBlockCount());
-  printRow(client, F("First 4Hr Block (index)"), getFirst4hrBlockIdx());
+  printRow(client, F("Last Block Day"), blockDayKey);
+  printRow(client, F("Total Block Writes"), getTotalBlockWriteCount());
 
-  // Last 4 hr block
-  uint8_t hr = getLastStoredBlockHour();
-  const char* suffix;
-  uint8_t displayHr;
-  if (hr == 0) { displayHr = 12; suffix = "AM"; } 
-  else if (hr < 12) { displayHr = hr; suffix = "AM"; }
-  else if (hr == 12) { displayHr = 12; suffix = "PM"; }
-  else { displayHr = hr - 12; suffix = "PM"; }
-  char buf[12];
-  
-  printRow(client, F("Last 4Hr Block Day"), blockDayKey);
-  printRow(client, F("Last 4Hr Block Hour"), buf);
-  
-  printRow(client, F("Total 4Hr Block Writes"), getTotalBlockWriteCount());
-
-  printBlockRangeRow(client, F("Block [0:2] (Cyc)"), CYCLE_4HR, 0, 2, "cyc");
-  printBlockRangeRow(client, F("Block [3:5] (Cyc)"), CYCLE_4HR, 3, 5, "cyc");
-  printBlockRangeRow(client, F("Block [0:2] (Gal)"), GAL_4HR, 0, 2, "gal");
-  printBlockRangeRow(client, F("Block [3:5] (Gal)"), GAL_4HR, 3, 5, "gal");
+  // block data
+  printRow(client, F("Cycle"), CYCLE);
+  printRow(client, F("Gallons"), GAL);
 
   // Nav Buttons
   renderNavButtons(client, PAGE_BLOCK);
 }
 
-static void renderWeatherTable(WiFiClient &client) {
-  client.print((const __FlashStringHelper*)WEATHER_TABLE_OPEN);
 
-  // Weather Info
-  float windMPH;
-  float avgWindMPH;
-  bool windMphValid = getWindMph(windMPH);
-  avgWindMPH = getAvgWindMph();
-  float temp;
-  float avgTemp;
-  bool tempValid = getTempF(temp);
-  avgTemp = getAvgTemp24hF();
-
-  printRow(client, F("Wind Valid"), windMphValid ? F("YES") : F("NO"));
-  printRow(client, F("Temp Valid"), tempValid ? F("YES") : F("NO"));
-
-  if (!windMphValid) {
-    printRow(client, F("Wind Speed (MPH)"), F("***"));
-    printRow(client, F("Avg Wind Speed (MPH)"), F("***"));
-  } else {
-    printRow(client, F("Wind Speed (MPH)"), windMPH);
-    printRow(client, F("Avg Wind Speed (MPH)"), avgWindMPH);
-  }
-
-  float windGustMPH = 0.0f;
-  bool windGustValid = getWindGustMph(windGustMPH);
-
-  if (windGustValid) printRow(client, F("Wind Gust (MPH)"), windGustMPH);
-  else printRow(client, F("Wind Gust (MPH)"), F("***"));
-
-  if (!tempValid) {
-    printRow(client, F("Temp (F)"), F("***"));
-    printRow(client, F("Avg Temp (F)"), F("***"));
-  } else {
-    printRow(client,F("Temp (F)"), temp);
-    printRow(client,F("Avg Temp (F)"), avgTemp);
-  }
-
-  float rain24hMm = 0.0f;
-  bool rainValid = getRainLast24h(rain24hMm);
-
-  if (rainValid) printRow(client, F("Rain 24h (mm)"), rain24hMm);
-  else printRow(client, F("Rain 24h (mm)"), F("***"));
-
-  float snow24hCm = 0.0f;
-  bool snowValid = getSnowLast24h(snow24hCm);
-
-  if (snowValid) printRow(client, F("Snow 24h (cm)"), snow24hCm);
-  else printRow(client,F("Snow 24h (cm)"), F("***"));
-
-  char wts[32];
-  snprintf(wts, sizeof(wts), "%s", getWeatherTimestamp());
-  size_t len = strlen(wts);
-  if (len > 3) {
-    wts[len - 3] = '\0';
-  }
-
-  if (wts[0] == '\0') printRow(client, F("Weather timestamp"), F("***"));
-  else printRow(client, F("Weather timestamp"), wts);
-  client.println();
-
-  // Weather Queue Info
-  char queuedWeatherPendingBuf[24];
-  const bool weatherPending = pumpRepo.hasQueuedWeather();
-  snprintf(queuedWeatherPendingBuf, sizeof(queuedWeatherPendingBuf),
-          "%s: %d",
-          weatherPending ? "Yes" : "No",
-          weatherPending ? 1 : 0);
-  printRow(client, F("Queued Weather Pending"), queuedWeatherPendingBuf);
-
-  char queuedWeatherAttemptsBuf[16];
-  snprintf(queuedWeatherAttemptsBuf, sizeof(queuedWeatherAttemptsBuf), "%d",
-          pumpRepo.getQueuedWeatherAttempts());
-  printRow(client, F("Queued Weather Attempts"), queuedWeatherAttemptsBuf);
-
-  const char* queuedWeatherTs = pumpRepo.getQueuedWeatherTimestamp();
-  if (!queuedWeatherTs || queuedWeatherTs[0] == '\0') {
-    printRow(client, F("Queued Weather Timestamp"), F("None"));
-  } else {
-    printRow(client, F("Queued Weather Timestamp"), queuedWeatherTs);
-  }
-
-
-  // Nav Buttons
-  renderNavButtons(client, PAGE_WEATHER);
-}
-
-static void renderQueueTable(WiFiClient &client) {
-  client.print((const __FlashStringHelper*)QUEUE_TABLE_OPEN);
-
-    // Daily Queue Info
-  char queuedPendingBuf[24];
-  const int queuedCount = pumpRepo.getSummaryQueueCount();
-  snprintf(queuedPendingBuf, sizeof(queuedPendingBuf),
-          "%s: %d",
-          queuedCount > 0 ? "Yes" : "No",
-          queuedCount);
-  printRow(client, F("Queued Daily Pending"), queuedPendingBuf);
-
-  const char* queuedDayKey = pumpRepo.getQueuedDailySummaryDayKey();
-  if (!queuedDayKey || queuedDayKey[0] == '\0') {
-    printRow(client, F("Queued Daily Day Key"), F("None"));
-  } else {
-    printRow(client, F("Queued Daily Day Key"), queuedDayKey);
-  }
-
-  char queuedAttemptsBuf[16];
-  snprintf(queuedAttemptsBuf, sizeof(queuedAttemptsBuf), "%d",
-          pumpRepo.getQueuedDailySummaryAttempts());
-  printRow(client, F("Queued Daily Attempts"), queuedAttemptsBuf);
-
-
-  // Nav Buttons
-  renderNavButtons(client, PAGE_QUEUE);
-}
 
 static void renderWifiTable(WiFiClient &client) {
   client.print((const __FlashStringHelper*)WIFI_TABLE_OPEN);
@@ -9094,8 +4477,6 @@ static void renderWifiTable(WiFiClient &client) {
   // Nav Buttons
   renderNavButtons(client, PAGE_WIFI);
 }
-
-
 
 static void renderChartsPage(WiFiClient &client) {
 
@@ -9115,8 +4496,6 @@ static void renderData(WiFiClient &client, uint8_t page) {
     case PAGE_CHARTS:  renderChartsPage(client);   break;
     case PAGE_CONN:    renderConnTable(client);    break;
     case PAGE_BLOCK:   renderBlockTable(client);   break;
-    case PAGE_WEATHER: renderWeatherTable(client); break;
-    case PAGE_QUEUE:   renderQueueTable(client);   break;
     case PAGE_WIFI:    renderWifiTable(client);    break;
     case PAGE_PUMP:
     default:           renderPumpTable(client);    break;
@@ -9136,7 +4515,7 @@ static void renderPageShell(WiFiClient &client) {
 
   client.println(F("<div class=\"page-wrap\">"));
   client.println(F("<div class=\"title-wrap\">"));
-  client.print(F("<h3>Shahman Pump Monitor "));
+  client.print(F("<h3>Shahman Data Logger "));
   client.print(APP_VERSION);
   if (TEST_MODE) client.print(F(" *TEST*"));
   client.println(F("</h3>"));
@@ -9240,8 +4619,6 @@ void webServer() {
     snprintf(fname, sizeof(fname), "pump%s_json_%s.json", suffix, ts);
 
     httpJsonAttachment(client, fname);
-    renderExportQueuedDailySummaryJson(client);
-
   } 
 
   else { 
@@ -9255,1059 +4632,1091 @@ void webServer() {
 }
 ```
 
-## File: Pump_Monitor/global.h
+## File: datalogger/server.h
 ```c
-// global.h
+#pragma once
+void webServer();
+```
+
+## File: datalogger/test_mode.cpp
+```cpp
+// Libraries
+#include <event.h>
+
+// Local Files
+#include "global.h"
+#include "ledFunc.h"
+#include "oled.h"
+
+int testModeADC = 0;
+int pumpCount = 0;
+Event pumpTestEvent;
+long testLogCyc = 0;
+
+#define CYCLE_TIME 30
+#define PUMP_ON 1
+#define PUMP_OFF 0
+
+int getTestModeADC() {
+  return testModeADC;
+}
+
+void setTestModeADC(float current) {
+  //testModeADC = 0;
+}
+
+void initPumpSim() {
+  pumpTestEvent.setSec(CYCLE_TIME);
+}
+
+float getPumpCurrent(int count) {
+  int index = 77 - count;
+  float cur = 0.0f;
+  if (index < 7) {
+    cur = 10.0f + 14.0f * expf(-float(index) / 2.5f);
+  }
+  else if (index < 66) {
+    cur = 9.5f + (float)random(0,101) / 100.0f;
+  }
+  else { // index >= 66
+    float tailIndex = (float)(index - 66);      // 0..11
+    cur = 10.0f * (1.0f - tailIndex / 11.0f);   // 10 -> 0
+    if (cur < 0.0f) cur = 0.0f;
+  }
+  return cur;
+}
+
+void simulatePump() {
+  static int simPumpState = PUMP_OFF;
+
+  if (simPumpState == PUMP_OFF) {
+    // Look for Turn On Event
+    if (pumpTestEvent.check()) {
+      // Serial.println("Test Mode Pump Event: ");
+      simPumpState = PUMP_ON;
+      pumpCount = 77;
+    }
+    setTestModeADC(0);
+  }
+  
+  else if (simPumpState == PUMP_ON) {
+    // Look for Turn Off Event
+    if (pumpCount == 0) {
+      int nextEvent = random(CYCLE_TIME, CYCLE_TIME+10);
+      pumpTestEvent.setSec(nextEvent);
+      Serial.println("Set Next Test Mode Pump On Event: " + String(nextEvent) + " sec");
+      simPumpState = PUMP_OFF;
+      setTestModeADC(0.0f);   // drop to 0 immediately
+    }
+
+    else if (pumpCount > 0) {
+      setTestModeADC(getPumpCurrent(pumpCount));
+      pumpCount--;
+    }
+  }
+  
+  else {
+    Serial.println("Invalid Simluated Pump State");
+  }
+}
+
+void simulateLogger() {
+  testLogCyc++;
+  if (testLogCyc % LOOPS_PER_SEC == 1) {
+    toggleLED();
+  }
+}
+
+void turnOnWifi() {
+  newPopupScreen("WIFI ON", "");
+}
+
+void turnOffWifi() {
+  newPopupScreen("WIFI OFF", "press button to wake");
+}
+```
+
+## File: datalogger/test_mode.h
+```c
 #pragma once
 
-#include <Arduino.h>
-
-class Diag;   // forward declaration
-
-// external vaiables
-extern int ADC1_COUNT;
-//extern float ADC1_VOLT; 
-extern const char* CONN_STATUS;
-extern int FB_CONNECT_ERR;
-extern int FB_WRITE_ERR;
-extern uint32_t LOOP_COUNT;
-extern uint32_t LOOP_TIME;
-extern int WIFI_ERR;
-extern const char APP_VERSION[];     // (don’t put PROGMEM on the extern)
-
-// Configurations
-
-//---------------------------------
-#define TEST_MODE 0
-//---------------------------------
-
-// Logging /Debug
-#define LOG_FIREBASE 1
-#define VERBOSE 0
-#define LOG_TIME 0  // serial log for execution times
-#define ALLOW_WEBPAGE_POLLING 0
-#define DISABLE_FIREBASE_DEBUG 0
-
-// Constants
-#define OFF 0
-#define ON 1
-#define FALSE 0
-#define TRUE 1
-#define NUM_4HR_BLOCKS 6
-
-#define SENSOR_AMP_PER_VOLT 10
-#define LOOPS_PER_SEC 10
-
-// OLED MAIN MENU MODE
-#define MAIN_TIMEOUT_SEC (900 * LOOPS_PER_SEC)  // 15 min
-
-// PIN MAPPINGS
-#define ADC1_PIN 35
-#define BTN_PIN 0
-#define DAC_PIN 26
-#define D1_PIN 0
-#define ISR_PIN 35
-#define LED_PIN 25
-#define TS1_PIN 14  // Touch Switch
-
-// Firebase Configuration
-
-// Computed Values (DO NOT EDIT)
-#define PROD_MODE (TEST_MODE == 0)
-#define COUNT_PER_AMP (1241 / SENSOR_AMP_PER_VOLT)
-
-// Needs to be last
-#include "utils.h"
+int getTestModeADC();
+void simulatePump();
+void initPumpSim();
+void simulateLogger();
+void turnOnWifi();
+void turnOffWifi();
 ```
 
-## File: Pump_Monitor/pumpFBRepo.cpp
+## File: datalogger/testcode.cpp
 ```cpp
+// Test Code
+#include "global.h"
+#include <WiFi.h>
+#include "ntp.h"
+#include "wifiFunc.h"
+```
+
+## File: datalogger/testcode.h
+```c
+#pragma once
+```
+
+## File: datalogger/utils.cpp
+```cpp
+// utils.cpp
 #include "global.h"
 
-#include "firebase.h"
-#include "history.h"
-#include "ntp.h"
-#include "nvm.h"
+uint32_t getCurrentEpoch();
+static uint32_t s_bootMs = millis();
+
+const char* getMonitorTime() {
+  static char str[16];
+
+  const float loopsPerSec = (float)LOOPS_PER_SEC;
+  const float monMin = (float)LOOP_COUNT / (60.0f * loopsPerSec);
+  const float monHr  = (float)LOOP_COUNT / (3600.0f * loopsPerSec);
+  const float monDay = (float)LOOP_COUNT / (86400.0f * loopsPerSec);
+
+  if (monHr < 1.0f) {
+    snprintf(str, sizeof(str), "%.1f m", monMin);
+  }
+  else if (monDay < 1.0f) {
+    snprintf(str, sizeof(str), "%.1f hr", monHr);
+  }
+  else {
+    snprintf(str, sizeof(str), "%.1f day", monDay);
+  }
+
+  return str;
+}
+
+uint32_t msSinceBoot() {
+  return (millis() - s_bootMs);
+}
+
+uint32_t minutesSinceBoot() {
+  return msSinceBoot() / 60000UL;
+}
+uint32_t hoursSinceBoot() {
+  return msSinceBoot() / 3600000UL;
+}
+
+//--------------------------------------------------
+// Logging Functions
+//--------------------------------------------------
+
+void Log(String text) {
+  Serial.println(text);
+}
+
+void VLog(String text) {
+  if (VERBOSE) Serial.println(text);
+}
+
+void TLog(const char* msg)
+// 1-arg overload: plain message
+ {
+  if (TEST_MODE) Serial.println(msg);
+}
+
+// 2-arg: timing only
+void TLog(const char* label, uint32_t startTime) {
+  if (!LOG_TIME) return;
+  Serial.print(label);
+  Serial.println(micros() - startTime);
+}
+
+// Date Helper
+void getDayKeyForOffset(int daysAgo, char* out, size_t len) {
+  time_t now = getCurrentEpoch();
+  time_t t = now - (daysAgo * 86400);
+
+  struct tm tm;
+  localtime_r(&t, &tm);
+
+  snprintf(out, len, "%04d_%02d_%02d",
+    tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday);
+}
+```
+
+## File: datalogger/utils.h
+```c
+// utils.h
+#pragma once
+#include "global.h"
+#include <Arduino.h>
+
+// Time and Date
+const char* getMonitorTime();
+uint32_t msSinceBoot();
+uint32_t hoursSinceBoot();
+uint32_t minutesSinceBoot();
+void getDayKeyForOffset(int daysAgo, char* out, size_t len);
+
+// Logging
+void Log(String text);
+void VLog(String text);
+void TLog(const char* msg);
+void TLog(const char* label, uint32_t startTime);
+
+// 2-arg overload: label + value (template)
+template<typename T>
+void TLog(const char* label, const T& value) {
+  if (!TEST_MODE) return;
+  Serial.print(label);
+  Serial.println(value);
+}
+
+// 3-arg: label + value + timing
+template<typename T>
+void TLog(const char* label, const T& value, uint32_t startTime) {
+  if (!LOG_TIME) return;
+  Serial.print(label);
+  Serial.print(value);
+  Serial.print(" ");
+  Serial.println(micros() - startTime);
+}
+```
+
+## File: datalogger/wifiFunc.cpp
+```cpp
+// wifiFunctions.cpp
+#include "global.h"
+
+#include "diag.h"
+#include "WiFi.h"
+#include "wifiFunc.h"
 #include "oled.h"
-#include "pumpData.h"
-#include "pumpFBRepo.h"
-#include "pumpfunc.h"
-#include "ramLog.h"
-#include "weather.h"
+#include "ledFunc.h"
+#include "secrets.h"
+#include <lwip/inet.h>   // for INADDR_NONE (ESP32)
+#include <time.h>
+#include <WiFiClientSecure.h>
 
-#define FB_PATH "aneil"
-#define FB_TEST_PATH "aneil/test_server"
-#define MAX_DAILY_FB_WRITES 10
+#define TEST_DHCP_ONLY 0   // set to 0 to restore DHCP->static reconnect
 
-PumpFBRepo::PumpFBRepo(FirebaseClient& client) : fb(client) {}
+// external variables
+extern const char* CONN_STATUS;
+extern WiFiServer server;
 
-int PumpFBRepo::firebaseOK() {
-  return fb.ready();
+static bool serverStarted = false;
+uint8_t wifiRadioState = 0;
+
+bool wifiLinkUp() {
+  return WiFi.status() == WL_CONNECTED &&
+         WiFi.localIP() != IPAddress(0,0,0,0) &&
+         WiFi.dnsIP()  != IPAddress(0,0,0,0);
 }
 
-//---------------------------------------------------
-// Getters
-//---------------------------------------------------
-
-int PumpFBRepo::getDailySummaryWriteCount() const {
-  return dailySummaryWriteCount;
+bool timeValid() {
+  return time(nullptr) > 1577836800; // 2020-01-01
 }
 
-const char* PumpFBRepo::getLastDailyWriteTimestamp() const {
-  return lastDailyWriteTimestamp;
-}
+bool syncTime(uint32_t timeoutMs = 15000) {
+  Serial.println("Syncing time (NTP)...");
+  configTime(0, 0, "pool.ntp.org", "time.nist.gov");
 
-const char* PumpFBRepo::getLastDailyWriteStatus() const {
-  return lastDailyWriteStatus;
-}
-
-bool PumpFBRepo::hasQueuedDailySummary() const {
-  return summaryCount > 0;
-}
-
-int PumpFBRepo::getSummaryQueueCount() const {
-  return summaryCount;
-}
-
-const char* PumpFBRepo::getQueuedDailySummaryDayKey() const {
-  if (summaryCount == 0) return "";
-  return summaryQueue[summaryTail].dayKey;
-}
-
-int PumpFBRepo::getQueuedDailySummaryAttempts() const {
-  if (summaryCount == 0) return 0;
-  return summaryQueue[summaryTail].attempts;
-}
-
-int PumpFBRepo::getSummaryQueueDroppedCount() const {
-  return summaryDroppedCount;
-}
-
-bool PumpFBRepo::getSummaryQueueItem(int offset, SummaryQueueItem& out) const {
-  if (offset < 0 || offset >= summaryCount) return false;
-
-  int idx = (summaryTail + offset) % SUMMARY_QUEUE_SIZE;
-
-  const SummaryQueueItem& item = summaryQueue[idx];
-  if (!item.inUse) return false;
-
-  out = item;  // copy whole struct
-  return true;
-}
-
-// Weather getters
-
-bool PumpFBRepo::hasQueuedWeather() const {
-  return weatherQueue.pending;
-}
-
-int PumpFBRepo::getQueuedWeatherAttempts() const {
-  return weatherQueue.attempts;
-}
-
-const char* PumpFBRepo::getQueuedWeatherTimestamp() const {
-  return weatherQueue.queuedTimestamp;
-}
-
-//---------------------------------------------------
-// Setters
-//---------------------------------------------------
-
-void PumpFBRepo::setDailyWriteStatus(const char* status) {
-  snprintf(lastDailyWriteStatus, sizeof(lastDailyWriteStatus),
-           "%s", (status && status[0]) ? status : "UNKNOWN");
-}
-
-void PumpFBRepo::setDailyWriteStatusf(const char* prefix, const char* detail) {
-  snprintf(lastDailyWriteStatus, sizeof(lastDailyWriteStatus),
-           "%s%s%s",
-           (prefix && prefix[0]) ? prefix : "UNKNOWN",
-           (detail && detail[0]) ? ": " : "",
-           (detail && detail[0]) ? detail : "");
-}
-
-void PumpFBRepo::clearDailyFBWriteCount() {
-  writesToday = 0;
-}
-
-//---------------------------------------------------
-// Write Operations
-//---------------------------------------------------
-
-bool PumpFBRepo::writeFirebaseCanary() {
-  if (!validClock()) return false;
-
-  bool ok = fb.writeInt("health/pump/canary", (int)time(nullptr));
-
-  if (ok) onFirebaseOpSuccess();
-  else onFirebaseOpFailure(fb.getLastHTTPCode());
-
-  return ok;
-}
-
-//---------------------------------------------------
-// Read Operations
-//---------------------------------------------------
-
-bool PumpFBRepo::readFirebaseDailySummary(
-    const String& dayKey,
-    bool& recordExists,
-    int& cyclesPerDay,
-    int& gallonsPerDay,
-    float& rainMm) {
-
-  recordExists = false;
-  cyclesPerDay = -1;
-  gallonsPerDay = -1;
-  rainMm = -1.0f;
-
-  if (!firebaseReadAllowed()) return false;
-  if (!validClock()) return false;
-
-  String path = String(FB_PATH);
-
-  String yearStr = getYearStr();
-  const int yearInt = atoi(yearStr.c_str());
-  if (yearInt < 2026) return false;
-
-  if (TEST_MODE) path = path + "/" + yearStr;
-  else           path = path + "/" + yearStr;
-
-  const String url = "/pump/" + path + "/daily_summary/" + dayKey;
-
-  FirebaseJson json;
-  bool ok = fb.readJSON(url, json);
-
-  if (!ok) {
-    const int http = fb.getLastHTTPCode();
-    const String err = fb.getLastError();
-
-    if (http == 404 || err.indexOf("path not exist") >= 0) {
-      recordExists = false;
+  uint32_t start = millis();
+  while (millis() - start < timeoutMs) {
+    time_t now = time(nullptr);
+    if (now > 1700000000) {
+      Serial.print("Epoch time: ");
+      Serial.println((uint32_t)now);
       return true;
     }
+    Serial.print(".");
+    delay(500);
+  }
 
-    onFirebaseOpFailure(http);
+  Serial.println("\nNTP sync FAILED");
+  Serial.print("Epoch time: ");
+  Serial.println((uint32_t)time(nullptr));
+  return false;
+}
+
+bool wifiLinkReady() {
+  static uint32_t goodSinceMs = 0;
+  static uint32_t lastBadMs = 0;
+
+  bool connected = (WiFi.status() == WL_CONNECTED);
+
+  if (!connected) {
+    goodSinceMs = 0;
+    lastBadMs = millis();
     return false;
   }
 
-  onFirebaseOpSuccess();
-  recordExists = true;
+  IPAddress ip = WiFi.localIP();
 
-  FirebaseJsonData jd;
+  bool ipValid =
+    (ip != IPAddress(0,0,0,0)) &&
+    (ip != IPAddress(255,255,255,255));
 
-  json.get(jd, "total_cycles");
-  if (jd.success) {
-    cyclesPerDay = (jd.typeNum == FirebaseJson::JSON_INT)
-      ? jd.intValue
-      : (int)jd.floatValue;
+  bool rssiValid = (WiFi.RSSI() < 0);  // RSSI should be negative dBm
+
+  bool good = connected && ipValid && rssiValid;
+
+  if (!good) {
+    goodSinceMs = 0;
+    lastBadMs = millis();
+    return false;
   }
 
-  json.get(jd, "total_gallons");
-  if (jd.success) {
-    gallonsPerDay = (jd.typeNum == FirebaseJson::JSON_INT)
-      ? jd.intValue
-      : (int)jd.floatValue;
+  // Require stability after last "bad"
+  if (goodSinceMs == 0) {
+    goodSinceMs = millis();
+    return false;
   }
 
-  json.get(jd, "rain_mm");
-  if (jd.success) {
-    rainMm = (jd.typeNum == FirebaseJson::JSON_INT)
-      ? (float)jd.intValue
-      : jd.floatValue;
+  // Require BOTH:
+  // - stable for 5s
+  // - no disconnects in last 5s
+  if ((millis() - goodSinceMs) >= 5000 &&
+      (millis() - lastBadMs) >= 5000) {
+    return true;
   }
 
-  return true;
+  return false;
 }
 
-//---------------------------------------------------
-// JSON BUILDERS
-//---------------------------------------------------
+bool dnsReady() {
+  static uint32_t lastCheckMs = 0;
+  static bool lastResult = false;
 
-bool PumpFBRepo::buildWeatherJson(FirebaseJson& json) {
-  json.clear();
-  json.set("timestamp", getTimestamp());
-
-  bool any = false;
-
-  float tempF;
-  if (getTempF(tempF)) { json.set("temp_f", tempF); any = true; }
-
-  json.set("avg_temp_24h_f", getAvgTemp24hF());
-
-  float windMph;
-  if (getWindMph(windMph)) { json.set("wind_mph", windMph); any = true; }
-
-  json.set("avg_wind_24h_mph", getAvgWindMph());
-
-  float windDir;
-  if (getWindDirDeg(windDir)) { json.set("wind_dir_deg", windDir); any = true; }
-
-  float gust;
-  if (getWindGustMph(gust)) { json.set("wind_gust_mph", gust); any = true; }
-
-  float rain;
-  if (getRainLast24h(rain)) { json.set("rain_24h_mm", rain); any = true; }
-
-  float snow;
-  if (getSnowLast24h(snow)) { json.set("snow_24h_cm", snow); any = true; }
-
-  return any;
-}
-
-bool PumpFBRepo::buildDailySummaryJson(FirebaseJson& json, char* dayKey, size_t len) {
-  if (!validClock()) return false;
-
-  getCurrentDayKey(dayKey, len);
-
-  unsigned int totalG = 0;
-  unsigned int totalC = 0;
-
-  for (int i = 0; i < NUM_4HR_BLOCKS; i++) {
-    totalG += GAL_4HR[i];
-    totalC += CYCLE_4HR[i];
+  if (WiFi.status() != WL_CONNECTED) {
+    lastResult = false;
+    return false;
   }
 
-  json.clear();
-  json.set("timestamp", getTimestamp());
-  json.set("total_gallons", (int)totalG);
-  json.set("total_cycles", (int)totalC);
+  if (millis() - lastCheckMs < 5000) {
+    return lastResult;
+  }
 
-  json.set("gallon1", uint16_t(GAL_4HR[0]));
-  json.set("gallon2", uint16_t(GAL_4HR[1]));
-  json.set("gallon3", uint16_t(GAL_4HR[2]));
-  json.set("gallon4", uint16_t(GAL_4HR[3]));
-  json.set("gallon5", uint16_t(GAL_4HR[4]));
-  json.set("gallon6", uint16_t(GAL_4HR[5]));
+  lastCheckMs = millis();
 
-  json.set("cycle1", uint16_t(CYCLE_4HR[0]));
-  json.set("cycle2", uint16_t(CYCLE_4HR[1]));
-  json.set("cycle3", uint16_t(CYCLE_4HR[2]));
-  json.set("cycle4", uint16_t(CYCLE_4HR[3]));
-  json.set("cycle5", uint16_t(CYCLE_4HR[4]));
-  json.set("cycle6", uint16_t(CYCLE_4HR[5]));
-
-  float val = Pump.getLastCycleEnergyAmpSeconds();
-  val = floorf(val * 100.0f + 0.5f) / 100.0f;
-  json.set("last_cycle_energy", val);
-
-  json.set("block_count", getStoredDailyBlockCount());
-  json.set("data_source", "system");
-
-  float rain;
-  if (getRainLast24h(rain)) json.set("rain_mm", rain);
-  else json.set("rain_mm", 0);
-
-  return true;
+  IPAddress ip;
+  lastResult = (WiFi.hostByName("arduino-27cc5-default-rtdb.firebaseio.com", ip) == 1 &&
+                ip != IPAddress(0,0,0,0));
+  return lastResult;
 }
 
-//---------------------------------------------------
-// QUEUE HELPERS
-//---------------------------------------------------
 
-bool PumpFBRepo::enqueueDailySummary(const String& url, const char* dayKey, FirebaseJson& json) {
-  String payload;
-  json.toString(payload, false);
+void updateWifiDiagState() {
+  if (WiFi.status() != WL_CONNECTED) {
+    diagState.setWifiState("WIFI_DISCONNECTED");
+    return;
+  }
 
-  int slot = summaryHead;
+  IPAddress ip  = WiFi.localIP();
+  IPAddress gw  = WiFi.gatewayIP();
+  IPAddress dns = WiFi.dnsIP();
+  const uint8_t* bssid = WiFi.BSSID();
 
-  if (summaryCount >= SUMMARY_QUEUE_SIZE) {
-    summaryTail = (summaryTail + 1) % SUMMARY_QUEUE_SIZE;
-    summaryDroppedCount++;
+  char buf[32];
+
+  // BSSID
+  if (bssid) {
+    snprintf(buf, sizeof(buf), "%02X:%02X:%02X:%02X:%02X:%02X",
+      bssid[0], bssid[1], bssid[2], bssid[3], bssid[4], bssid[5]);
   } else {
-    summaryCount++;
+    snprintf(buf, sizeof(buf), "--");
+  }
+  diagState.setWifiBSSID(buf);
+
+  // RSSI
+  snprintf(buf, sizeof(buf),"%d CH:%d", WiFi.RSSI(), WiFi.channel());
+  diagState.setWifiRSSI(buf);
+
+  // IP
+  snprintf(buf, sizeof(buf),"%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+  diagState.setWifiIP(buf);
+
+  // GW
+  snprintf(buf, sizeof(buf),"%u.%u.%u.%u", gw[0], gw[1], gw[2], gw[3]);
+  diagState.setWifiGW(buf);
+
+  // DNS
+  snprintf(buf, sizeof(buf),"%u.%u.%u.%u", dns[0], dns[1], dns[2], dns[3]);
+  diagState.setWifiDNS(buf);
+
+  // State
+  diagState.setWifiState("CONNECTED");
+}
+
+
+void scanWifi() {
+    if (WiFi.status() == WL_CONNECTED) {
+        Serial.println("Skipping WiFi scan: already connected");
+        return;
+    }
+
+    displayPopupScreen("SCANNING WIFI","Finding Networks");
+    updatePopupScreen();
+    Serial.println("Starting WiFi scan...");
+
+    int startTime = micros();
+    int netCount = WiFi.scanNetworks();
+    
+    Serial.println("Scan complete");
+    if (netCount == 0) {
+        Serial.println("NO networks found");
+    } else {
+        Serial.print(netCount);
+        Serial.println(" Networks found");
+        for (int i = 0; i < netCount; ++i) {
+            // Print SSID and RSSI for each network found
+            Serial.print(i + 1);
+            Serial.print(": ");
+            Serial.print(WiFi.SSID(i));
+            Serial.print(" (");
+            Serial.print(WiFi.RSSI(i));
+            Serial.print(")");
+            Serial.println((WiFi.encryptionType(i) == WIFI_AUTH_OPEN)?" ":"*");
+            delay(10);
+        }
+    }
+    Serial.println("");
+    Serial.println("Scan time: "+String(micros() - startTime));
+}
+
+bool waitForWifiStable(uint32_t stableMs, uint32_t timeoutMs) {
+  // Serial.println("Waiting for WiFi to stabilize...");
+
+  uint32_t tStart = millis();
+  uint32_t stableStart = 0;
+
+  while (millis() - tStart < timeoutMs) {
+    if (wifiLinkUp() && timeValid()) {
+      if (stableStart == 0) stableStart = millis();
+      if (millis() - stableStart >= stableMs) {
+        // Serial.println("WiFi stable.");
+        return true;
+      }
+    } else {
+      stableStart = 0; // reset stability window
+    }
+    delay(50);
   }
 
-  auto& item = summaryQueue[slot];
-  item.inUse = true;
-  snprintf(item.dayKey, sizeof(item.dayKey), "%s", dayKey);
-  snprintf(item.queuedTimestamp, sizeof(item.queuedTimestamp), "%s", getTimestamp());
-  item.attempts = 0;
-  item.url = url;
-  item.payload = payload;
-
-  summaryHead = (summaryHead + 1) % SUMMARY_QUEUE_SIZE;
-  return true;
+  Serial.println("WiFi NOT stable (timeout)");
+  return false;
 }
 
-void PumpFBRepo::clearDailySummarySlot(int i) {
-  summaryQueue[i].inUse = false;
-  summaryQueue[i].payload = "";
-  summaryQueue[i].url = "";
-}
+bool connectDhcpThenStaticHost(const char* ssid, const char* password) {
+    int host = TEST_SERVER_HOST_ID;
+    if (!TEST_MODE) host = EDGE_HOST_ID;
 
-bool PumpFBRepo::queueWeatherPayload(const String& url, FirebaseJson& json) {
-  json.toString(weatherQueue.payload, false);
-  weatherQueue.pending = true;
-  weatherQueue.attempts = 0;
-  snprintf(weatherQueue.queuedTimestamp, sizeof(weatherQueue.queuedTimestamp), "%s", getTimestamp());
-  weatherQueue.url = url;
-  return true;
-}
-
-void PumpFBRepo::clearWeatherQueue() {
-  weatherQueue.pending = false;
-  weatherQueue.payload = "";
-  weatherQueue.url = "";
-}
-
-//---------------------------------------------------
-// PUBLIC QUEUE BUILDERS
-//---------------------------------------------------
-
-bool PumpFBRepo::queueDailySummary() {
-  char dayKey[16];
-  FirebaseJson json;
-
-  if (!buildDailySummaryJson(json, dayKey, sizeof(dayKey))) return false;
-
-  String path = String(FB_PATH);
-  String yearStr = getYearStr();
-
-  if (TEST_MODE) path = String(FB_TEST_PATH) + "/" + yearStr;
-  else           path = path + "/" + yearStr;
-
-  String url = "/pump/" + path + "/daily_summary/" + dayKey + "/";
-
-  // Add Day Key suffix for TEST_MODE  YYYY_MM_DD_A
-  if (TEST_MODE) {
-    static char suffix = 'A';
-    size_t len = strlen(dayKey);
-
-    if (len < sizeof(summaryQueue[0].dayKey) - 2) {
-      dayKey[len] = '_';
-      dayKey[len + 1] = suffix;
-      dayKey[len + 2] = '\0';
-
-      suffix++;
-      if (suffix > 'Z') suffix = 'A';
+  // If already connected with correct static IP, do nothing
+  if (WiFi.status() == WL_CONNECTED) {
+    IPAddress ip = WiFi.localIP();
+    if (ip[3] == host) {
+      return true;
     }
   }
 
-  enqueueDailySummary(url, dayKey, json);
-  setDailyWriteStatus("QUEUED");
-  return true;
-}
+  Serial.println("WiFi: DHCP -> static host reconnect");
 
-bool PumpFBRepo::queueWeatherSnapshot() {
-  FirebaseJson json;
-  if (!buildWeatherJson(json)) return false;
+  WiFi.disconnect(true);
+  delay(250);
+  WiFi.mode(WIFI_STA);
+  WiFi.setSleep(false);
 
-  char key[32];
-  snprintf(key, sizeof(key), "%04u_%02u_%02uT%02u_00_00",
-           getYearInt(), getMonthInt(), getDayInt(), getHourInt());
+  // -----------------------------
+  // Step 1: Connect using DHCP
+  // -----------------------------
+  WiFi.begin(ssid, password);
 
-  String path = TEST_MODE ? String("test/weather/") : String("weather/");
-  return queueWeatherPayload(path + key, json);
-}
-
-//---------------------------------------------------
-// PROCESSORS
-//---------------------------------------------------
-
-bool PumpFBRepo::processSummaryQueueOnce() {
-  if (summaryCount == 0) {
-    ramLog("[QUEUE] SUM_CNT 0");
-    return false;
+  uint32_t t0 = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - t0 < 15000) {
+    delay(200);
   }
-  if (!firebaseWriteAllowed()) {
-    ramLog("[QUEUE] FB WRITES NOT ALLOWED");
-     return false;
-  }
-  if (!validClock()) {
-    ramLog("[QUEUE] INVALID CLOCK");
+
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("WiFi DHCP connect failed");
     return false;
   }
 
-  if (writesToday >= MAX_DAILY_FB_WRITES) {
-    setDailyWriteStatus("[QUEUE] MAX WRITES THROTTLED");
+  // Wait until DHCP options are populated
+  t0 = millis();
+  while ((WiFi.gatewayIP() == IPAddress(0,0,0,0) ||
+          WiFi.gatewayIP() == IPAddress(255,255,255,255) ||
+          WiFi.subnetMask() == IPAddress(0,0,0,0)) &&
+         millis() - t0 < 5000) {
+    delay(200);
+  }
+
+  IPAddress gw   = WiFi.gatewayIP();
+  IPAddress mask = WiFi.subnetMask();
+  IPAddress dns  = WiFi.dnsIP();
+
+  if (gw == IPAddress(0,0,0,0) || mask == IPAddress(0,0,0,0)) {
+    Serial.println("DHCP did not provide valid network info");
     return false;
   }
 
-  int idx = summaryTail;
-  FirebaseJson json;
-  json.setJsonData(summaryQueue[idx].payload);
-
-  if (!fb.writeJSON(summaryQueue[idx].url, json)) {
-    summaryQueue[idx].attempts++;
-    onFirebaseOpFailure(fb.getLastHTTPCode());
-    setDailyWriteStatusf("[QUEUE] FAILED Write", fb.getLastError().c_str());
-  }
-
-  onFirebaseOpSuccess();
-
-  writesToday++;
-  dailySummaryWriteCount++;
-
-  snprintf(lastDailyWriteTimestamp, sizeof(lastDailyWriteTimestamp), "%s", getTimestamp());
-  setDailyWriteStatus("[QUEUE] WRITE SUCCESS");
-
-  clearDailySummarySlot(idx);
-  summaryTail = (summaryTail + 1) % SUMMARY_QUEUE_SIZE;
-  summaryCount--;
-
-  return true;
-}
-
-bool PumpFBRepo::processWeatherQueueOnce() {
-  if (!weatherQueue.pending) return false;
-  if (hasQueuedDailySummary()) return false;
-  if (!firebaseWriteAllowed()) return false;
-
-  FirebaseJson json;
-  json.setJsonData(weatherQueue.payload);
-
-  if (!fb.writeJSON(weatherQueue.url, json)) {
-    weatherQueue.attempts++;
-    onFirebaseOpFailure(fb.getLastHTTPCode());
-    return false;
-  }
-
-  onFirebaseOpSuccess();
-  clearWeatherQueue();
-  return true;
-}
-```
-
-## File: Pump_Monitor/Pump_Monitor.ino
-```
-// Included Library Files
-#include <Arduino.h>
-#include <WiFi.h>
-
-// My Libraries
-#include "event.h"
-
-// My Files
-#include "global.h"
-#include "datastore.h"
-#include "diag.h"
-#include "history.h"
-#include "ledFunc.h"
-#include "firebase.h"
-#include "ntp.h"
-#include "nvm.h"
-#include "oled.h"
-#include "ota.h"
-#include "pumpData.h"
-#include "pumpFunc.h"
-#include "ramlog.h"
-#include "server.h"
-#include "testcode.h"
-#include "test_mode.h"
-#include "weather.h"
-#include "wifiFunc.h"
-
-// Version Info
-const char APP_VERSION[] PROGMEM = "V3.02D";
-
-// System States
-const char* CONN_STATUS = "OFF";
-uint32_t LOOP_COUNT = 0;
-uint32_t LOOP_TIME = 1000;
-int ISR_CNT = 0;
-unsigned int ONE_SEC_TIMER_MS = 0;
-uint16_t ADAPTIVE_DELAY = 98;
-unsigned int START_TIME = 0;
-
-// Error Counts
-int WIFI_ERR = 0;
-int FB_CONNECT_ERR = 0;
-int FB_WRITE_ERR = 0;
-
-// Hardware States
-int ADC1_COUNT = 0;
-float ADC1_VOLT = 0;
-int BTN_VAL = 0;
-int D1_VAL = 2;
-int TS1_VAL = 0;
-
-// NVM Boot Status
-static bool gNvmRestoreDone = false;
-
-// Events
-Event testEvent;
-
-// Diagnostics
-Diag diagState;
-
-// Binary Identifier
-#if TEST_MODE
-__attribute__((used)) static const char BUILD_MODE_MARKER[] PROGMEM =
-    "PUMP_MONITOR|MODE=TEST";
-#else
-__attribute__((used)) static const char BUILD_MODE_MARKER[] PROGMEM =
-    "PUMP_MONITOR|MODE=PROD";
+#if TEST_DHCP_ONLY
+  Serial.println("TEST: staying on DHCP (skipping static reconnect)");
+  return true;   // WiFi is connected via DHCP; caller can proceed to NTP
 #endif
 
-const char* getBuildModeMarker() {
-  return BUILD_MODE_MARKER;
-}
+  // -----------------------------
+  // Step 2: Build static IP
+  // -----------------------------
+  IPAddress staticIP;
 
-void IRAM_ATTR isrFunction() {
-  PUMP_EVENT = 1;
-  ISR_CNT++;
-}
-
-void initNvmBootRestore() {
-  if (gNvmRestoreDone) return;
-
-  if (!timeValid()) {
-    Serial.println("Time not valid yet; skipping NVM restore.");
-    return;
-  }
-
-  char dayKey[16]; 
-  const uint32_t nowEpoch = getCurrentEpoch();
-  getCurrentDayKey(dayKey, sizeof(dayKey));
-
-  // Update boot stats
-  nvmUpdateBootStats(nowEpoch);
-
-  uint8_t restoredBlkCount = 0;
-  uint8_t restoredFirstBlk = 0;
-  uint8_t restoredLastHr = 0;
-
-  NvmRestoreResult result = nvmRestore4hrStateIfFresh(
-      dayKey,
-      nowEpoch,
-      4 * 3600,   // 4 hour freshness window
-      (uint32_t*)GAL_4HR,   NUM_4HR_BLOCKS,
-      (uint32_t*)CYCLE_4HR, NUM_4HR_BLOCKS
-  );
-
-  if (result == NVM_RESTORE_OK) {
-    snprintf(blockDayKey, BLOCK_DAY_KEY_SIZE, dayKey);
-
-    // rebuild true observed totals only
-    GAL_TODAY = 0;
-    CYCLE_TODAY = 0;
-    uint8_t count = getStoredDailyBlockCount();
-    uint8_t firstBlock = getFirst4hrBlockIdx();
-
-    // Clamp count so we never exceed array bounds
-    if (firstBlock >= NUM_4HR_BLOCKS) {
-      count = 0;
-    } else if (firstBlock + count > NUM_4HR_BLOCKS) {
-      count = NUM_4HR_BLOCKS - firstBlock;
-    }
-
-    for (int i = 0; i < count; i++) {
-      int block = firstBlock + i;
-      GAL_TODAY += GAL_4HR[block];
-      CYCLE_TODAY += CYCLE_4HR[block];
-    }
-
-    char txt1[80];
-    char txt2[80];
-    snprintf(txt1, sizeof(txt1), "NVM restore OK: %s \n", dayKey);
-    snprintf(txt2, sizeof(txt2), "count=%u first=%u\n",
-      count, firstBlock);
-    Serial.printf(txt1);
-    Serial.printf(txt2);
-    ramLog(txt1);
-    ramLog(txt2);
+  // Common home LAN case (/24)
+  if (mask == IPAddress(255,255,255,0)) {
+    staticIP = IPAddress(gw[0], gw[1], gw[2], host);
   } else {
-    logNVMFailure(result);
-    ramLog("NVM Restore Failed");
+    // Fallback: derive network portion
+    IPAddress net(gw[0] & mask[0],
+                  gw[1] & mask[1],
+                  gw[2] & mask[2],
+                  gw[3] & mask[3]);
+
+    staticIP = IPAddress(net[0], net[1], net[2], host);
+
+    Serial.print("WARN: non-/24 subnet detected: ");
+    Serial.println(mask);
   }
-  gNvmRestoreDone = true;  // if we got here the restore was completed
-}
 
-void setup() {
-  Serial.begin(115200);
+  Serial.print("DHCP IP: ");
+  Serial.println(WiFi.localIP());
+  Serial.print("Gateway: ");
+  Serial.println(gw);
+  Serial.print("Subnet: ");
+  Serial.println(mask);
+  Serial.print("DNS: ");
+  Serial.println(dns);
+  Serial.print("Static IP: ");
+  Serial.println(staticIP);
 
-  // Init ADC
-  adcAttachPin(ADC1_PIN);
-  //analogSetClockDiv(255); // 1338mS
+  // -----------------------------
+  // Step 3: Reconnect using static IP
+  // -----------------------------
+  WiFi.disconnect(true);
+  delay(250);
 
-  // Init LED
-  pinMode(LED_PIN, OUTPUT);  // Set GPIO25 as digital output pin
+  WiFi.config(staticIP, gw, mask, dns);
+  WiFi.begin(ssid, password);
 
-  // Init ISR
-  //pinMode(ISR_PIN, INPUT_PULLUP);
-  //attachInterrupt(ISR_PIN, isrFunction, RISING);
-
-  // Init OLED
-  initDisplay();
-
-  // Init NVM
-  nvmInit();
-
-  // Randomize
-  randomSeed((uint32_t)esp_random());
-
-  // Set WiFi to station mode and disconnect from an AP if it was previously connected
-  WiFi.mode(WIFI_STA);
-  WiFi.disconnect();
-  delay(500);
-
-  Serial.println();
-  Serial.println();
-  Serial.print(F("### STARTING SUMP PUMP MONITOR: "));
-  Serial.print(FPSTR(APP_VERSION));   // FPSTR reads PROGMEM string
-  Serial.println(F(" ###"));
-  Serial.println("Setup Complete");
-  //scanWifi();   // DISABLED – creates issues with Firebase TLS stability.  Only use for debugging board bring up
-  Serial.println(getBuildModeMarker());
-  connectPumpWifi();
-
-  // NTP Time Server
-  newPopupScreen("NTP Setup", "Syncing NTP time");
-  setupNTP();
-  oledMain(MAIN_TIMEOUT_SEC);
-
-  // Setup NVM Boot Restore  (must be after NTP)
-  initNvmBootRestore();
-  nvmDumpPumpState();
-
-  // Firebase
-  if (waitForWifiStable()) {
-    Serial.println("Post-WiFi settle...");
-    LEDOn();
-    delay(2000);
-    LEDOff();
-  } else {
-    Serial.println("WiFi not yet stable");
+  t0 = millis();
+  while (WiFi.status() != WL_CONNECTED && millis() - t0 < 15000) {
+    delay(200);
   }
-  initFirebaseHealth();
 
-  // Init Pump
-  initPump();
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Static reconnect failed");
+    return false;
+  }
 
-  // Store Startup Time
-  START_TIME = (millis() / 1000); 
-
-  // Test Functions
-  //testDataStore(); 
-
-  // Init OTA
-  initOTA(TEST_MODE ? "pump-test" : "pump-prod");
-
-  // History Loader
-  historyLoaderBegin(Pump.Daily365);
-
-  // Setup done, go to main screen
-  oledMain(MAIN_TIMEOUT_SEC);
+  Serial.print("WiFi connected with static IP: ");
+  Serial.println(WiFi.localIP());
+  return (WiFi.localIP() == staticIP);
 }
 
-void loop() {
-  static unsigned long loopCount = 0;
+void connectWifi() {
 
-  webServer();   // SERVICE HTTP AS FAST AS POSSIBLE
-
-  loop100ms();                              // Run the 100ms loop
-  if (loopCount % 10 == 0) loop1Sec();      // Run the 1 sec loop
-  if (loopCount % 100 == 0) loop10Sec();    // Run the 10 sec loop
-  if (loopCount % 600 == 0) loop1Min();     // Run the 1 minute loop
-
-  // Complete the loop
-  loopCount++;
-  LOOP_COUNT++;
-
-  delay(ADAPTIVE_DELAY);  // avg code run time is ~2 ms
-}
-
-void loop100ms() {
-  // Run Simulation if needed
-  if (TEST_MODE) simulatePump();
-
-  // Read Inputs
-  readDigitalButton();
-  readADC();
-
-  // Run Main Logic
-  checkForPumpEvent();  // Want accurate timing so check every 100ms
-  processPumpEvent();
-
-  // Update Outputs
-  displayText();
+  wifiRadioState = 1;
+  char details[64];
+  snprintf(details, sizeof(details), "Network: %s", WIFI_SSID);
+  displayPopupScreen("CONNECTING...", details);
   updatePopupScreen();
-  setLED();
-  //webServer();  REMOVE AFRER TESTING
 
-  // process Events
-  processLoopCheck();
-  processTestEvent();
-  processFBWriteEvent();
+  bool ok = connectDhcpThenStaticHost(WIFI_SSID, WIFI_PSW);
 
-  // Others
-  handleOTA();
-  historyLoaderTick();
-}
+  if (ok) {
+    CONN_STATUS = "CONN";
+    Serial.println("WiFi connected with static host 186/192");
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
 
-void loop1Sec() {
-  static uint32_t count_1s;
-
-  // Adaptive Loop Adjust
-  static uint32_t prevLoopStart;
-  uint32_t msNow = millis();
-  ONE_SEC_TIMER_MS = msNow - prevLoopStart;
-  prevLoopStart = msNow;
-
-  // Dynamically Adjust Loop Time
-  if (ONE_SEC_TIMER_MS < 1000 && ADAPTIVE_DELAY < 100) ADAPTIVE_DELAY++;
-  else if (ONE_SEC_TIMER_MS > 1000 && ADAPTIVE_DELAY > 80) ADAPTIVE_DELAY--;
-
-  // Firebase
-  updateFirebaseState();
-
-  // process 1 second tasks
-  readDigital();
-  readTouchSwitch();
-  writeDAC();
-
-  // Keep NTP Clock Valid
-  if (wifiOK()) updateNTP();
-
-  // update loop counter
-  count_1s++;
-}
-
-void loop10Sec() {
-  ensureServerStarted();
-
-  // Early WiFi stabilization
-  if (LOOP_COUNT < 40 * LOOPS_PER_SEC) check_wifi();
-
-  // Test Firebase
-  //test_firebase();
-
-  // OTA
-  void updateOTAState();
-
-  // Make sure NVM was checked after boot
-  if (!gNvmRestoreDone) initNvmBootRestore();  
-}
-
-void loop1Min() {
-  static uint16_t minCount = 0;
-  minCount = (minCount + 1) % 600;  // Prevent Overflow
-
-  // Update System State
-  if (WiFi.status() != WL_CONNECTED) diagState.setSystemState("*NO WIFI*");
-  else if (!validClock()) diagState.setSystemState("*NO CLOCK*");
-  else if (!firebaseWriteAllowed()) diagState.setSystemState("*NO FIREBASE*");
-  else diagState.setSystemState("RUNNING");
-
-  // Reconnect Wifi if needed
-  check_wifi();
-  updateWifiDiagState();
-  diagState.updateDiagInfo();
-
-  // Check for Weather
-  checkWeather();
-
-  // Check NTP
-  ensureTimeHealthy();
-
-  // Run normal scheduled hourly tasks
-  checkForOneHourTasks();
-}
-
-void checkForOneHourTasks() {
-  static int8_t lastHour = -1;
-
-  // Only run hourly logic if NTP/system time is valid
-  if (!validClock()) return;
-
-  const int hour = (int)getHourInt();
-  if (hour < 0 || hour > 23) return;
-
-  // First valid hour after boot: initialize and do nothing
-  if (lastHour < 0) {
-    lastHour = hour;
-    return;
-  }
-
-  // Detect a clean hour rollover (including 23 -> 0)
-  const bool advanced =
-    ((hour > 0 && lastHour == hour - 1) || (hour == 0 && lastHour == 23));
-
-  if (hour != lastHour && advanced) {
-    loop1Hour(hour);
-    if (hour == 0) loop1DayMidnight();
-    lastHour = hour;
-  } 
-  else if (hour != lastHour) {
-    // Clock jumped (NTP correction / reboot / manual set) — resync without firing loops
-    lastHour = hour;
-  }
-}
-
-// One Hour Tasks - On the hour
-void loop1Hour(int hour) {
-  Serial.println();
-  Serial.print("*** RUNNING 1 HOUR LOOP [");
-  Serial.print(hour);
-  Serial.println("]");
-
-  // Check for queued firebase retries
-  pumpRepo.processSummaryQueueOnce();
-  pumpRepo.processWeatherQueueOnce();
-
-}
-
-// Midnight
-void loop1DayMidnight() {
-  Serial.println();
-  Serial.println("*** RUNNING 1 DAY LOOP - MIDNIGHT");
-
-  // Firebase functions
-  clearDailyFBWriteCount();
-
-  // send daily email
-  textStatus();
-
-}
-
-//------------------------------------------------------------------------
-
-void writeDAC() {
-  //dacWrite(DAC_PIN, LOOP_COUNT % 250);
-}
-
-void readADC() {
-  uint32_t startTime = micros();
-
-  if (TEST_MODE) ADC1_COUNT = getTestModeADC();
-  else ADC1_COUNT = analogRead(ADC1_PIN);
-
-  ADC1_VOLT = 3.3 * (ADC1_COUNT / 4095.0);
-  TLog("ADC: ", ADC1_COUNT, startTime);
-  TLog("ADC read time: ", startTime);
-
-  if (ADC1_COUNT > 1 * COUNT_PER_AMP) {
-    Pump.updateAvgCurrent(ADC1_COUNT);
-  }
-}
-
-void readDigital() {
-  uint32_t startTime = micros();
-  D1_VAL = digitalRead(D1_PIN);
-  TLog("Digital read time: ", startTime);
-}
-
-void readDigitalButton() {
-  static uint8_t oldBtn = 1;
-  BTN_VAL = digitalRead(BTN_PIN);     // Read New Button Status
-  if (oldBtn == 1 && BTN_VAL == 0) processButton();
-  oldBtn = BTN_VAL;                   // Save Status
-}
-
-void readTouchSwitch() {
-  uint32_t startTime = micros();
-  TS1_VAL = touchRead(TS1_PIN);
-  TLog("TS read time: ", startTime);
-}
-
-void processButton() {
-  Serial.println("Button Event");
-  displayPopupScreen("BUTTON PRESSED", "Show Main Menu");
-  delay(1000);
-  oledMain(MAIN_TIMEOUT_SEC);
-}
-
-void processLoopCheck() {
-  static uint32_t loopCount = 0;
-  static uint32_t startTime = 0;
-  if (loopCount % 999 == 0) {
-    LOOP_TIME = int((millis() - startTime) / 100);
-    Serial.println();
-    if (LOOP_TIME < 950 || LOOP_TIME > 1050) {
-      Serial.println("*** Total time for 1000 loops:" + String(LOOP_TIME));
+    // Keep your time sync here (don’t return early if you want server/UI to keep working)
+    if (!syncTime()) {
+      Serial.println("NTP failed");
     }
-    startTime = millis();
-  }
-  loopCount++;
-}
 
-void processTestEvent() {
-  if (testEvent.check()) {
-    Serial.println();
-    Serial.println("*** TEST EVENT ***");
-    Serial.println("Total time for Test Event:" + String(testEvent.getDelta()) + "ms");
-    Serial.println();
-    testEvent.setSec(73);
-  }
-}
-
-void testEmail() {
-  //email.sendEmail("aneilshah@yahoo.com", "Sump Pump Status", "This will be data...\nSomeday");
-  //email.sendEmail("7343555141@vtext.com", "Sump Pump", "Cycles: 5\nGallons Pumped: 600");
-}
-
-void textStatus() {
-  float deltaMin = Pump.getAvgCycleMin();
-  if (deltaMin < 0.1) deltaMin = 5.0;  // default to 5 mins if there is no data
-  int cph = 60 / deltaMin;
-  int cpd = 60 * 25 / deltaMin;
-  int GPM = 48;  // Delete this after fixing
-  int gallonsPerHour = 60 * GPM / deltaMin;   // WRONG - FIX THIS
-  uint32_t gallonsPerDay = 60 * 24 * GPM / deltaMin;  // WRONG - FIX THIS
-
-  String body = "Cycles: " + String(Pump.getPumpEventCount()) + "\n";
-
-  float monMin = float(LOOP_COUNT / 60.0 / LOOPS_PER_SEC);
-  float monDay = float(LOOP_COUNT / 3600.0 / 24 / LOOPS_PER_SEC);
-  if (monDay < 1) {
-    body += "Monitor Time: " + String(monMin) + "m\n";
   } else {
-    body += "Monitor Time: " + String(monDay) + "d\n";
+    CONN_STATUS = "NOT CONNECTED";
+    Serial.println("WiFi connect FAILED");
   }
 
-  float pumpOnMin = float(Pump.getPumpOnTimeLoops() / 60.0 / LOOPS_PER_SEC);
-  float pumpOnHour = float(Pump.getPumpOnTimeLoops() / 3600.0 / LOOPS_PER_SEC);
-  if (pumpOnHour < 1) {
-    body += "Pump Time: " + String(pumpOnMin) + "m\n";
-  } else {
-    body += "Pump Time: " + String(pumpOnHour) + "h\n";
-  }
-  body += "Current: " + Pump.getPumpCurText() + "\n";
-  body += "Avg Cycle: " + String(Pump.getAvgCycleMin()) + "m\n";
-  body += "StDev: " + String(Pump.getStDevCycleMin()) + "m\n";
-  body += "CPD: " + String(cpd) + " / " + String(gallonsPerDay) + " Gal\n";
-  body += "TS: " + String(getTimestamp()) + "\n";
-
-  //email.sendEmail("aneilshah@yahoo.com", "Sump Pump Status", body);
-  //email.sendEmail("7343555141@vtext.com", "Pump", "\n"+body);
+  oledMain(MAIN_TIMEOUT_SEC);
+  LEDOff();
 }
 
-void testDataStore() {
-  delay(1000);
-  DataStoreFloat X(15, 1, "abc");
-  for (int i = 0; i <100; i++) {
-    X.addData(i + (float(i)/100));
-    Serial.println(X.dataText());
-  }
+void disconnectWifi() {
+  wifiRadioState = 0;
+  CONN_STATUS = "NOT_CONNECTED";
+  WiFi.disconnect(true);   // Disconnect and stop reconnect attempts
+  WiFi.mode(WIFI_OFF);     // Turn off the Wi-Fi radio
 }
 
-void check_wifi() {
-  if (!wifiOK()) {
-    Serial.println("WiFi not OK, reconnecting...");
-    connectPumpWifi();
-    WIFI_ERR++;
-    return;
-  }
-
-  // 2) Optional: ensure WiFi stabilizes after reconnect
-  if (!waitForWifiStable(1500, 5000)) {
-    Serial.println("WiFi not stable yet");
-    return;
-  }
+bool wifiRadioOn() {
+  return wifiRadioState == 1;
 }
 
-// Version History
-// 2.01 Mar-24-2024 Table clean up, added mulitple pages and history
-// 2.02 Apr-1-2024 Refactot of all Pump Data into a PumpData Class
-// 2.03 Jan-12-2026 Full Refactor of Server
-// 2.04 Jan-12-2026 Refactor of Firebase / Wifi startup and retry, removed scanning SSIDs
-// 2.05 Jan-13-2026 Refactor of Firebase Driver
-// 2.06 Feb-23-2026 Refactor of UI, added trend graphs, added export, stability cleanups
-// 2.07 Feb-24-2026 Bug fixes on first day data, refactored firebase format
-// 2.08 Feb-27-2026 Integrated NVM for Daily Data
-// 2.09 Feb-28-2026 Added Weather Checks
-// 3.00 Mar-26-2026 Bring in Furnace Firebase State Machine, update OLED
-// 3.01 Mar-29-2026 Implment OTA
-// 3.02 Apr-7-2026 Updated UI, better diagnostics, Ram Log, Queue in NVM
+bool ensureServerStarted() {
+  // If WiFi dropped, allow restart later
+  if (serverStarted && WiFi.status() != WL_CONNECTED) {
+    serverStarted = false;
+  }
+
+  // Only start once we have a real IP
+  IPAddress ip = WiFi.localIP();
+  bool hasIP = (ip != IPAddress(0,0,0,0) && ip != IPAddress(255,255,255,255));
+
+  if (!serverStarted && WiFi.status() == WL_CONNECTED && hasIP) {
+    server.begin();
+    serverStarted = true;
+    Serial.println("SERVER STARTED");
+    Serial.print("Open: http://");
+    Serial.print(WiFi.localIP());
+    Serial.println("/");
+  }
+
+  return serverStarted;
+}
+
+
+bool wifiOK() {
+    if (WiFi.status() == WL_CONNECTED  &&
+        WiFi.localIP() != IPAddress(0,0,0,0)) {
+    CONN_STATUS = "CONN";
+    return true;
+    }
+
+    CONN_STATUS = "OFF";
+    return false;
+}
+
+bool dnsOK() {
+  return WiFi.dnsIP() != IPAddress(0,0,0,0);
+}
+
+bool internetOK() {
+  WiFiClient c;
+  int timeout = 2000;
+  c.setTimeout(timeout / 1000);
+  return c.connect("1.1.1.1", 80);
+}
+
+bool internetOK443() {
+  WiFiClientSecure c;
+  int timeout = 3000;
+  c.setInsecure();                 // reachability test only
+  c.setTimeout(timeout / 1000);    // seconds
+  bool ok = c.connect("www.google.com", 443);
+  c.stop();
+  return ok;
+}
+```
+
+## File: datalogger/wifiFunc.h
+```c
+#pragma once
+
+void scanWifi();
+void connectWifi();
+void disconnectWifi();
+bool ensureServerStarted();
+bool waitForWifiStable(uint32_t stableMs = 1500, uint32_t timeoutMs = 20000);
+bool wifiOK();
+bool dnsOK();
+bool internetOK();
+bool internetOK443();
+bool timeValid();
+void updateWifiDiagState();
+
+// Helpers
+bool dnsReady();
+bool wifiLinkReady();
+bool wifiRadioOn();
+
+#define EDGE_HOST_ID 186
+#define TEST_SERVER_HOST_ID 192
+// #define SUBNET_ID 50
+#define USE_STATIC_IP 0
+```
+
+## File: README-datalogger.md
+```markdown
+# Data Logger (ESP32 + OLED + WiFi + Firebase)
+
+An ESP32-based data logger with OLED status screens, WiFi
+connectivity, NTP time sync.
+
+This system reads IO and logs to NVM and provides statsusd reports to a
+web server. It also includes a built-in web UI, OTA
+firmware update support.
+
+------------------------------------------------------------------------
+
+## Features
+
+-   OLED UI (Heltec SSD1306)
+-   WiFi STA with DHCP → static-IP reconnect model
+-   NTP time synchronization (fixed UTC offset, no DST)
+-   NVS-backed data
+-   Boot statistics persistence (reboot counter + timestamps)
+-   ArduinoOTA firmware update support
+-   Embedded Web UI (Multi Function Pages / Export / Charts)
+-   CSV / JSON exports
+-   Pixel Shifting to save OLED screen from burn in (learned the hard way)
+-   Watchdog Timer
+-   Serial Logger / RAM Logger (for Prod)
+-   Test Mode 
+-   Adaptive loop delay tuning
+
+------------------------------------------------------------------------
+
+## Hardware
+
+Typical setup:
+
+-   ESP32 (Heltec or compatible)
+-   SSD1306 128×64 OLED
+-   ADC input
+-   LED indicator
+-   touch/button input
+
+GPIO and configuration constants are defined in `global.h`.
+
+------------------------------------------------------------------------
+
+## System Overview (Conceptual Flow)
+
+** NEED TO REWRITE **
+
+Pump Current Signal\
+↓\
+Cycle Detection\
+↓\
+Runtime Accumulation\
+↓\
+4-Hour Block Aggregation\
+↓\
+NVM Checkpoint\
+↓\
+Reboot? → Restore + Continue\
+↓\
+Daily Summary (23:00)\
+↓\
+Firebase Write (if safe)\
+↓\
+365-Day History → Web UI
+
+------------------------------------------------------------------------
+
+## Scheduling Model (NEEDS UPDATE)
+
+Main loop runs every \~100ms.
+
+Soft task structure:
+
+-   `loop100ms()` --- input sampling, pump detection, OLED updates
+-   `loop1Sec()` --- adaptive delay control, NTP updates, OTA servicing
+-   `loop10Sec()` --- server start + connection checks
+-   `loop1Min()` --- WiFi/Firebase reconnect logic
+-   `loop1Hour()` --- Firebase summary retry
+-   `loop1Day()` --- reset daily write counter
+
+OTA servicing may also be called in the main loop to ensure responsive
+firmware updates.
+
+------------------------------------------------------------------------
+
+## CONNECTIVITY:
+
+System     Reliability
+---------- ------------------------------
+NTP        HTTP: Always works
+
+------------------------------------------------------------------------
+
+## Daily Lifecycle
+
+** NEED TO REWRITE **
+
+The system operates on a repeating daily cycle.
+
+Each day is divided into 6 blocks:
+
+-   03:00 / 07:00 / 11:00 / 15:00 / 19:00 / 23:00
+
+At each boundary:
+
+-   the previous 4 hours are finalized and reset
+-   data is stored / checkpointed
+-   state is persisted
+
+At 23:00:
+
+-   the full day is known
+-   totals are computed
+-   estimates are computed if needed
+-   Firebase is queued, and queue store in NVM
+
+------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+## Firebase Architecture
+
+### Write Model
+
+The system performs:
+
+-   6 × 4-hour model buckets per day (3,7,11,15,19,23)
+-   One authoritative daily summary write
+
+Intermediate 4-hour bucket state is persisted to NVS to prevent data
+loss during firmware updates or unexpected reboots.
+
+### Paths
+
+Normal mode:
+
+    /pump/<namespace>/<year>/daily_summary/YYYY_MM_DD/
+    /pump/<namespace>/<year>/daily_detail/YYYY_MM_DD/
+
+Test mode:
+
+    /pump/<namespace>/test_server/<year>/daily_summary/YYYY_MM_DD/
+    /pump/<namespace>/test_server/<year>/daily_detail/YYYY_MM_DD/
+
+### Daily Summary Stucture (NEEDS UPDATE)
+
+-   timestamp
+-   total_gallons (model-derived)
+-   total_cycles (model-derived)
+-   cycle1..cycle6
+-   gallon1..gallon6
+-   last_cycle_energy (Amp-seconds proxy)
+
+
+
+------------------------------------------------------------------------
+
+## NVM Checkpointing  (UPDATE)
+
+### 4-Hour Block Persistence
+
+After each completed 4-hour block these items are written to NVS:
+
+-   `GAL_4HR[6]`
+-   `CYCLE_4HR[6]`
+-   `daily4hrCount`
+-   `day_key`
+-   `save_epoch`
+
+On reboot:
+
+-   State is restored only if:
+    -   Day key matches current day
+    -   Saved timestamp is within configured window (4 hours)
+
+If validation fails, state is ignored and cleared.
+
+### Boot Statistics
+
+On each reboot:
+
+-   Boot counter increments
+-   Previous boot timestamp stored
+-   Last boot timestamp stored
+
+
+
+------------------------------------------------------------------------
+
+## Web UI (NEEDS UPDATE)
+
+Accessible at device IP address.
+
+Pages:
+
+-   MAIN --- real-time stats
+-   TREND --- daily history + gallons/day SVG chart
+-   DETAILS --- waveform graph + energy metrics
+
+------------------------------------------------------------------------
+
+## Charts
+
+Charts are rendered as inline SVG (no external JS libraries).
+
+1) Gallons Per Day (last 365 days
+2) Current Waveform from last pump on event
+3) On / Off pulse wave for last 24 hours
+
+
+------------------------------------------------------------------------
+
+## OTA Firmware Update
+
+Supports ArduinoOTA-based firmware updates over WiFi.
+
+-   Requires OTA-enabled firmware build
+-   Uses configurable TCP port (default 3232)
+-   Requires OTA handler to be serviced in main loop
+-   First upload must be performed via USB
+
+------------------------------------------------------------------------
+
+## Stability Improvements
+
+-   Boot statistics tracking
+-   Reduced dynamic memory in OLED hot path
+-   Static HTML fragments stored in PROGMEM
+-   Adaptive loop delay tuning
+
+------------------------------------------------------------------------
+
+# Time Handling
+
+-   Real Time clock synced with NTP time server
+-   Automatic time zone with DST handling
+-   Time zone sanity checking every minute
+
+------------------------------------------------------------------------
+
+## Test Mode
+
+Test mode simulates:
+
+-  Data to be logged
+
+Used for UI validation without hardware.
+
+------------------------------------------------------------------------
+
+## Prod Diagnostics (No Serial Available)
+
+### RAM Log
+
+-   circular buffer (\~100 lines)
+-   timestamps
+-   exportable
+
+### CSV Export
+
+Exports as much internal data / variables as possible:
+
+** NEED TO UPDATE **
+-   system states
+-   Firebase state
+-   Wifi State
+-   NVM state
+-   RAM log
+
+
+This is the **primary debugging interface**.
+
+------------------------------------------------------------------------
+
+## Test Mode Diagnostics
+
+Test mode supports very detailed serial logging
+
+------------------------------------------------------------------------
+
+## Build / Flash
+
+1.  Install Arduino IDE or PlatformIO
+2.  Install ESP32 board support
+3.  Configure `secrets.h` (WiFi + Firebase)
+4.  Upload firmware (USB required for first OTA-enabled build)
+
+------------------------------------------------------------------------
+
+## Project Structure (NEEDS UPDATE)
+
+Main File - Pump_Monitor.ino
+
+Pump detection + metrics: Pump_Monitor.cpp / pumpFunc.cpp
+Data: pumpData.cpp / datastore.cpp
+WiFi + Time: wifiFunctions.cpp / ntp.cpp
+UI + Indicators - oledFunc.cpp / ledFunc.cpp
+Web Server: serverFunc.cpp
+OTA: OTA.cpp
+NVM: nvm.cpp
+Test Mode: test_mode.cpp
+Charts: charts.cpp, pump365.h, eventData.cpp
+Diagnostics: diag.cpp
+Export Generation: export.cpp
+Utilities: utils.cpp
+
+
+Config: global.h
+Secrets: secrets.h
+
+------------------------------------------------------------------------
+
+## License
+
+Private project.
+
+------------------------------------------------------------------------
+
+## Limitations
+
+
+
+
+## Future Improvements
+
+- 
+- Encapsulate globals and diagnostics
+- Move Daily Statistics to NVM
+- Move RAM log to web page
+- Add an NVM log for crash debugging
+```
+
+## File: repomix.config.json
+```json
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "input": {
+    "maxFileSize": 52428800
+  },
+  "output": {
+    "filePath": "repomix-datalogger.md",
+    "style": "markdown",
+    "parsableStyle": false,
+    "fileSummary": true,
+    "directoryStructure": true,
+    "files": true,
+    "removeComments": false,
+    "removeEmptyLines": false,
+    "compress": false,
+    "topFilesLength": 5,
+    "showLineNumbers": false,
+    "truncateBase64": false,
+    "copyToClipboard": false,
+    "includeFullDirectoryStructure": false,
+    "tokenCountTree": false,
+    "git": {
+      "sortByChanges": true,
+      "sortByChangesMaxCommits": 100,
+      "includeDiffs": false,
+      "includeLogs": false,
+      "includeLogsCount": 50
+    }
+  },
+  "include": [],
+  "ignore": {
+    "useGitignore": true,
+    "useDotIgnore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": []
+  },
+  "security": {
+    "enableSecurityCheck": true
+  },
+  "tokenCount": {
+    "encoding": "o200k_base"
+  }
+}
 ```

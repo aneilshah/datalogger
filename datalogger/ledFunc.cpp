@@ -3,21 +3,21 @@
 
 uint8_t LED_STATE = LED_OFF;
 
-void toggleLED() {
+void toggleLed() {
   LED_STATE = !LED_STATE;
-  setLED();
+  setLed();
 }
 
-void LEDOn() {
+void ledOn() {
   LED_STATE = LED_ON;
-  setLED();
+  setLed();
 }
 
-void LEDOff() {
+void ledOff() {
   LED_STATE = LED_OFF;
-  setLED();
+  setLed();
 }
 
-void setLED() {
+void setLed() {
   digitalWrite(LED_PIN, LED_STATE);  // LED
 }

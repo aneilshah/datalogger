@@ -1,9 +1,6 @@
 #pragma once
 
-#define BLOCK_DAY_KEY_SIZE 16
-#define DATA_SYSTEM 0    // All Data from System
-#define DATA_ESTIMATED 1 // Data uses estimates
-#define DATA_PARTIAL 2   // Block Skipped
+#define DAY_KEY_SIZE 16
 
 // external pump variables
 extern int PUMP_EVENT;
@@ -12,14 +9,15 @@ extern int PUMP_GPD;
 extern int cycleLockoutCount;
 extern uint32_t GAL_TODAY;
 extern uint32_t CYCLE_TODAY;
-extern uint32_t GAL_4HR[];
-extern uint32_t CYCLE_4HR[];
+extern uint32_t GAL;
+extern uint32_t CYCLE;
 extern bool gYesterdayWasZero;
-extern char blockDayKey[BLOCK_DAY_KEY_SIZE];
+extern char dayKey[DAY_KEY_SIZE];
 
 // getters
-uint8_t getDataType();
-void setDataType(uint8_t data_type);
+
+
+// setters
 
 // Pump Defines
 #define LOCKOUT_TIME_LOOPS 10 * LOOPS_PER_SEC  // 10 sec [No second pump event during this time]
@@ -30,4 +28,3 @@ void setDataType(uint8_t data_type);
 void processPumpEvent();
 void checkForPumpEvent();
 void initPump();
-void processFBWriteEvent();

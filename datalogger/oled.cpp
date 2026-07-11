@@ -6,6 +6,7 @@
 #include "ntp.h"
 #include "pumpData.h"
 #include "pumpFunc.h"
+#include "wifiFunc.h"
 
 // Just in case
 #include <stdio.h>
@@ -126,7 +127,10 @@ void displayText() {
     }
     else if (LOOP_COUNT % TotalTime < 2 * TimePerStageLoops) {
       // WiFi status
-      snprintf(line4, sizeof(line4), "WIFI: %s", CONN_STATUS);
+      if (wifiRadioOn())
+        snprintf(line4, sizeof(line4), "WIFI: %s", CONN_STATUS);
+      else
+        snprintf(line4, sizeof(line4), "WIFI: RADIO OFF");
     }
     else {
       snprintf(line4, sizeof(line4), "<RESERVED 2>");
@@ -256,6 +260,14 @@ void oledMinimized() {
   OLED_MODE = OLED_MINIMIZED;
 }
 
-void oledOff() {
+void oledBlank() {
   OLED_MODE = OLED_OFF;
+}
+
+void oledOff() {
+  display.displayOff();
+}
+
+void oledOn() {
+  display.displayOn();
 }

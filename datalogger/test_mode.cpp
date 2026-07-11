@@ -3,10 +3,14 @@
 
 // Local Files
 #include "global.h"
+#include "ledFunc.h"
+#include "oled.h"
+#include "wifiFunc.h"
 
 int testModeADC = 0;
 int pumpCount = 0;
 Event pumpTestEvent;
+long testLogCyc = 0;
 
 #define CYCLE_TIME 30
 #define PUMP_ON 1
@@ -73,4 +77,26 @@ void simulatePump() {
   else {
     Serial.println("Invalid Simluated Pump State");
   }
+}
+
+void simulateLogger() {
+  testLogCyc++;
+  
+  // LED Blinker Routine
+  if (wifiRadioOn()) {
+    if (testLogCyc % 20 == 0) ledOn();
+    else if (testLogCyc % 20 == 10) ledOff();
+  }
+  else {
+    if (testLogCyc % 5 == 0) ledOn();
+    else if (testLogCyc % 5 == 1) ledOff();
+  }
+}
+
+void turnOnWifi() {
+  newPopupScreen("WIFI ON", "");
+}
+
+void turnOffWifi() {
+  newPopupScreen("WIFI OFF", "press button to wake");
 }

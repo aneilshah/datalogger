@@ -90,13 +90,6 @@ static void renderExportMainMetrics(WiFiClient &client) {
   client.print(F("gallons_today,"));
   client.println(GAL_TODAY);
 
-  client.print(F("data_type,"));
-  if (getDataType() == DATA_SYSTEM)
-    client.println("\"system\"");
-  else if (getDataType() == DATA_ESTIMATED)
-    client.println("\"estimated\"");
-  else if (getDataType() == DATA_PARTIAL)
-    client.println("\"partial\"");
 
   client.print(F("yesterday_was_zero,"));
   client.println(gYesterdayWasZero ? F("1") : F("0"));
@@ -106,51 +99,11 @@ static void renderExportMainMetrics(WiFiClient &client) {
 }
 
 // -----------------------------------------------------------------------------
-// 4HR BLOCK EXPORT
+// Logger EXPORT
 // -----------------------------------------------------------------------------
-static void renderExportBlockData(WiFiClient &client) {
-  addTitle(client, F("[TODAYS 4HR BLOCKS]"));
+static void renderExportLoggerData(WiFiClient &client) {
+  addTitle(client, F("[LOGGER]"));
 
-  client.print(F("total_4hr_block_writes,"));
-  client.printf("%u / 6\n", getTotalBlockWriteCount());
-  client.print(F("first_4hr_block_idx,"));
-  client.println(getFirst4hrBlockIdx());
-
-  // Last 4 hr block
-  client.print(F("last_4hr_block_hour,"));
-  uint8_t hr = getLastStoredBlockHour();
-  const char* suffix;
-  uint8_t displayHr;
-  if (hr == 0) {displayHr = 12; suffix = "AM";} 
-  else if (hr < 12) {displayHr = hr;suffix = "AM";}
-  else if (hr == 12) {displayHr = 12; suffix = "PM";}
-  else {displayHr = hr - 12;suffix = "PM";}
-  client.printf("%u %s\n", displayHr, suffix);
-
-  client.print(F("daily_4hr_block_day,"));
-  client.println(blockDayKey);
-  client.print(F("4hr_blocks_today,"));
-  client.println(getStoredDailyBlockCount());
-
-  for (int i = 0; i < NUM_4HR_BLOCKS; i++) {
-    const int blockNum = i + 1;
-
-    client.print(F("cycles_4hr_"));
-    client.print(blockNum);
-    client.print(F(","));
-    client.println(CYCLE_4HR[i]);
-
-    client.print(F("gallons_4hr_"));
-    client.print(blockNum);
-    client.print(F(","));
-    client.println(GAL_4HR[i]);
-  }
-
-  client.print(F("cycles_today,"));
-  client.println(CYCLE_TODAY);
-
-  client.print(F("gallons_today,"));
-  client.println(GAL_TODAY);
 }
 
 // -----------------------------------------------------------------------------
@@ -266,49 +219,6 @@ static void renderExportClockInfo(WiFiClient &client) {
 }
 
 
-
-// -----------------------------------------------------------------------------
-// ESTIMATED DAILY SUMMARY EXPORT
-// -----------------------------------------------------------------------------
-static void renderExportEstimatedDailySummary(WiFiClient &client) {
-  addTitle(client, F("[ESTIMATED DAILY SUMMARY]"));
-
-  unsigned int totalGallons = 0;
-  unsigned int totalCycles = 0;
-
-  for (int i = 0; i < NUM_4HR_BLOCKS; i++) {
-    totalGallons += GAL_4HR[i];
-    totalCycles += CYCLE_4HR[i];
-  }
-
-  unsigned int estGallons = totalGallons;
-  unsigned int estCycles = totalCycles;
-
-  uint8_t blockCount = getStoredDailyBlockCount();
-  if (blockCount > 0 && blockCount < NUM_4HR_BLOCKS) {
-    estGallons = (NUM_4HR_BLOCKS * totalGallons) / blockCount;
-    estCycles  = (NUM_4HR_BLOCKS * totalCycles)  / blockCount;
-  }
-
-  client.print(F("daily_4hr_block_count,"));
-  client.println(blockCount);
-
-  client.print(F("raw_cycles_observed,"));
-  client.println(totalCycles);
-
-  client.print(F("raw_gallons_observed,"));
-  client.println(totalGallons);
-
-  client.print(F("est_cycles_per_day,"));
-  client.println(estCycles);
-
-  client.print(F("est_gallons_per_day,"));
-  client.println(estGallons);
-
-  client.print(F("estimation_scaled,"));
-  client.println((blockCount > 0 && blockCount < NUM_4HR_BLOCKS) ? F("1") : F("0"));
-}
-
 // -----------------------------------------------------------------------------
 // NVM EXPORT
 // -----------------------------------------------------------------------------
@@ -364,10 +274,9 @@ void renderExportCsv(WiFiClient &client) {
   client.println();
 
   renderExportMainMetrics(client);
-  renderExportBlockData(client);
+  renderExportLoggerData(client);
   renderExportSystemInfo(client);
   renderExportClockInfo(client);
-  renderExportEstimatedDailySummary(client);
   renderExportNvmInfo(client);
   renderExportTrendInfo(client);
   renderExportRamLog(client);

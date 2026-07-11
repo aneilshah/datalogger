@@ -1,12 +1,15 @@
 // Included Library Files
 #include <Arduino.h>
 #include <WiFi.h>
+#include <esp_sleep.h>
+#include <Wire.h>
 
 // My Libraries
 #include "event.h"
 
 // My Files
 #include "global.h"
+#include "button.h"
 #include "datastore.h"
 #include "diag.h"
 #include "ledFunc.h"
@@ -14,6 +17,7 @@
 #include "nvm.h"
 #include "oled.h"
 #include "ota.h"
+#include "power.h"
 #include "pumpData.h"
 #include "pumpFunc.h"
 #include "ramlog.h"
@@ -23,7 +27,7 @@
 #include "wifiFunc.h"
 
 // Version Info
-const char APP_VERSION[] PROGMEM = "V0.03A";
+const char APP_VERSION[] PROGMEM = "V0.0A";
 
 // System States
 const char* CONN_STATUS = "OFF";
@@ -86,54 +90,6 @@ void initNvmBootRestore() {
   // Update boot stats
   nvmUpdateBootStats(nowEpoch);
 
-  uint8_t restoredBlkCount = 0;
-  uint8_t restoredFirstBlk = 0;
-  uint8_t restoredLastHr = 0;
-
-  NvmRestoreResult result = nvmRestore4hrStateIfFresh(
-      dayKey,
-      nowEpoch,
-      4 * 3600,   // 4 hour freshness window
-      (uint32_t*)GAL_4HR,   NUM_4HR_BLOCKS,
-      (uint32_t*)CYCLE_4HR, NUM_4HR_BLOCKS
-  );
-
-  if (result == NVM_RESTORE_OK) {
-    snprintf(blockDayKey, BLOCK_DAY_KEY_SIZE, dayKey);
-
-    // rebuild true observed totals only
-    GAL_TODAY = 0;
-    CYCLE_TODAY = 0;
-    setDataType(DATA_ESTIMATED);
-    uint8_t count = getStoredDailyBlockCount();
-    uint8_t firstBlock = getFirst4hrBlockIdx();
-
-    // Clamp count so we never exceed array bounds
-    if (firstBlock >= NUM_4HR_BLOCKS) {
-      count = 0;
-    } else if (firstBlock + count > NUM_4HR_BLOCKS) {
-      count = NUM_4HR_BLOCKS - firstBlock;
-    }
-
-    for (int i = 0; i < count; i++) {
-      int block = firstBlock + i;
-      GAL_TODAY += GAL_4HR[block];
-      CYCLE_TODAY += CYCLE_4HR[block];
-    }
-
-    char txt1[80];
-    char txt2[80];
-    snprintf(txt1, sizeof(txt1), "NVM restore OK: %s \n", dayKey);
-    snprintf(txt2, sizeof(txt2), "count=%u first=%u\n",
-      count, firstBlock);
-    Serial.printf(txt1);
-    Serial.printf(txt2);
-    ramLog(txt1);
-    ramLog(txt2);
-  } else {
-    logNVMFailure(result);
-    ramLog("NVM Restore Failed");
-  }
   gNvmRestoreDone = true;  // if we got here the restore was completed
 }
 
@@ -167,13 +123,13 @@ void setup() {
 
   Serial.println();
   Serial.println();
-  Serial.print(F("### STARTING SUMP PUMP MONITOR: "));
+  Serial.print(F("### STARTING DATA LOGGER: "));
   Serial.print(FPSTR(APP_VERSION));   // FPSTR reads PROGMEM string
   Serial.println(F(" ###"));
   Serial.println("Setup Complete");
   //scanWifi();   // DISABLED – creates issues with Firebase TLS stability.  Only use for debugging board bring up
   Serial.println(getBuildModeMarker());
-  connectPumpWifi();
+  connectWifi();
 
   // NTP Time Server
   newPopupScreen("NTP Setup", "Syncing NTP time");
@@ -214,12 +170,22 @@ void loop() {
   loopCount++;
   LOOP_COUNT++;
 
-  delay(ADAPTIVE_DELAY);  // avg code run time is ~2 ms
+  if (!wifiRadioOn()) {
+    lowPowerModeInit();
+    esp_sleep_enable_timer_wakeup(ADAPTIVE_DELAY * 1000);   // 98 ms
+    esp_light_sleep_start();
+    fullPowerMode();
+    Wire.begin();
+  }
+
+  else {
+    delay(ADAPTIVE_DELAY);  // avg code run time is ~2 ms
+  }
 }
 
 void loop100ms() {
   // Run Simulation if needed
-  if (TEST_MODE) simulatePump();
+  if (TEST_MODE) simulateLogger();
 
   // Read Inputs
   readDigitalButton();
@@ -232,13 +198,12 @@ void loop100ms() {
   // Update Outputs
   displayText();
   updatePopupScreen();
-  setLED();
+  setLed();
   //webServer();  REMOVE AFRER TESTING
 
   // process Events
   processLoopCheck();
   processTestEvent();
-  processFBWriteEvent();
 
   // Others
   handleOTA();
@@ -274,7 +239,7 @@ void loop10Sec() {
   ensureServerStarted();
 
   // Early WiFi stabilization
-  if (LOOP_COUNT < 40 * LOOPS_PER_SEC) check_wifi();
+  if (LOOP_COUNT < 40 * LOOPS_PER_SEC) checkWifi();
 
 
   // OTA
@@ -294,7 +259,7 @@ void loop1Min() {
   else diagState.setSystemState("RUNNING");
 
   // Reconnect Wifi if needed
-  check_wifi();
+  checkWifi();
   updateWifiDiagState();
   diagState.updateDiagInfo();
 
@@ -390,13 +355,6 @@ void readTouchSwitch() {
   TLog("TS read time: ", startTime);
 }
 
-void processButton() {
-  Serial.println("Button Event");
-  displayPopupScreen("BUTTON PRESSED", "Show Main Menu");
-  delay(1000);
-  oledMain(MAIN_TIMEOUT_SEC);
-}
-
 void processLoopCheck() {
   static uint32_t loopCount = 0;
   static uint32_t startTime = 0;
@@ -471,10 +429,12 @@ void testDataStore() {
   }
 }
 
-void check_wifi() {
+void checkWifi() {
+  if (!wifiRadioOn()) return; 
+
   if (!wifiOK()) {
     Serial.println("WiFi not OK, reconnecting...");
-    connectPumpWifi();
+    connectWifi();
     WIFI_ERR++;
     return;
   }

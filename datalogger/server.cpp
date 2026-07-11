@@ -21,7 +21,7 @@ static const uint8_t PAGE_PUMP    = 0;
 static const uint8_t PAGE_SYSTEMS = 1;
 static const uint8_t PAGE_CHARTS  = 2;
 static const uint8_t PAGE_CONN    = 3;
-static const uint8_t PAGE_BLOCK   = 4;
+static const uint8_t PAGE_UTIL    = 4;
 static const uint8_t PAGE_WIFI    = 7;
 
 // -------------------------
@@ -244,8 +244,8 @@ static const char SYSTEM_TABLE_OPEN[] PROGMEM =
 static const char CONN_TABLE_OPEN[] PROGMEM =
 "<table><tr><th>CONNECTIVITY DATA</th><th>VALUE</th></tr>";
 
-static const char BLOCK_TABLE_OPEN[] PROGMEM =
-"<table><tr><th>4HR BLOCK DATA</th><th>VALUE</th></tr>";
+static const char UTIL_TABLE_OPEN[] PROGMEM =
+"<table><tr><th>UTIL DATA</th><th>VALUE</th></tr>";
 
 static const char WIFI_TABLE_OPEN[] PROGMEM =
 "<table><tr><th>WIFI DATA</th><th>VALUE</th></tr>";
@@ -359,14 +359,14 @@ static uint8_t parsePageParam(const char *path, size_t pathLen) {
   if (strncmp(p, "systems", 7) == 0) return PAGE_SYSTEMS;
   if (strncmp(p, "charts", 6) == 0)  return PAGE_CHARTS;
   if (strncmp(p, "conn", 4) == 0)    return PAGE_CONN;
-  if (strncmp(p, "block", 5) == 0)   return PAGE_BLOCK;
+  if (strncmp(p, "util", 5) == 0)    return PAGE_UTIL;
   if (strncmp(p, "wifi", 4) == 0)    return PAGE_WIFI; 
 
   return PAGE_PUMP;
 }
 
 // Navigation Buttons 
-// PUMP / SYS / CON / BLOCK / WIFI / CHART / EXPORT* / JSON* / REFERSH*)
+// PUMP / SYS / CON / UTIL / WIFI / CHART / EXPORT* / REFERSH*)
 static void renderNavButtons(WiFiClient &client, uint8_t active) {
   client.println(F("<div class=\"nav\">"));
 
@@ -383,8 +383,8 @@ static void renderNavButtons(WiFiClient &client, uint8_t active) {
   client.println(F("\" onclick=\"setPage('conn')\">CONN</button>"));
 
   client.print(F("<button class=\"navbtn "));
-  client.print(active == PAGE_BLOCK ? "active" : "white");
-  client.println(F("\" onclick=\"setPage('block')\">BLOCK</button>"));
+  client.print(active == PAGE_UTIL ? "active" : "white");
+  client.println(F("\" onclick=\"setPage('util')\">UTIL</button>"));
 
 
   client.print(F("<button class=\"navbtn "));
@@ -541,30 +541,6 @@ static void renderSystemTable(WiFiClient &client) {
   renderNavButtons(client, PAGE_SYSTEMS);
 }
 
-static void printBlockRangeRow(
-  WiFiClient &client,
-  const __FlashStringHelper *label,
-  const uint32_t *values,
-  uint8_t startBlock,
-  uint8_t endBlock,
-  const char *unit
-) {
-  String text = "";
-
-  for (uint8_t i = startBlock; i <= endBlock; i++) {
-    if (i > startBlock) text += " | ";
-
-    if (i < NUM_4HR_BLOCKS) text += String(values[i]);
-    else text += "0";
-  }
-
-  if (unit && unit[0] != '\0') {
-    text += " ";
-    text += unit;
-  }
-
-  printRow(client, label, text);
-}
 
 static void renderConnTable(WiFiClient &client) {
   client.print((const __FlashStringHelper*)CONN_TABLE_OPEN);
@@ -573,47 +549,12 @@ static void renderConnTable(WiFiClient &client) {
   renderNavButtons(client, PAGE_CONN);
 }
 
-static void renderBlockTable(WiFiClient &client) {
-  client.print((const __FlashStringHelper*)BLOCK_TABLE_OPEN);
+static void renderUtilTable(WiFiClient &client) {
+  client.print((const __FlashStringHelper*)UTIL_TABLE_OPEN);
 
-  printRow(client, F("Todays 4Hr Block Count"), getStoredDailyBlockCount());
-  printRow(client, F("First 4Hr Block (index)"), getFirst4hrBlockIdx());
-
-  // Last 4 hr block
-  uint8_t hr = getLastStoredBlockHour();
-  const char* suffix;
-  uint8_t displayHr;
-  if (hr == 0) { displayHr = 12; suffix = "AM"; } 
-  else if (hr < 12) { displayHr = hr; suffix = "AM"; }
-  else if (hr == 12) { displayHr = 12; suffix = "PM"; }
-  else if (hr <= 24) { displayHr = hr - 12; suffix = "PM"; }
-  else {displayHr = 0; suffix = "ERR";}
-  char buf[12];
-  snprintf(buf, sizeof(buf), "%u %s", displayHr, suffix);
-
-  
-  printRow(client, F("Last 4Hr Block Day"), blockDayKey);
-  printRow(client, F("Last 4Hr Block Hour"), buf);
-
-  printRow(client, F("Total 4Hr Block Writes"), getTotalBlockWriteCount());
-
-  // Data Type
-  if (getDataType() == DATA_SYSTEM)
-    printRow(client, F("Block Data Type"), "system");
-  else if (getDataType() == DATA_ESTIMATED)
-    printRow(client, F("Block Data Type"), "estimated");
-  else if (getDataType() == DATA_PARTIAL)
-    printRow(client, F("Block Data Type"), "partial");
-  else printRow(client, F("Block Data Type"), "unknown"); 
-
-  // block data
-  printBlockRangeRow(client, F("Block [0:2] (Cyc)"), CYCLE_4HR, 0, 2, "cyc");
-  printBlockRangeRow(client, F("Block [3:5] (Cyc)"), CYCLE_4HR, 3, 5, "cyc");
-  printBlockRangeRow(client, F("Block [0:2] (Gal)"), GAL_4HR, 0, 2, "gal");
-  printBlockRangeRow(client, F("Block [3:5] (Gal)"), GAL_4HR, 3, 5, "gal");
 
   // Nav Buttons
-  renderNavButtons(client, PAGE_BLOCK);
+  renderNavButtons(client, PAGE_UTIL);
 }
 
 
@@ -650,7 +591,7 @@ static void renderData(WiFiClient &client, uint8_t page) {
     case PAGE_SYSTEMS: renderSystemTable(client);  break;
     case PAGE_CHARTS:  renderChartsPage(client);   break;
     case PAGE_CONN:    renderConnTable(client);    break;
-    case PAGE_BLOCK:   renderBlockTable(client);   break;
+    case PAGE_UTIL:    renderUtilTable(client);   break;
     case PAGE_WIFI:    renderWifiTable(client);    break;
     case PAGE_PUMP:
     default:           renderPumpTable(client);    break;
@@ -670,7 +611,7 @@ static void renderPageShell(WiFiClient &client) {
 
   client.println(F("<div class=\"page-wrap\">"));
   client.println(F("<div class=\"title-wrap\">"));
-  client.print(F("<h3>Shahman Pump Monitor "));
+  client.print(F("<h3>Shahman Data Logger "));
   client.print(APP_VERSION);
   if (TEST_MODE) client.print(F(" *TEST*"));
   client.println(F("</h3>"));
@@ -771,7 +712,7 @@ void webServer() {
     char suffix[10]; 
     if (TEST_MODE) snprintf(suffix, sizeof(suffix), "_test");
     else snprintf(suffix, sizeof(suffix), "");  
-    snprintf(fname, sizeof(fname), "pump%s_json_%s.json", suffix, ts);
+    snprintf(fname, sizeof(fname), "logger%s_json_%s.json", suffix, ts);
 
     httpJsonAttachment(client, fname);
   } 

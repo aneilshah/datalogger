@@ -30,7 +30,6 @@ extern const char APP_VERSION[];     // (don’t put PROGMEM on the extern)
 #define ON 1
 #define FALSE 0
 #define TRUE 1
-#define NUM_4HR_BLOCKS 6
 
 #define SENSOR_AMP_PER_VOLT 10
 #define LOOPS_PER_SEC 10

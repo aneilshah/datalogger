@@ -18,6 +18,7 @@ extern const char* CONN_STATUS;
 extern WiFiServer server;
 
 static bool serverStarted = false;
+uint8_t wifiRadioState = 0;
 
 bool wifiLinkUp() {
   return WiFi.status() == WL_CONNECTED &&
@@ -159,9 +160,6 @@ void updateWifiDiagState() {
   // State
   diagState.setWifiState("CONNECTED");
 }
-
-
-
 
 
 void scanWifi() {
@@ -335,7 +333,9 @@ bool connectDhcpThenStaticHost(const char* ssid, const char* password) {
   return (WiFi.localIP() == staticIP);
 }
 
-void connectPumpWifi() {
+void connectWifi() {
+
+  wifiRadioState = 1;
   char details[64];
   snprintf(details, sizeof(details), "Network: %s", WIFI_SSID);
   displayPopupScreen("CONNECTING...", details);
@@ -345,7 +345,7 @@ void connectPumpWifi() {
 
   if (ok) {
     CONN_STATUS = "CONN";
-    Serial.println("WiFi connected with static host 184/190");
+    Serial.println("WiFi connected with static host 186/192");
     Serial.print("IP address: ");
     Serial.println(WiFi.localIP());
 
@@ -360,7 +360,18 @@ void connectPumpWifi() {
   }
 
   oledMain(MAIN_TIMEOUT_SEC);
-  LEDOff();
+  ledOff();
+}
+
+void disconnectWifi() {
+  wifiRadioState = 0;
+  CONN_STATUS = "NOT_CONNECTED";
+  WiFi.disconnect(true);   // Disconnect and stop reconnect attempts
+  WiFi.mode(WIFI_OFF);     // Turn off the Wi-Fi radio
+}
+
+bool wifiRadioOn() {
+  return wifiRadioState == 1;
 }
 
 bool ensureServerStarted() {
