@@ -58,7 +58,7 @@ void setOledMode(uint8_t mode) {
   oledModeTimer = 0;
 }
 
-void clearOledModalEvent() {
+void clearModalEvent() {
   oledModalEvent = false;
 }
 
@@ -333,7 +333,7 @@ void oledOn() {
 
 void oledModal(const char* title) {
   strncpy(modalTitle, title, sizeof(modalTitle) - 1);
-  clearOledModalEvent();
+  clearModalEvent();
   setOledMode(OLED_MODAL);
 }
 

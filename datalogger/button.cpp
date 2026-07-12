@@ -14,6 +14,7 @@
 static uint8_t buttonState = BUTTON_OFF;
 static bool stuckButton = false;
 static uint16_t holdTime = 0;
+static uint16_t prevHold = 0;
 
 bool buttonStuck() {return stuckButton;}
 bool shortPress() {return buttonState == SHORT_PRESS;}
@@ -34,13 +35,19 @@ void processShortButtonPressEvent(uint16_t hold) {
   Serial.printf("Short Button Press: %u\n", hold);
 }
 
-void processButton(uint16_t hold)
+void processButton(uint8_t btnVal)
 {
     static constexpr uint16_t HOLD_THRESH = 5;
-    static uint16_t prevHold = 0;
+    static constexpr uint16_t MAX_HOLD = 500;
 
-    // Button Off
-    if (hold == 0) {
+    //Serial.printf("btnVal: %u  holdTime: %u  prevHold: %u  state: %u\n", btnVal, holdTime, prevHold, buttonState);
+
+    // Update Hold Time
+    if (btnVal && holdTime < MAX_HOLD) holdTime++;
+    if (!btnVal) holdTime = 0;
+
+    // Check Button Off
+    if (holdTime == 0) {
       if (prevHold > 0 && prevHold < HOLD_THRESH) {
         processShortButtonPressEvent(prevHold);
       }
@@ -56,12 +63,11 @@ void processButton(uint16_t hold)
       return;
     }
 
-    // Button Held
-    if (hold >= HOLD_THRESH) {
-      holdTime = hold;
-      processButtonHold(hold);
+    // Check Button Held
+    if (holdTime >= HOLD_THRESH) {
+      processButtonHold(holdTime);
     }
 
     // note that we are not setting holdTime until long hold detected
-    prevHold = hold;
+    prevHold = holdTime;
 }

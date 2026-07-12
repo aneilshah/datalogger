@@ -1,6 +1,6 @@
 #pragma once
 
-void processButton(uint16_t hold);
+void processButton(uint8_t btnVal);
 bool shortPress();
 bool longPress();
 uint16_t buttonHold();

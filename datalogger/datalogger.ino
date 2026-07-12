@@ -347,28 +347,8 @@ void readDigital() {
 }
 
 void readDigitalButton() {
-  static uint8_t oldBtn = 1;
-  static uint16_t holdTime = 0;
-  const uint16_t MAX_HOLD = 50000;
-
   BTN_VAL = !digitalRead(BTN_PIN);     // Read New Button Status
-  if (BTN_VAL) 
-  {
-    if (holdTime < MAX_HOLD) holdTime++;
-  }
-  else holdTime = 0;
-  processButton(holdTime);
-  return;
-
-  ////////////////////////////////////////////////////
-
-  // if (oldBtn == 1 && BTN_VAL == 0) {
-  //   processButton(holdTime);
-  //   holdTime = 0;
-  // }
-  // else if (oldBtn == 1 && BTN_VAL == 1) holdTime++;
-  // else holdTime = 0;
-  // oldBtn = BTN_VAL;                   // Save Status
+  processButton(BTN_VAL);
 }
 
 void readTouchSwitch() {

@@ -10,7 +10,6 @@ uint8_t powerMode = POWER_FULL;
 
 void lowPowerModeInit() {
   powerMode = POWER_LOW;
-
   disconnectWifi();
   oledOff();
   ledOff();

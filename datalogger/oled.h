@@ -27,7 +27,7 @@ void oledModal(const char* title);
 void oledOn();
 void oledOff();
 bool modalEvent();
-void clearOledModalEvent();
+void clearModalEvent();
 
 // getters
 uint8_t getOledMode();

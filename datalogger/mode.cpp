@@ -30,7 +30,7 @@ const char* getLoggerModeTxt() {
 void setLoggerMode(uint8_t mode) {
   loggerMode = mode;
   modeTimer = 0;
-  clearOledModalEvent();
+  clearModalEvent();
   Serial.printf("Logger Mode: %s\n", getLoggerModeTxt());
 }
 
@@ -63,9 +63,10 @@ void processLoggerMode() {
 
   // Paused, has data
   else if (loggerMode == MODE_PAUSED) {
-    if (shortPress())
+    if (shortPress()) {
       setLoggerMode(MODE_CHECK_RESTART);
       oledModal("RESTART LOGGING?");
+    }
   }
 
   // Checking to start logging from init
@@ -74,8 +75,9 @@ void processLoggerMode() {
       lowPowerModeInit();
       setLoggerMode(MODE_LOGGING);
     }
-    else if (shortPress())
+    else if (shortPress()) {
       setLoggerMode(MODE_INIT);
+    }
   }
 
   // Check if user wants to Reset Logger
@@ -85,9 +87,10 @@ void processLoggerMode() {
       // TODO: ADD RESET CODE HERE (logger.reset() etc)
       setLoggerMode(MODE_INIT);
     }
-    else if (shortPress())
+    else if (shortPress()) {
       setLoggerMode(MODE_PAUSED);
       oledMain();
+    }
   }
 
   // Check if user wants to Pause Logging
@@ -95,12 +98,14 @@ void processLoggerMode() {
     if (modalEvent()) {
       resumeFullPowerMode();
       //TODO: Might need new OLED screen here?
+      Serial.println("OLED MAIN");
       oledMain();
       setLoggerMode(MODE_PAUSED);
     }
-    else if (shortPress())
-      lowPowerModeInit();
+    else if (shortPress()) {
       setLoggerMode(MODE_LOGGING);
+      oledOff();
+    }
   }
 
   // Check if user wants to Restart from Paused state
@@ -109,9 +114,10 @@ void processLoggerMode() {
       lowPowerModeInit();
       setLoggerMode(MODE_LOGGING);
     }
-    else if (shortPress())
+    else if (shortPress()) {
       setLoggerMode(MODE_CHECK_RESET);
       oledModal("RESTART LOGGING?");
+    }
   }
 
   // Default to Init Mode, should not get here
@@ -122,4 +128,3 @@ void processLoggerMode() {
 
   modeTimer++;
 }
-
