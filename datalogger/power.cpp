@@ -24,7 +24,6 @@ void resumeFullPowerMode() {
   powerMode = POWER_FULL;
   ledOn();
   oledOn();
-  oledMain();
   connectWifi();
 }
 
@@ -32,7 +31,6 @@ void resumeHalfPowerMode() {
   powerMode = POWER_HALF;
   ledOn();
   oledOn();
-  oledHalfPower();
 }
 
 uint8_t getPowerMode() {

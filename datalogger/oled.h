@@ -8,11 +8,11 @@
 #define OLED_MAIN 1
 #define OLED_POPUP 2
 #define OLED_MINIMIZED 3
-#define OLED_LOW_POWER 4
-#define OLED_HALF_POWER 5
+#define OLED_MODAL 4
+#define OLED_PAUSE_LOGGER 5
 #define OLED_MODE_NO_TIMEOUT 10
 
-#define HOLD_TIMEOUT 30
+#define OLED_HOLD_TIMEOUT 30
 
 void initDisplay();
 void updateOLED();
@@ -22,10 +22,12 @@ void updatePopupScreen();
 void oledMain(uint32_t duration = MAIN_TIMEOUT_SEC);
 void oledMinimized();
 void oledBlank();
-void oledHalfPower();
-void oledLowPower();
+void oledPauseLogger();
+void oledModal(const char* title);
 void oledOn();
 void oledOff();
+bool modalEvent();
+void clearOledModalEvent();
 
 // getters
 uint8_t getOledMode();

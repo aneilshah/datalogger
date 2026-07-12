@@ -348,6 +348,7 @@ void connectWifi() {
     Serial.println(WiFi.localIP());
 
     // Keep your time sync here (don’t return early if you want server/UI to keep working)
+    newPopupScreen("NTP Setup", "Syncing NTP time");
     if (!syncTime()) {
       Serial.println("NTP failed");
     }

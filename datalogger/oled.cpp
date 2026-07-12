@@ -33,6 +33,8 @@ static uint32_t popupTimer = 0;
 static uint32_t mainTimer = 0;
 static uint32_t mainTimeout = OLED_MODE_NO_TIMEOUT;
 static uint32_t oledModeTimer = 0;
+static char modalTitle[32] = "";
+static bool oledModalEvent = false;
 
 #define MIN_MODE_CYCLE_TIME (5 * LOOPS_PER_SEC)
 
@@ -54,6 +56,14 @@ void VextOFF(void)  //Vext default OFF
 void setOledMode(uint8_t mode) {
   oledMode = mode;
   oledModeTimer = 0;
+}
+
+void clearOledModalEvent() {
+  oledModalEvent = false;
+}
+
+bool modalEvent() {
+  return oledModalEvent;
 }
 
 void initDisplay() {
@@ -84,8 +94,8 @@ void updateOLED() {
     display.setFont(ArialMT_Plain_10);
 
     // Line 0: HEADER
-    if (TEST_MODE) snprintf(line0, sizeof(line0), "SHAH LOG %s T", APP_VERSION);
-    else           snprintf(line0, sizeof(line0), "SHAH LOG %s", APP_VERSION);
+    if (TEST_MODE) snprintf(line0, sizeof(line0), "DATA LOG %s T", APP_VERSION);
+    else           snprintf(line0, sizeof(line0), "DATA LOG %s", APP_VERSION);
     display.drawString(horOffset, vertOffsetMain, line0);
 
     // Line 1: Wifi
@@ -222,41 +232,31 @@ void updateOLED() {
     display.display();
   }
 
-  else if (oledMode == OLED_LOW_POWER) {
-    uint16_t countdown = HOLD_TIMEOUT - buttonHold();
+  else if (oledMode == OLED_MODAL) {
+    uint16_t countdown = 0;
+    
+    if (buttonHold() < OLED_HOLD_TIMEOUT) 
+      countdown = OLED_HOLD_TIMEOUT - buttonHold();
 
     display.clear();
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.setFont(ArialMT_Plain_10);
 
     // Status Bar
-    snprintf(line2, sizeof(line2), "LOW POWER in... %u", countdown);
-    display.drawString(horOffset, 20 + vertOffset, line2);
+    snprintf(line1, sizeof(line1), modalTitle);
+    display.drawString(horOffset, 10 + vertOffset, line1);
 
-    snprintf(line3, sizeof(line3), "Mode Timer: ... %u", getModeTimer());
+    snprintf(line3, sizeof(line3), "HOLD to Enter (%u)", countdown);
     display.drawString(horOffset, 30 + vertOffset, line3);
 
-    snprintf(line4, sizeof(line4), "HOLD: ... %u", buttonHold());
+    snprintf(line4, sizeof(line4), "Press to Cancel");
     display.drawString(horOffset, 40 + vertOffset, line4);
     display.display();
 
     if (countdown == 0) {
-      lowPowerModeInit();
-    }
-  } 
-
-  else if (oledMode == OLED_HALF_POWER) {
-    uint16_t countdown = HOLD_TIMEOUT - buttonHold();
-    display.clear();
-    display.setTextAlignment(TEXT_ALIGN_LEFT);
-    display.setFont(ArialMT_Plain_10);
-
-    // Status Bar
-    snprintf(line2, sizeof(line2), "HALF POWER in... %u", countdown);
-    display.drawString(horOffset, 20 + vertOffset, line2);
-    display.display();
-    if (countdown == 0) {
-      oledMain();
+      if (!oledModalEvent)
+        Serial.println("MODAL EVENT");
+      oledModalEvent = true;
     }
   } 
 
@@ -331,12 +331,14 @@ void oledOn() {
   display.displayOn();
 }
 
-void oledLowPower() {
-  setOledMode(OLED_LOW_POWER);
+void oledModal(const char* title) {
+  strncpy(modalTitle, title, sizeof(modalTitle) - 1);
+  clearOledModalEvent();
+  setOledMode(OLED_MODAL);
 }
 
-void oledHalfPower() {
-  setOledMode(OLED_HALF_POWER);
+void oledPauseLogger() {
+  setOledMode(OLED_PAUSE_LOGGER);
 }
 
 

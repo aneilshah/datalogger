@@ -1,5 +1,6 @@
 // Button.cpp
 #include "global.h"
+#include "button.h"
 
 #include "oled.h"
 #include "power.h"
@@ -20,31 +21,17 @@ bool longPress() {return buttonState == LONG_PRESS;}
 uint16_t buttonHold() {return holdTime;}
 
 void processButtonHold(uint16_t hold) {
-
+  buttonState = BUTTON_HOLD;
 }
 
 void processLongButtonPressEvent(uint16_t hold) {
-
+  buttonState = LONG_PRESS;
+  Serial.printf("Long Button Press: %u\n", hold);
 } 
 
-void processShortButtonPressEvent() {
-  // Toggle Power Modes
-  if (getPowerMode() == POWER_FULL && getOledMode() == OLED_MAIN) {
-    oledLowPower();
-  } 
-
-  else if (getPowerMode() == POWER_FULL && getOledMode() == OLED_LOW_POWER) {
-    oledMain();
-  } 
-  
-  else if (getPowerMode() == POWER_HALF) {
-    resumeFullPowerMode();
-  } 
-  
-  // Low Power
-  else {
-    resumeHalfPowerMode();
-  }
+void processShortButtonPressEvent(uint16_t hold) {  
+  buttonState = SHORT_PRESS;
+  Serial.printf("Short Button Press: %u\n", hold);
 }
 
 void processButton(uint16_t hold)
@@ -55,14 +42,10 @@ void processButton(uint16_t hold)
     // Button Off
     if (hold == 0) {
       if (prevHold > 0 && prevHold < HOLD_THRESH) {
-        buttonState = SHORT_PRESS;
-        processShortButtonPressEvent();
-        Serial.printf("Short Button Press: %u\n", prevHold);
+        processShortButtonPressEvent(prevHold);
       }
       else if (prevHold >= HOLD_THRESH) {
-        buttonState = LONG_PRESS;
-        processLongButtonPressEvent(hold);
-        Serial.printf("Long Button Press: %u\n", prevHold);
+        processLongButtonPressEvent(prevHold);
       }
       else {
         buttonState = BUTTON_OFF;
@@ -75,7 +58,6 @@ void processButton(uint16_t hold)
 
     // Button Held
     if (hold >= HOLD_THRESH) {
-      buttonState = BUTTON_HOLD;
       holdTime = hold;
       processButtonHold(hold);
     }

@@ -10,6 +10,8 @@
 #define MODE_PAUSED   2
 #define MODE_CHECK_START 3
 #define MODE_CHECK_RESET 4
+#define MODE_CHECK_PAUSE 5
+#define MODE_CHECK_RESTART 6
 
 extern EventLogger Logger;
 

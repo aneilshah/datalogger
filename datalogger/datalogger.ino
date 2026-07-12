@@ -11,6 +11,7 @@
 
 // My Drivers
 #include "button.h"
+#include "mode.h"
 #include "ntp.h"
 #include "nvm.h"
 #include "oled.h"
@@ -137,7 +138,6 @@ void setup() {
   connectWifi();
 
   // NTP Time Server
-  newPopupScreen("NTP Setup", "Syncing NTP time");
   setupNTP();
   oledMain(MAIN_TIMEOUT_SEC);
 
@@ -200,6 +200,7 @@ void loop100ms() {
   // Run Main Logic
   checkForPumpEvent();  // Want accurate timing so check every 100ms
   processPumpEvent();
+  processLoggerMode();
 
   // Update Outputs
   updateOLED();
