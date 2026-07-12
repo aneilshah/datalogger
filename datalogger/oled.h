@@ -12,12 +12,12 @@
 #define OLED_HALF_POWER 5
 #define OLED_MODE_NO_TIMEOUT 10
 
-#define OLED_POWER_TIMEOUT 30
+#define HOLD_TIMEOUT 30
 
 void initDisplay();
-void displayText();
-void displayPopupScreen(const char* text, const char* details, uint16_t timeout = 0, uint8_t next = OLED_MAIN);
-void newPopupScreen(const char* text, const char* details, uint16_t timeout = 0, uint8_t next = OLED_MAIN);
+void updateOLED();
+void displayPopupScreen(const char* text, const char* details, uint16_t timeout = 0, uint8_t nextMode = OLED_MAIN);
+void newPopupScreen(const char* text, const char* details, uint16_t timeout = 0, uint8_t nextMode = OLED_MAIN);
 void updatePopupScreen();
 void oledMain(uint32_t duration = MAIN_TIMEOUT_SEC);
 void oledMinimized();

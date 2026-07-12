@@ -11,13 +11,13 @@ static const esp_partition_t *loggerPartition = nullptr;
 
 static uint32_t headerAddress()
 {
-    return 0;
+  return 0;
 }
 
 static uint32_t hourAddress(uint16_t hour)
 {
-    return sizeof(EventLogger::LogHeader) +
-           (hour * sizeof(EventLogger::HourRecord));
+  return sizeof(EventLogger::LogHeader) +
+          (hour * sizeof(EventLogger::HourRecord));
 }
 
 //-----------------------------------------------------

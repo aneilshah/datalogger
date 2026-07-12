@@ -3,13 +3,12 @@
 //
 // Logger Charts
 //
-// Part 1 of 3
 //*****************************************************************************
 
 #include "charts.h"
 
 #include "global.h"
-#include "logger.h"
+#include "mode.h"
 
 #include <stdio.h>
 

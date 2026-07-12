@@ -2,30 +2,13 @@
 
 #include <stdint.h>
 
-//-----------------------------------------------------
-// Logger Modes
-//-----------------------------------------------------
-
-#define LG_INIT     0
-#define LG_LOGGING  1
-#define LG_PAUSED   2
-
 enum : uint8_t
 {
     EVENT_CONTINUES = 0x01
 };
 
-//-----------------------------------------------------
-// Globals
-//-----------------------------------------------------
-
-uint8_t getLoggerMode();
-
-void initLogger();
-void processLogger();
 
 class EventLogger;
-extern EventLogger Logger;
 
 //-----------------------------------------------------
 // Event Logger

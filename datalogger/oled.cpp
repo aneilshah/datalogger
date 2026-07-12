@@ -2,8 +2,12 @@
 #include <Wire.h>
 #include "HT_SSD1306Wire.h"
 #include "global.h"
-#include "oled.h"
+
+// Project Files
+#include "button.h"
+#include "mode.h"
 #include "ntp.h"
+#include "oled.h"
 #include "power.h"
 #include "pumpData.h"
 #include "pumpFunc.h"
@@ -21,12 +25,14 @@ SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED)
 
 // OLED State
 static uint8_t oledMode = OLED_OFF;
+static uint8_t nextOledMode = OLED_MAIN;
+static uint16_t popupTimeout = 0;
 static char PopupText[32] = "";
 static char PopupDetails[64] = "";
 static uint32_t popupTimer = 0;
-static uint8_t powerTimer = 10;
 static uint32_t mainTimer = 0;
 static uint32_t mainTimeout = OLED_MODE_NO_TIMEOUT;
+static uint32_t oledModeTimer = 0;
 
 #define MIN_MODE_CYCLE_TIME (5 * LOOPS_PER_SEC)
 
@@ -45,14 +51,19 @@ void VextOFF(void)  //Vext default OFF
   digitalWrite(Vext, HIGH);
 }
 
+void setOledMode(uint8_t mode) {
+  oledMode = mode;
+  oledModeTimer = 0;
+}
+
 void initDisplay() {
   display.init();
-  oledMode = OLED_OFF;
+  setOledMode(OLED_OFF);
   VextON();
 }
 
-void displayText() {
-  static unsigned int cnt = 0;
+void updateOLED() {
+  static unsigned int offsetTimer = 0;
   static unsigned int horOffset = 0;
   static unsigned int vertOffset = 0;
   static unsigned int vertOffsetMain = 0;
@@ -65,7 +76,7 @@ void displayText() {
   char line4[48];
   char line5[48];
 
-  horOffset = (cnt / (60 * LOOPS_PER_SEC)) % 10;  // Every 60 seconds, span = 10 pixels  
+  horOffset = (offsetTimer / (60 * LOOPS_PER_SEC)) % 10;  // Every 60 seconds, span = 10 pixels  
 
   if (oledMode == OLED_MAIN) {
     display.clear();
@@ -136,7 +147,7 @@ void displayText() {
     display.drawString(horOffset, 40 + vertOffsetMain, line4);
 
     // Line 5: On Time / Clock
-    float hours = cnt / 36000.0f;
+    float hours = offsetTimer / 36000.0f;
     if (hours < 24.0f) {
       snprintf(line5, sizeof(line5), "UP:%.1fh | CLK:%s", hours, getClock());
     } else {
@@ -151,7 +162,7 @@ void displayText() {
     // Update timers and change state as needed
     if (mainTimer > 0) mainTimer--;
     if (mainTimeout != OLED_MODE_NO_TIMEOUT && mainTimer == 0) {
-      oledMode = OLED_MINIMIZED;  
+      setOledMode(OLED_MINIMIZED);  
     }
   }
 
@@ -165,7 +176,7 @@ void displayText() {
     snprintf(cycMin, sizeof(cycMin), "%.1f", deltaMin);
 
     const unsigned int CYCLE_COUNT = 8;
-    unsigned int mode = (cnt / MIN_MODE_CYCLE_TIME) % CYCLE_COUNT;
+    unsigned int mode = (offsetTimer / MIN_MODE_CYCLE_TIME) % CYCLE_COUNT;
 
     display.clear();
     display.setTextAlignment(TEXT_ALIGN_LEFT);
@@ -178,8 +189,8 @@ void displayText() {
     }
     else if (mode == 1) {
       snprintf(line2, sizeof(line2), "ON: %u%c [%u%c]",
-              (unsigned)(cnt / LOOPS_PER_SEC), 's',
-              (unsigned)(cnt / 864000), 'd');
+              (unsigned)(offsetTimer / LOOPS_PER_SEC), 's',
+              (unsigned)(offsetTimer / 864000), 'd');
       display.drawString(horOffset, vertOffset, line2);
     }
     else if (mode == 2) {
@@ -206,45 +217,58 @@ void displayText() {
       display.drawString(horOffset, vertOffset, "Press TOP Button");
     }
 
-    if (cnt % (120 * LOOPS_PER_SEC) == 0) vertOffset = random(0, 50);
+    if (offsetTimer % (120 * LOOPS_PER_SEC) == 0) vertOffset = random(0, 50);
 
     display.display();
   }
 
   else if (oledMode == OLED_LOW_POWER) {
+    uint16_t countdown = HOLD_TIMEOUT - buttonHold();
+
     display.clear();
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.setFont(ArialMT_Plain_10);
 
     // Status Bar
-    snprintf(line2, sizeof(line2), "LOW POWER in... %u", powerTimer);
+    snprintf(line2, sizeof(line2), "LOW POWER in... %u", countdown);
     display.drawString(horOffset, 20 + vertOffset, line2);
+
+    snprintf(line3, sizeof(line3), "Mode Timer: ... %u", getModeTimer());
+    display.drawString(horOffset, 30 + vertOffset, line3);
+
+    snprintf(line4, sizeof(line4), "HOLD: ... %u", buttonHold());
+    display.drawString(horOffset, 40 + vertOffset, line4);
     display.display();
-    powerTimer--;
-    if (powerTimer == 0) {
+
+    if (countdown == 0) {
       lowPowerModeInit();
     }
   } 
 
   else if (oledMode == OLED_HALF_POWER) {
+    uint16_t countdown = HOLD_TIMEOUT - buttonHold();
     display.clear();
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.setFont(ArialMT_Plain_10);
 
     // Status Bar
-    snprintf(line2, sizeof(line2), "HALF POWER in... %u", powerTimer);
+    snprintf(line2, sizeof(line2), "HALF POWER in... %u", countdown);
     display.drawString(horOffset, 20 + vertOffset, line2);
     display.display();
-    powerTimer--;
-    if (powerTimer == 0) {
+    if (countdown == 0) {
       oledMain();
     }
   } 
 
-  cnt++;  // shared counter for all modes
+  else if (oledMode == OLED_POPUP) {
+    updatePopupScreen();
+  }
+
+  oledModeTimer++;    // resets with mode change
+  offsetTimer++;  // doesnt reset with modes
 }
 
-void displayPopupScreen(const char* text, const char* details, uint16_t timeout, uint8_t next) {
+void displayPopupScreen(const char* text, const char* details, uint16_t timeout, uint8_t nextMode) {
   strncpy(PopupText, text, sizeof(PopupText) - 1);
   PopupText[sizeof(PopupText) - 1] = '\0';
 
@@ -252,7 +276,9 @@ void displayPopupScreen(const char* text, const char* details, uint16_t timeout,
   PopupDetails[sizeof(PopupDetails) - 1] = '\0';
 
   popupTimer = 0;
-  oledMode = OLED_POPUP;
+  popupTimeout = timeout;
+  nextOledMode = nextMode;
+  setOledMode(OLED_POPUP);
   updatePopupScreen();
 }
 
@@ -268,27 +294,33 @@ void updatePopupScreen() {
     // write the buffer to the display
     display.display();
 
+    if (popupTimeout && (getModeTimer() > popupTimeout * LOOPS_PER_SEC)) {
+      setOledMode(nextOledMode);
+    }
+
     popupTimer++;
   }
 }
 
-void newPopupScreen(const char* text, const char* details, uint16_t timeout, uint8_t next) {
-  displayPopupScreen(text, details, timeout, next);
+void newPopupScreen(const char* text, const char* details, uint16_t timeout, uint8_t nextMode) {
+  popupTimeout = timeout;
+  nextOledMode = nextMode;
+  displayPopupScreen(text, details, timeout, nextMode);
   updatePopupScreen();
 }
 
 void oledMain(uint32_t duration) {
-  oledMode = OLED_MAIN;
+  setOledMode(OLED_MAIN);
   mainTimer = duration;
   mainTimeout = duration;
 }
 
 void oledMinimized() {
-  oledMode = OLED_MINIMIZED;
+  setOledMode(OLED_MINIMIZED);
 }
 
 void oledBlank() {
-  oledMode = OLED_OFF;
+  setOledMode(OLED_OFF);
 }
 
 void oledOff() {
@@ -300,13 +332,11 @@ void oledOn() {
 }
 
 void oledLowPower() {
-  oledMode = OLED_LOW_POWER;
-  powerTimer = OLED_POWER_TIMEOUT;
+  setOledMode(OLED_LOW_POWER);
 }
 
 void oledHalfPower() {
-  oledMode = OLED_HALF_POWER;
-  powerTimer = OLED_POWER_TIMEOUT;
+  setOledMode(OLED_HALF_POWER);
 }
 
 

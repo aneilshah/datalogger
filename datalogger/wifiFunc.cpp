@@ -168,8 +168,7 @@ void scanWifi() {
         return;
     }
 
-    displayPopupScreen("SCANNING WIFI","Finding Networks");
-    updatePopupScreen();
+    newPopupScreen("SCANNING WIFI","Finding Networks");
     Serial.println("Starting WiFi scan...");
 
     int startTime = micros();
@@ -338,8 +337,7 @@ void connectWifi() {
   wifiRadioState = WIFI_RADIO_ON;
   char details[64];
   snprintf(details, sizeof(details), "Network: %s", WIFI_SSID);
-  displayPopupScreen("CONNECTING...", details);
-  updatePopupScreen();
+  newPopupScreen("CONNECTING...", details);
 
   bool ok = connectDhcpThenStaticHost(WIFI_SSID, WIFI_PSW);
 

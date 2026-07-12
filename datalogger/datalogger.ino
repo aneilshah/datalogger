@@ -25,6 +25,7 @@
 #include "diag.h"
 #include "ledFunc.h"
 #include "logger.h"
+#include "mode.h"
 #include "pumpData.h"
 #include "pumpFunc.h"
 #include "testcode.h"
@@ -201,8 +202,8 @@ void loop100ms() {
   processPumpEvent();
 
   // Update Outputs
-  displayText();
-  updatePopupScreen();
+  updateOLED();
+  //updatePopupScreen();
   setLed();
   //webServer();  REMOVE AFRER TESTING
 
@@ -346,12 +347,13 @@ void readDigital() {
 
 void readDigitalButton() {
   static uint8_t oldBtn = 1;
-  static uint32_t holdTime = 0;
+  static uint16_t holdTime = 0;
+  const uint16_t MAX_HOLD = 50000;
 
   BTN_VAL = !digitalRead(BTN_PIN);     // Read New Button Status
   if (BTN_VAL) 
   {
-    holdTime++;
+    if (holdTime < MAX_HOLD) holdTime++;
   }
   else holdTime = 0;
   processButton(holdTime);
@@ -359,13 +361,13 @@ void readDigitalButton() {
 
   ////////////////////////////////////////////////////
 
-  if (oldBtn == 1 && BTN_VAL == 0) {
-    processButton(holdTime);
-    holdTime = 0;
-  }
-  else if (oldBtn == 1 && BTN_VAL == 1) holdTime++;
-  else holdTime = 0;
-  oldBtn = BTN_VAL;                   // Save Status
+  // if (oldBtn == 1 && BTN_VAL == 0) {
+  //   processButton(holdTime);
+  //   holdTime = 0;
+  // }
+  // else if (oldBtn == 1 && BTN_VAL == 1) holdTime++;
+  // else holdTime = 0;
+  // oldBtn = BTN_VAL;                   // Save Status
 }
 
 void readTouchSwitch() {
