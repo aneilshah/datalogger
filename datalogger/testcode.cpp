@@ -11,6 +11,151 @@
 #include "ntp.h"
 #include "wifiFunc.h"
 
+#define LOGGER_MAGIC 0x12345678
+#define LOGGER_VERSION 1
+
+// HELPERS
+
+//*****************************************************************************
+// Build Flat Hour
+//*****************************************************************************
+void loggerBuildFlatHour(
+  EventLogger::HourRecord &hour,
+  uint32_t count,
+  uint32_t duration)
+{
+  memset(&hour, 0, sizeof(hour));
+
+  for (int i = 0; i < 60; i++)
+  {
+    hour.minute[i].count = count;
+    hour.minute[i].shortest = duration;
+    hour.minute[i].longest = duration;
+    hour.minute[i].total = count * duration;
+  }
+}
+
+//*****************************************************************************
+// Build Ramp Hour
+//*****************************************************************************
+void loggerBuildRampHour(
+  EventLogger::HourRecord &hour,
+  uint32_t maxCount,
+  uint32_t duration)
+{
+  memset(&hour, 0, sizeof(hour));
+
+  for (int i = 0; i < 60; i++)
+  {
+    uint32_t count = ((i + 1) * maxCount) / 60;
+
+    if (count == 0)
+      count = 1;
+
+    hour.minute[i].count = count;
+    hour.minute[i].shortest = duration;
+    hour.minute[i].longest = duration;
+    hour.minute[i].total = count * duration;
+  }
+}
+
+//*****************************************************************************
+// Build Burst Hour
+//*****************************************************************************
+void loggerBuildBurstHour(
+  EventLogger::HourRecord &hour,
+  uint32_t burstCount,
+  uint32_t duration)
+{
+  memset(&hour, 0, sizeof(hour));
+
+  for (int i = 0; i < 60; i++)
+  {
+    uint32_t count = 0;
+
+    if (i >= 20 && i < 40)
+      count = burstCount;
+
+    hour.minute[i].count = count;
+
+    if (count > 0)
+    {
+      hour.minute[i].shortest = duration;
+      hour.minute[i].longest  = duration;
+      hour.minute[i].total    = count * duration;
+    }
+  }
+}
+
+
+//*****************************************************************************
+// Create Test Data
+//*****************************************************************************
+void loggerCreateTestData()
+{
+  loggerDataErase();
+
+  EventLogger::LogHeader header;
+  EventLogger::HourRecord hour;
+
+  memset(&header, 0, sizeof(header));
+
+  header.magic = LOGGER_MAGIC;
+  header.version = LOGGER_VERSION;
+
+  strcpy(header.startTime, "2026-07-13 08:00");
+  strcpy(header.stopTime,  "2026-07-13 11:00");
+
+  header.samplesTaken = 3 * 3600;
+  header.hoursStored = 3;
+  header.crc = 0;
+
+  if (!loggerDataWriteHeader(header))
+  {
+    Serial.println("Header write failed");
+    return;
+  }
+
+  //------------------------------------------------
+  // Hour 0 - Flat
+  //------------------------------------------------
+
+  loggerBuildFlatHour(hour, 1, 10);
+
+  if (!loggerDataWriteHour(0, hour))
+  {
+    Serial.println("Hour 0 write failed");
+    return;
+  }
+
+  //------------------------------------------------
+  // Hour 1 - Ramp
+  //------------------------------------------------
+
+  loggerBuildRampHour(hour, 12, 10);
+
+  if (!loggerDataWriteHour(1, hour))
+  {
+    Serial.println("Hour 1 write failed");
+    return;
+  }
+
+  //------------------------------------------------
+  // Hour 2 - Burst
+  //------------------------------------------------
+
+  loggerBuildBurstHour(hour, 8, 15);
+
+  if (!loggerDataWriteHour(2, hour))
+  {
+    Serial.println("Hour 2 write failed");
+    return;
+  }
+
+  Serial.println("Logger test data created.");
+}
+
+
 //*****************************************************************************
 // Logger Test
 //*****************************************************************************
@@ -22,7 +167,7 @@ void loggerTest()
   // Build one hour of test data
   for (int minute = 0; minute < 60; minute++)
   {
-    Logger.clearBucket();
+    Logger.clearHourBlock();
 
     switch (minute % 6)
     {
@@ -79,7 +224,7 @@ void loggerTest()
         break;
     }
 
-    Logger.endBucket();
+    Logger.endHourBlock();
   }
 
   // Save first hour
@@ -135,7 +280,7 @@ void loggerDataTest()
   memset(&txHeader, 0, sizeof(txHeader));
   memset(&rxHeader, 0, sizeof(rxHeader));
 
-  txHeader.magic = 0x12345678;
+  txHeader.magic = LOGGER_MAGIC;
   txHeader.version = 1;
 
   strcpy(txHeader.startTime, "2026-07-13 17:30");
@@ -183,7 +328,7 @@ void loggerDataTest3Hours()
 
   memset(&header, 0, sizeof(header));
 
-  header.magic = 0x12345678;
+  header.magic = LOGGER_MAGIC;
   header.version = 1;
   strcpy(header.startTime, "2026-07-13 08:00");
   strcpy(header.stopTime,  "2026-07-13 11:00");
@@ -253,10 +398,13 @@ void loggerDataTest3Hours()
   Serial.println("3 Hours Written");
 }
 
+
 //*****************************************************************************
 // Dump Hour
 //*****************************************************************************
-void loggerDumpHour(uint16_t hourNumber)
+void loggerDumpHour(
+  uint16_t hourNumber,
+  bool detailed)
 {
   EventLogger::HourRecord hour;
 
@@ -268,6 +416,31 @@ void loggerDumpHour(uint16_t hourNumber)
 
   Serial.println();
   Serial.printf("===== HOUR %u =====\n", hourNumber);
+
+  if (!detailed)
+  {
+    uint32_t totalEvents = 0;
+    uint32_t totalSeconds = 0;
+    uint32_t longest = 0;
+
+    for (int i = 0; i < 60; i++)
+    {
+      const auto &m = hour.minute[i];
+
+      totalEvents += m.count;
+      totalSeconds += m.total;
+
+      if (m.longest > longest)
+        longest = m.longest;
+    }
+
+    Serial.printf("Events   : %lu\n", totalEvents);
+    Serial.printf("Duration : %lu sec\n", totalSeconds);
+    Serial.printf("Longest  : %lu sec\n", longest);
+
+    return;
+  }
+
   Serial.println("Min  Cnt  Tot  Min  Max  Flg");
   Serial.println("----------------------------");
 

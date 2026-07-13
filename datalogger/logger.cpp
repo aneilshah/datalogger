@@ -10,7 +10,7 @@ EventLogger::EventLogger()
 
 void EventLogger::clear()
 {
-  memset(&bucketStats, 0, sizeof(bucketStats));
+  memset(&hourStats, 0, sizeof(hourStats));
   memset(&sessionStats, 0, sizeof(sessionStats));
   memset(&currentHour, 0, sizeof(currentHour));
   memset(&header, 0, sizeof(header));
@@ -23,18 +23,18 @@ void EventLogger::clear()
   currentDuration = 0;
 }
 
-void EventLogger::clearBucket()
+void EventLogger::clearHourBlock()
 {
-  memset(&bucketStats, 0, sizeof(bucketStats));
+  memset(&hourStats, 0, sizeof(hourStats));
 
   if (inEvent)
-    bucketStats.flags |= EVENT_CONTINUES;
+    hourStats.flags |= EVENT_CONTINUES;
 }
 
 const EventLogger::EventStatistics&
-EventLogger::getBucketStatistics() const
+EventLogger::getHourStatistics() const
 {
-  return bucketStats;
+  return hourStats;
 }
 
 const EventLogger::EventStatistics&
@@ -74,11 +74,11 @@ void EventLogger::sample(bool active)
   }
 }
 
-void EventLogger::endBucket()
+void EventLogger::endHourBlock()
 {
   //
-  // Finish this bucket if an event is still active.
-  // Continue timing the event into the next bucket.
+  // Finish this block if an event is still active.
+  // Continue timing the event into the next block.
   //
   if (inEvent)
   {
@@ -87,17 +87,17 @@ void EventLogger::endBucket()
     inEvent = true;
     currentDuration = 0;
 
-    bucketStats.flags |= EVENT_CONTINUES;
+    hourStats.flags |= EVENT_CONTINUES;
   }
 
   // Save completed minute into current hour.
   if (minuteIndex < 60)
   {
-    currentHour.minute[minuteIndex] = bucketStats;
+    currentHour.minute[minuteIndex] = hourStats;
     minuteIndex++;
   }
 
-  clearBucket();
+  clearHourBlock();
 
   // Hour complete.
   if (minuteIndex >= 60)
@@ -125,23 +125,23 @@ void EventLogger::finishEvent()
   eventsDetected = true;
 
   //------------------------------------------------
-  // Bucket statistics
+  // HourBlock statistics
   //------------------------------------------------
 
-  bucketStats.count++;
+  hourStats.count++;
 
-  if (bucketStats.shortest == 0 ||
-    currentDuration < bucketStats.shortest)
+  if (hourStats.shortest == 0 ||
+    currentDuration < hourStats.shortest)
   {
-    bucketStats.shortest = currentDuration;
+    hourStats.shortest = currentDuration;
   }
 
-  if (currentDuration > bucketStats.longest)
+  if (currentDuration > hourStats.longest)
   {
-    bucketStats.longest = currentDuration;
+    hourStats.longest = currentDuration;
   }
 
-  bucketStats.total += currentDuration;
+  hourStats.total += currentDuration;
 
   //------------------------------------------------
   // Session statistics

@@ -87,6 +87,10 @@ void updateOLED() {
   horOffset = (offsetTimer / (60 * LOOPS_PER_SEC)) % 10;  // Every 60 seconds, span = 10 pixels  
 
   if (oledMode == OLED_MAIN) {
+    const auto &header  = Logger.getHeader();
+    const auto &session = Logger.getSessionStatistics();
+    const auto &hour    = Logger.getHourStatistics();
+
     display.clear();
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.setFont(ArialMT_Plain_10);
@@ -104,8 +108,7 @@ void updateOLED() {
     // display.drawString(horOffset, 10 + vertOffsetMain, line1);
 
     if (getLoggerMode() == MODE_PAUSED)
-      snprintf(line1, sizeof(line1), "PAUSED [%.1f Hr]", 0.0f);
-
+      snprintf(line1, sizeof(line1), "PAUSED [%.1f Hr]", header.hoursStored);
     else if (getLoggerMode() == MODE_INIT)
       snprintf(line1, sizeof(line1), "READY [NO DATA]");
 
@@ -115,7 +118,8 @@ void updateOLED() {
     display.drawString(horOffset, 10 + vertOffsetMain, line1);
     
     // Line 2: Block / Session
-    snprintf(line2, sizeof(line2), "#Ev  Hr: %u  Tot: %u", 0, 0);
+    snprintf(line2, sizeof(line2), "#Ev  Hr: %u  Tot: %u",
+      hour.count, session.count);
     display.drawString(horOffset, 20 + vertOffsetMain, line2);
 
 
@@ -141,15 +145,17 @@ void updateOLED() {
 
     if (LOOP_COUNT % TotalTime < TimePerStageLoops) {
       // Avg
-      snprintf(line4, sizeof(line4), "Avg: %.1f", 1.1f);
+      float avg = session.count ? (float)session.total / (float)session.count : 0.0f;
+      snprintf(line4, sizeof(line4), "Avg: %.1f", avg);
     }
     else if (LOOP_COUNT % TotalTime < 2 * TimePerStageLoops) {
       // Min / Max
-      snprintf(line4, sizeof(line4), "Min: %.1f   Max: %.1f", 2.2f, 3.3f);
+      snprintf(line4, sizeof(line4), "Min: %us   Max: %us", 
+        session.shortest, session.longest);
     }
     else {
       // Samples
-      snprintf(line4, sizeof(line4), "Samples: %u", 12345);
+      snprintf(line4, sizeof(line4), "Samples: %u", header.samplesTaken);
 
     }
 

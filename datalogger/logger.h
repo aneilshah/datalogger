@@ -52,18 +52,18 @@ public:
     void sample(bool active);
 
     // Finish current minute
-    void endBucket();
+    void endHourBlock();
 
     // Finish current hour
     bool endHour();
 
     // Clear current minute
-    void clearBucket();
+    void clearHourBlock();
 
     // Reset entire logging session
     void clear();
 
-    const EventStatistics& getBucketStatistics() const;
+    const EventStatistics& getHourStatistics() const;
     const EventStatistics& getSessionStatistics() const;
 
     const HourRecord& getHourRecord() const;
@@ -75,7 +75,7 @@ private:
 
     void finishEvent();
 
-    EventStatistics bucketStats;
+    EventStatistics hourStats;
     EventStatistics sessionStats;
 
     HourRecord currentHour;

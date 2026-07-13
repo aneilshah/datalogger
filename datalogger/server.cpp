@@ -407,21 +407,23 @@ static void renderLoggerTable(WiFiClient &client)
 {
   client.print((const __FlashStringHelper*)LOGGER_TABLE_OPEN);
 
-  const auto &hour    = Logger.getBucketStatistics();
+  const auto &hour    = Logger.getHourStatistics();
   const auto &session = Logger.getSessionStatistics();
   const auto &header  = Logger.getHeader();
+
+  const float hourAvg =
+    hour.count ? (float)hour.total / hour.count : 0.0f;
+
+  const float sessionAvg =
+    session.count ? (float)session.total / session.count : 0.0f;
 
   //------------------------------------------------
   // Current Hour
   //------------------------------------------------
 
   printRow(client, F("<b>Current Hour</b>"), F(""));
-
   printRow(client, F("Events"), String(hour.count));
-
-  printRow(client,
-            F("Active Time"),
-            String(hour.total) + " sec");
+  printRow(client, F("Active Time"), String(hour.total) + " sec");
 
   if (hour.count == 0)
   {
@@ -431,17 +433,9 @@ static void renderLoggerTable(WiFiClient &client)
   }
   else
   {
-    printRow(client,
-      F("Shortest Event"),
-      String(hour.shortest) + " sec");
-
-    printRow(client,
-      F("Longest Event"),
-      String(hour.longest) + " sec");
-
-    printRow(client,
-      F("Average Event"),
-      String((float)hour.total / hour.count, 1) + " sec");
+    printRow(client, F("Shortest Event"), String(hour.shortest) + " sec");
+    printRow(client, F("Longest Event"), String(hour.longest) + " sec");
+    printRow(client, F("Average Event"), String(hourAvg, 1) + " sec");
   }
 
   //------------------------------------------------
@@ -449,18 +443,10 @@ static void renderLoggerTable(WiFiClient &client)
   //------------------------------------------------
 
   printRow(client, F("<b>Session</b>"), F(""));
+  printRow(client, F("Hours Logged"), String(header.hoursStored));
+  printRow(client, F("Events"), String(session.count));
 
-  printRow(client,
-    F("Hours Logged"),
-    String(header.hoursStored));
-
-  printRow(client,
-    F("Events"),
-    String(session.count));
-
-  printRow(client,
-    F("Active Time"),
-    String(session.total) + " sec");
+  printRow(client, F("Active Time"), String(session.total) + " sec");
 
   if (session.count == 0)
   {
@@ -470,17 +456,9 @@ static void renderLoggerTable(WiFiClient &client)
   }
   else
   {
-    printRow(client,
-      F("Shortest Event"),
-      String(session.shortest) + " sec");
-
-    printRow(client,
-      F("Longest Event"),
-      String(session.longest) + " sec");
-
-    printRow(client,
-      F("Average Event"),
-      String((float)session.total / session.count, 1) + " sec");
+    printRow(client, F("Shortest Event"), String(session.shortest) + " sec");
+    printRow(client, F("Longest Event"), String(session.longest) + " sec");
+    printRow(client, F("Average Event"), String(sessionAvg, 1) + " sec");
   }
 
   // Timestamp
@@ -552,7 +530,7 @@ static void renderChartsPage(WiFiClient &client) {
 
   client.println(F("<h3>Charts</h3>"));
   // Charts
-  renderLoggerChart(client);
+  renderLoggerCharts(client);
 
 
   // Nav Buttons

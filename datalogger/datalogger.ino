@@ -155,8 +155,7 @@ void setup() {
   // Test Functions
   //testDataStore(); 
   Serial.println("Running Logger Test");
-  loggerDataTest();
-  loggerDataTest3Hours();
+  loggerCreateTestData();
   loggerDumpHour(0);
   loggerDumpHour(1);
   loggerDumpHour(2);
