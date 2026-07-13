@@ -25,6 +25,7 @@
 #include "diag.h"
 #include "ledFunc.h"
 #include "logger.h"
+#include "loggerData.h"
 #include "mode.h"
 #include "testcode.h"
 #include "test_mode.h"
@@ -115,6 +116,9 @@ void setup() {
 
   // Init NVM
   nvmInit();
+  loggerDataInit();
+  nvmDumpBootState();
+  nvmDumpLoggerState();
 
   // Randomize
   randomSeed((uint32_t)esp_random());
@@ -150,6 +154,13 @@ void setup() {
 
   // Test Functions
   //testDataStore(); 
+  Serial.println("Running Logger Test");
+  loggerDataTest();
+  loggerDataTest3Hours();
+  loggerDumpHour(0);
+  loggerDumpHour(1);
+  loggerDumpHour(2);
+  Serial.println("Test Complete");
 
   // Init OTA
   initOTA(TEST_MODE ? "logger-test" : "logger-prod");

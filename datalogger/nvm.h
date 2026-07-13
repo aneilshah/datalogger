@@ -19,6 +19,7 @@ bool nvmSaveState(
 //  Block Methods
 void nvmClearState();
 void nvmDumpLoggerState();
+void nvmDumpBootState();
 
 // Getters
 uint32_t getTotalBlockWriteCount();

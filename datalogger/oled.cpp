@@ -104,21 +104,24 @@ void updateOLED() {
     // display.drawString(horOffset, 10 + vertOffsetMain, line1);
 
     if (getLoggerMode() == MODE_PAUSED)
-      snprintf(line1, sizeof(line1), "PAUSED [%f.1 Hr]", 0.0f);
+      snprintf(line1, sizeof(line1), "PAUSED [%.1f Hr]", 0.0f);
 
     else if (getLoggerMode() == MODE_INIT)
-      snprintf(line1, sizeof(line1), "READY");
+      snprintf(line1, sizeof(line1), "READY [NO DATA]");
 
     else
       snprintf(line1, sizeof(line1), "TBD MODE");
+
+    display.drawString(horOffset, 10 + vertOffsetMain, line1);
     
     // Line 2: Block / Session
-    snprintf(line2, sizeof(line2), "Events  Hr:%u  Tot:%u", 0, 0);
+    snprintf(line2, sizeof(line2), "#Ev  Hr: %u  Tot: %u", 0, 0);
     display.drawString(horOffset, 20 + vertOffsetMain, line2);
 
 
     // Line 3: Last Event
-    snprintf(line3, sizeof(line3), "Last Event: %s", "8:23 PM");
+    const char* time = "---";
+    snprintf(line3, sizeof(line3), "Last Event: %s", time);
     display.drawString(horOffset, 30 + vertOffsetMain, line3);
 
 
@@ -138,11 +141,11 @@ void updateOLED() {
 
     if (LOOP_COUNT % TotalTime < TimePerStageLoops) {
       // Avg
-      snprintf(line4, sizeof(line4), "Avg: %f.1", 1.1f);
+      snprintf(line4, sizeof(line4), "Avg: %.1f", 1.1f);
     }
     else if (LOOP_COUNT % TotalTime < 2 * TimePerStageLoops) {
       // Min / Max
-      snprintf(line4, sizeof(line4), "Min: %f.1   Max: %f.1", 2.2f, 3.3f);
+      snprintf(line4, sizeof(line4), "Min: %.1f   Max: %.1f", 2.2f, 3.3f);
     }
     else {
       // Samples
@@ -192,7 +195,7 @@ void updateOLED() {
       display.drawString(horOffset, vertOffset, line2);
     }
     else if (mode == 2) {
-      snprintf(line2, sizeof(line2), "Events  Hr:%u  Tot:%u", 0, 0);
+      snprintf(line2, sizeof(line2), "#Ev  Hr: %u  Tot: %u", 0, 0);
       display.drawString(horOffset, vertOffset, line2);
     }
     else if (mode == 3) {
