@@ -9,8 +9,6 @@
 #include "ntp.h"
 #include "oled.h"
 #include "power.h"
-#include "pumpData.h"
-#include "pumpFunc.h"
 #include "wifiFunc.h"
 
 // Just in case
@@ -98,59 +96,57 @@ void updateOLED() {
     else           snprintf(line0, sizeof(line0), "DATA LOG %s", APP_VERSION);
     display.drawString(horOffset, vertOffsetMain, line0);
 
-    // Line 1: Wifi
-    if (wifiRadioOn())
-      snprintf(line1, sizeof(line1), "WIFI: %s", CONN_STATUS);
+    // Line 1: Status
+    // if (wifiRadioOn())
+    //   snprintf(line1, sizeof(line1), "WIFI: %s", CONN_STATUS);
+    // else
+    //   snprintf(line1, sizeof(line1), "WIFI: RADIO OFF");
+    // display.drawString(horOffset, 10 + vertOffsetMain, line1);
+
+    if (getLoggerMode() == MODE_PAUSED)
+      snprintf(line1, sizeof(line1), "PAUSED [%f.1 Hr]", 0.0f);
+
+    else if (getLoggerMode() == MODE_INIT)
+      snprintf(line1, sizeof(line1), "READY");
+
     else
-      snprintf(line1, sizeof(line1), "WIFI: RADIO OFF");
-    display.drawString(horOffset, 10 + vertOffsetMain, line1);
-
-    // Line 2: CPH / CPD
-    float avgCycleMin = Pump.getAvgCycleMin();
-    float cph = 0.0f;
-    int cpd = 0;
-
-    if (avgCycleMin > 0.1f) {
-      cph = 60.0f / avgCycleMin;
-      cpd = (int)(cph * 24.0f);
-    }
-    char curText[12];
-    Pump.getPumpCurText(curText, sizeof(curText));
-
-    snprintf(line2, sizeof(line2), "CPH: %.1f  CPD: %d", cph, cpd);
+      snprintf(line1, sizeof(line1), "TBD MODE");
+    
+    // Line 2: Block / Session
+    snprintf(line2, sizeof(line2), "Events  Hr:%u  Tot:%u", 0, 0);
     display.drawString(horOffset, 20 + vertOffsetMain, line2);
 
 
-    // Line 3: Gallons - Current
-    int gallonsPerDay = 0;
-    if (avgCycleMin > 0.1f) {
-      gallonsPerDay = (int)(5 * 60 * 24 / avgCycleMin);
-    }
-    if (avgCycleMin <= 0.1f) {
-      snprintf(line3, sizeof(line3), "GPD: --  I: %s", curText);
-    } else {
-      snprintf(line3, sizeof(line3), "GPD: %d  I: %s", gallonsPerDay, curText);
-    }
+    // Line 3: Last Event
+    snprintf(line3, sizeof(line3), "Last Event: %s", "8:23 PM");
     display.drawString(horOffset, 30 + vertOffsetMain, line3);
 
 
     /////////////////////////////////////////
     // Line 4: Revolving Line
     /////////////////////////////////////////
+
+    // Act:2h18m H:8
+    // Avg:58s Max:14m
+    // Min:3s Hr:18m
+    // Samp:28452
+
     const float TimePerStage = 2.0; // Seconds
     const int Stages = 3;
     const int TotalTime = LOOPS_PER_SEC * TimePerStage * Stages;
     const int TimePerStageLoops = int(TimePerStage * LOOPS_PER_SEC);
 
     if (LOOP_COUNT % TotalTime < TimePerStageLoops) {
-      // Pct ON / OFF
-      snprintf(line4, sizeof(line4), "<RESERVED 1>");
+      // Avg
+      snprintf(line4, sizeof(line4), "Avg: %f.1", 1.1f);
     }
     else if (LOOP_COUNT % TotalTime < 2 * TimePerStageLoops) {
-      snprintf(line4, sizeof(line4), "<RESERVED 2>");
+      // Min / Max
+      snprintf(line4, sizeof(line4), "Min: %f.1   Max: %f.1", 2.2f, 3.3f);
     }
     else {
-      snprintf(line4, sizeof(line4), "<RESERVED 3>");
+      // Samples
+      snprintf(line4, sizeof(line4), "Samples: %u", 12345);
 
     }
 
@@ -177,24 +173,16 @@ void updateOLED() {
   }
 
   else if (oledMode == OLED_MINIMIZED) {
-    float deltaMin = Pump.getAvgCycleMin();
-    if (deltaMin < 0.1f) deltaMin = 5.0f;
-
-    uint32_t gallonsPerDay = (uint32_t)(5 * 60 * 24 / deltaMin);
-
-    char cycMin[10];
-    snprintf(cycMin, sizeof(cycMin), "%.1f", deltaMin);
-
-    const unsigned int CYCLE_COUNT = 8;
-    unsigned int mode = (offsetTimer / MIN_MODE_CYCLE_TIME) % CYCLE_COUNT;
-
     display.clear();
     display.setTextAlignment(TEXT_ALIGN_LEFT);
     display.setFont(ArialMT_Plain_10);
+    
+    const unsigned int CYCLE_COUNT = 8;
+    unsigned int mode = (offsetTimer / MIN_MODE_CYCLE_TIME) % CYCLE_COUNT;
 
     if (mode == 0) {
       if (TEST_MODE) snprintf(line0, sizeof(line0), "*TEST MODE* %s", APP_VERSION);
-      else           snprintf(line0, sizeof(line0), "DATA APP %s", APP_VERSION);
+      else           snprintf(line0, sizeof(line0), "LOGGER APP %s", APP_VERSION);
       display.drawString(horOffset, vertOffset, line0);
     }
     else if (mode == 1) {
@@ -204,7 +192,7 @@ void updateOLED() {
       display.drawString(horOffset, vertOffset, line2);
     }
     else if (mode == 2) {
-      snprintf(line2, sizeof(line2), "CYC: %sm %ld GPD", cycMin, gallonsPerDay);
+      snprintf(line2, sizeof(line2), "Events  Hr:%u  Tot:%u", 0, 0);
       display.drawString(horOffset, vertOffset, line2);
     }
     else if (mode == 3) {

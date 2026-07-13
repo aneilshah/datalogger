@@ -116,7 +116,7 @@ void processLoggerMode() {
     }
     else if (shortPress()) {
       setLoggerMode(MODE_CHECK_RESET);
-      oledModal("RESTART LOGGING?");
+      oledModal("RESET DATA?");
     }
   }
 

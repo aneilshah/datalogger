@@ -22,7 +22,7 @@ void initOTA(const char* hostname)
   ArduinoOTA.setPort(3232);
 
   // Optional but strongly recommended
-  //ArduinoOTA.setPassword("pumpOTA123");   // change this!
+  //ArduinoOTA.setPassword("loggerOTA123");   // change this!
 
   ArduinoOTA.onStart([]() {
     _otaInProgress = true;
@@ -68,7 +68,7 @@ void updateOTAState() {
     case OTA_OFF:
       if (wifiStable) {
         Serial.println("[OTA] OFF -> ON");
-        initOTA(TEST_MODE ? "pump-test" : "pump-prod");
+        initOTA(TEST_MODE ? "logger-test" : "logger-prod");
         otaState = OTA_ON;
       }
       break;
@@ -83,7 +83,7 @@ void updateOTAState() {
     case OTA_INIT:
       if (wifiStable) {
         Serial.println("[OTA] INIT -> ON");
-        initOTA(TEST_MODE ? "pump-test" : "pump-prod");
+        initOTA(TEST_MODE ? "logger-test" : "logger-prod");
         otaState = OTA_ON;
       }
       break;

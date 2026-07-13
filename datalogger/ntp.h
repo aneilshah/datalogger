@@ -26,6 +26,6 @@ uint8_t getMonthInt();
 uint16_t getYearInt();
 uint32_t getDateKeyInt();
 
-// Unique to Pump (MERGE LATER)
+// FROM PUMP - MAYBE NOT NEEDED?
 void getCurrentDayKey(char* buf, size_t len);
 uint32_t getCurrentEpoch();

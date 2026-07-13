@@ -1,7 +1,6 @@
 #include "charts.h"
 
 #include "global.h"
-#include "pumpData.h"
 #include "eventData.h"
 #include "ntp.h"
 #include "utils.h"
@@ -26,11 +25,11 @@ void renderLoggerChart(WiFiClient &client) {
   eventDataPurgeNow();
 
   client.println(F("<div class=\"chart-wrap\">"
-                   "<div class=\"chart-title\">Pump Events - Last 24 Hours</div>"));
+                   "<div class=\"chart-title\">Logger Events - Last 24 Hours</div>"));
 
   const int eventCount = eventDataCount();
   if (eventCount <= 0) {
-    client.println(F("<div class=\"small\">No pump events.</div></div>"));
+    client.println(F("<div class=\"small\">No logger events.</div></div>"));
     return;
   }
 

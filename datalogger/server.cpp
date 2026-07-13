@@ -3,10 +3,10 @@
 #include "charts.h"
 #include "diag.h"
 #include "export.h"
-#include "pumpData.h"
+#include "logger.h"
+#include "mode.h"
 #include "ntp.h"
 #include "nvm.h"
-#include "pumpFunc.h"
 #include "utils.h"
 
 extern uint16_t ADAPTIVE_DELAY;
@@ -34,7 +34,7 @@ static const char HTML_HEAD_A[] PROGMEM =
 
 static const char HTML_HEAD_SCRIPT[] PROGMEM =
 "<script>"
-"var curPage='pump';"
+"var curPage='logger';"
 "function setPage(p){curPage=p;loadDoc(p);}"
 "function loadDoc(p){"
 "var xhttp=new XMLHttpRequest();"
@@ -402,115 +402,92 @@ static void renderNavButtons(WiFiClient &client, uint8_t active) {
 // -------------------------
 // Renderers (dynamic /data)
 // -------------------------
-static void renderLoggerTable(WiFiClient &client) {
+
+static void renderLoggerTable(WiFiClient &client)
+{
   client.print((const __FlashStringHelper*)LOGGER_TABLE_OPEN);
 
-  const bool noNewDataYetToday = (CYCLE_TODAY == 0);
-  const bool showNA = (gYesterdayWasZero && noNewDataYetToday);
+  const auto &hour    = Logger.getBucketStatistics();
+  const auto &session = Logger.getSessionStatistics();
+  const auto &header  = Logger.getHeader();
 
-  // Total Cycles
-  printRow(client, F("Pump Cycles"), String(Pump.getPumpEventCount()));
+  //------------------------------------------------
+  // Current Hour
+  //------------------------------------------------
 
-    // Cycles per HR [Day] (hold over unless yesterday was zero)
-  if (showNA) {
-    printRow(client, F("Cycles per HR [Day]"), F("N/A"));
-  } else if (Pump.getPumpEventCount() < 2) {
-    printRow(client, F("Cycles per HR [Day]"), F("***"));
-  } else {
-    float deltaMin = Pump.getAvgCycleMin();
-    if (deltaMin < 0.1f) deltaMin = 5.0f;
-    const float cph = 60.0f / deltaMin;
-    const int cpd = (int)(60.0f * 25.0f / deltaMin);
+  printRow(client, F("<b>Current Hour</b>"), F(""));
 
-    String s;
-    s.reserve(24);
-    s = String(cph, 2);
-    s += " [";
-    s += String(cpd);
-    s += "]";
-    printRow(client, F("Cycles per HR [Day]"), s);
+  printRow(client, F("Events"), String(hour.count));
+
+  printRow(client,
+            F("Active Time"),
+            String(hour.total) + " sec");
+
+  if (hour.count == 0)
+  {
+    printRow(client, F("Shortest Event"), F("***"));
+    printRow(client, F("Longest Event"),  F("***"));
+    printRow(client, F("Average Event"),  F("***"));
+  }
+  else
+  {
+    printRow(client,
+      F("Shortest Event"),
+      String(hour.shortest) + " sec");
+
+    printRow(client,
+      F("Longest Event"),
+      String(hour.longest) + " sec");
+
+    printRow(client,
+      F("Average Event"),
+      String((float)hour.total / hour.count, 1) + " sec");
   }
 
-  // Gallons per Hour [Day] (hold over unless yesterday was zero)
-  // Note using 5 Gallons per Cycle (Probably should make this consistent)
-  if (showNA) {
-    printRow(client, F("Gallons per Hour [Day]"), F("N/A"));
-  } else if (Pump.getPumpEventCount() < 2) {
-    printRow(client, F("Gallons per Hour [Day]"), F("***"));
-  } else {
-    float deltaMin = Pump.getAvgCycleMin();
-    if (deltaMin < 0.1f) deltaMin = 5.0f;
-    const int  gph = (int)(5.0f * (60.0f / deltaMin));
-    const uint32_t gpd = (uint32_t)(5.0f * 60.0f * 24.0f / deltaMin);
+  //------------------------------------------------
+  // Session
+  //------------------------------------------------
 
-    String s;
-    s.reserve(28);
-    s = String(gph);
-    s += " GPH [";
-    s += String(gpd);
-    s += "]";
-    printRow(client, F("Gallons per Hour [Day]"), s);
+  printRow(client, F("<b>Session</b>"), F(""));
+
+  printRow(client,
+    F("Hours Logged"),
+    String(header.hoursStored));
+
+  printRow(client,
+    F("Events"),
+    String(session.count));
+
+  printRow(client,
+    F("Active Time"),
+    String(session.total) + " sec");
+
+  if (session.count == 0)
+  {
+    printRow(client, F("Shortest Event"), F("***"));
+    printRow(client, F("Longest Event"),  F("***"));
+    printRow(client, F("Average Event"),  F("***"));
   }
+  else
+  {
+    printRow(client,
+      F("Shortest Event"),
+      String(session.shortest) + " sec");
 
-  const float loopsPerSec = (float)LOOPS_PER_SEC;
+    printRow(client,
+      F("Longest Event"),
+      String(session.longest) + " sec");
 
-  // Total pump ON time
-  const float onMin  = (float)Pump.getPumpOnTimeLoops() / (60.0f * loopsPerSec);
-  const float onHour = (float)Pump.getPumpOnTimeLoops() / (3600.0f * loopsPerSec);
-  if (onMin < 60.0f) printRow(client, F("TOTAL Pump ON Time"), String(onMin, 1) + "m");
-  else               printRow(client, F("TOTAL Pump ON Time"), String(onHour, 2) + "hr");
-
-  // Last pump ON time (seconds)
-  const float lastOnSec = (float)Pump.getLastPumpOnTimeLoops() / loopsPerSec;
-  printRow(client, F("Last Pump ON Time"), String(lastOnSec, 1) + "s");
-
-  // Last cycle time
-  if (Pump.getPumpEventCount() < 2) printRow(client, F("Last Cycle Time"), F("***"));
-  else                              printRow(client, F("Last Cycle Time"), String(Pump.getDeltaMin(), 2) + "m");
-
-  // Time since last cycle
-  if (Pump.getPumpEventCount() < 1) {
-    printRow(client, F("Time Since Last Cycle"), F("***"));
-  } else {
-    const float offTimeMin = (float)(LOOP_COUNT - Pump.getLastPumpEventLoops()) / (60.0f * loopsPerSec);
-    printRow(client, F("Time Since Last Cycle"), String(offTimeMin, 2) + "m");
+    printRow(client,
+      F("Average Event"),
+      String((float)session.total / session.count, 1) + " sec");
   }
-
-  // Avg cycle + stdev
-  if (Pump.getPumpEventCount() < 2) {
-    printRow(client, F("Avg Cycle Time [StDev]"), F("***"));
-  } else {
-    String s;
-    s.reserve(40);
-    s = String(Pump.getAvgCycleMin(), 2);
-    s += "m [";
-    s += String(Pump.getStDevCycleMin(), 2);
-    s += "]";
-    printRow(client, F("Avg Cycle Time [StDev]"), s);
-  } 
-
-  // Current (steady-state from last completed event) + Energy in brackets
-  if (Pump.getPumpEventCount() < 1) {
-    printRow(client, F("Pump Current [Energy]"), F("***"));
-  } else {
-    String s;
-    s.reserve(32);
-    s = Pump.getLastEventSSCurText();               // e.g. "9.3A"
-    s += " [";
-    s += String(Pump.getLastCycleEnergyAmpSeconds(), 1);  // e.g. "142.6"
-    s += " A·s]";
-
-    printRow(client, F("Pump Current [Energy]"), s);
-  }
-
-  // Wifi Status
-  printRow(client, F("Wifi Status"), CONN_STATUS);
-
 
   // Timestamp
   printRow(client, F("Timestamp"), getTimestamp());
 
   // Monitor time
+  const float loopsPerSec = (float)LOOPS_PER_SEC;
   const float monMin = (float)LOOP_COUNT / (60.0f * loopsPerSec);
   const float monHr  = (float)LOOP_COUNT / (3600.0f * loopsPerSec);
   const float monDay = (float)LOOP_COUNT / (86400.0f * loopsPerSec);
@@ -520,20 +497,17 @@ static void renderLoggerTable(WiFiClient &client) {
   else                    printRow(client, F("Total Monitor Time"), String(monDay, 2) + "d");
 
   client.print((const __FlashStringHelper*)HTML_TABLE_CLOSE);
+
   renderNavButtons(client, PAGE_LOGGER);
 }
+
 
 static void renderSystemTable(WiFiClient &client) {
   client.print((const __FlashStringHelper*)SYSTEM_TABLE_OPEN);
 
   printRow(client, F("Loop Count (100ms)"), String(LOOP_COUNT));
-  printRow(client, F("Last-cycle Current (n | avg)"), Pump.getLastCycleCurrentSummaryText());
-  printRow(client, F("Last Cycle Energy"), String(Pump.getLastCycleEnergyAmpSeconds(), 2) + " A·s");
-
-
   printRow(client, F("1 Sec Run Time"), String(LOOP_TIME) + " ms");
   printRow(client, F("Adaptive Loop Delay"), String(ADAPTIVE_DELAY) + " ms");
-  printRow(client, F("Daily Totals Stored"), String(Pump.Daily365.dailyValidCount()) + " days");
 
   client.print((const __FlashStringHelper*)HTML_TABLE_CLOSE);
 
@@ -690,7 +664,7 @@ void webServer() {
     char suffix[10]; 
     if (TEST_MODE) snprintf(suffix, sizeof(suffix), "_test");
     else snprintf(suffix, sizeof(suffix), "");  
-    snprintf(fname, sizeof(fname), "pump%s_export_%s.csv", suffix, ts);
+    snprintf(fname, sizeof(fname), "logger%s_export_%s.csv", suffix, ts);
 
     httpCsvAttachment(client, fname);
     renderExportCsv(client);

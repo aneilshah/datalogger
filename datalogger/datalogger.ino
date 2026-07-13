@@ -22,13 +22,10 @@
 #include "wifiFunc.h"
 
 // Project Files
-#include "datastore.h"
 #include "diag.h"
 #include "ledFunc.h"
 #include "logger.h"
 #include "mode.h"
-#include "pumpData.h"
-#include "pumpFunc.h"
 #include "testcode.h"
 #include "test_mode.h"
 
@@ -66,10 +63,10 @@ Diag diagState;
 // Binary Identifier
 #if TEST_MODE
 __attribute__((used)) static const char BUILD_MODE_MARKER[] PROGMEM =
-    "PUMP_MONITOR|MODE=TEST";
+    "LOGGER|MODE=TEST";
 #else
 __attribute__((used)) static const char BUILD_MODE_MARKER[] PROGMEM =
-    "PUMP_MONITOR|MODE=PROD";
+    "LOGGER|MODE=PROD";
 #endif
 
 const char* getBuildModeMarker() {
@@ -77,7 +74,7 @@ const char* getBuildModeMarker() {
 }
 
 void IRAM_ATTR isrFunction() {
-  PUMP_EVENT = 1;
+  // LOGIC GOES HERE
   ISR_CNT++;
 }
 
@@ -89,7 +86,7 @@ void initNvmBootRestore() {
     return;
   }
 
-  char dayKey[16]; 
+  char dayKey[DAY_KEY_SIZE]; 
   const uint32_t nowEpoch = getCurrentEpoch();
   getCurrentDayKey(dayKey, sizeof(dayKey));
 
@@ -143,10 +140,9 @@ void setup() {
 
   // Setup NVM Boot Restore  (must be after NTP)
   initNvmBootRestore();
-  nvmDumpPumpState();
+  nvmDumpLoggerState();
 
-  // Init Pump
-  initPump();
+  // Init Logger
   initLogger();
 
   // Store Startup Time
@@ -156,7 +152,7 @@ void setup() {
   //testDataStore(); 
 
   // Init OTA
-  initOTA(TEST_MODE ? "pump-test" : "pump-prod");
+  initOTA(TEST_MODE ? "logger-test" : "logger-prod");
 
   // Setup done, go to main screen
   oledMain(MAIN_TIMEOUT_SEC);
@@ -198,8 +194,6 @@ void loop100ms() {
   readADC();
 
   // Run Main Logic
-  checkForPumpEvent();  // Want accurate timing so check every 100ms
-  processPumpEvent();
   processLoggerMode();
 
   // Update Outputs
@@ -381,14 +375,6 @@ void processTestEvent() {
   }
 }
 
-void testDataStore() {
-  delay(1000);
-  DataStoreFloat X(15, 1, "abc");
-  for (int i = 0; i <100; i++) {
-    X.addData(i + (float(i)/100));
-    Serial.println(X.dataText());
-  }
-}
 
 void checkWifi() {
   if (!wifiRadioOn()) return; 

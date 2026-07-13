@@ -4,20 +4,17 @@
 #include "global.h"
 #include "ntp.h"
 #include "nvm.h"
-#include "pumpFunc.h"
 
 static Preferences prefs;
 
 // Namespaces
-static const char* NS_PUMP = "pump";
+static const char* NS_LOGGER = "logger";
 static const char* NS_BOOT = "boot";
 
-// Keys (pump namespace)
+// Keys (logger namespace)
 static const char* K_HAS_STATE  = "has_state";
 static const char* K_DAY_KEY    = "day_key";
 static const char* K_SAVE_EPOCH = "save_epoch";
-static const char* K_GAL        = "gal";
-static const char* K_CYC        = "cyc";
 static const char* K_WRITE_COUNT = "write_count";  // Export this one
 
 // Keys (boot namespace)
@@ -38,13 +35,11 @@ static bool safeStrEq(const String& a, const char* b) {
 
 bool nvmSaveState(
   const char* dayKey,
-  uint32_t saveEpoch,
-  uint32_t gal,
-  uint32_t cyc
+  uint32_t saveEpoch
 ) {
   if (!dayKey) return false;
 
-  if (!prefs.begin(NS_PUMP, false)) return false;
+  if (!prefs.begin(NS_LOGGER, false)) return false;
   
   // Get updated write counts
   uint32_t oldWriteCount = prefs.getULong(K_WRITE_COUNT, 0);
@@ -56,29 +51,25 @@ bool nvmSaveState(
   ok &= (prefs.putString(K_DAY_KEY, dayKey) > 0);
   ok &= (prefs.putULong(K_SAVE_EPOCH, (unsigned long)saveEpoch) > 0);
   ok &= (prefs.putULong(K_WRITE_COUNT, newWriteCount) > 0);
-  ok &= (prefs.putULong(K_GAL, gal) > 0);
-  ok &= (prefs.putULong(K_CYC, cyc) > 0);
 
   prefs.end();
   return ok;
 }
 
 void nvmClearState() {  
-  if (!prefs.begin(NS_PUMP, false)) return;
+  if (!prefs.begin(NS_LOGGER, false)) return;
 
   // Dont remove K_WRITE_COUNT
   prefs.remove(K_HAS_STATE);
   prefs.remove(K_DAY_KEY);
   prefs.remove(K_SAVE_EPOCH);
-  prefs.remove(K_GAL);
-  prefs.remove(K_CYC);
   prefs.end();
 }
 
 bool nvmSetZeroBlocks() {
   bool ok = true;
 
-  if (!prefs.begin(NS_PUMP, false)) {
+  if (!prefs.begin(NS_LOGGER, false)) {
     return false;
   }
 
@@ -86,8 +77,6 @@ bool nvmSetZeroBlocks() {
   char dayKey[DAY_KEY_SIZE]; 
   const uint32_t nowEpoch = getCurrentEpoch();
   getCurrentDayKey(dayKey, sizeof(dayKey));
-  const uint32_t zeroGal = 0;
-  const uint32_t zeroCyc = 0;
 
   ok &= prefs.putBool(K_HAS_STATE, true);
 
@@ -95,9 +84,6 @@ bool nvmSetZeroBlocks() {
   ok &= (prefs.putULong(K_SAVE_EPOCH, nowEpoch) > 0);
 
   // Dont change K_WRITE_COUNT
-
-  ok &= (prefs.putULong(K_GAL, zeroGal) > 0);
-  ok &= (prefs.putULong(K_CYC, zeroCyc) > 0);
 
   prefs.end();
   return ok;
@@ -108,7 +94,7 @@ bool nvmSetZeroBlocks() {
 //-------------------------------------------------
 
 uint32_t getTotalBlockWriteCount() {
-  if (!prefs.begin(NS_PUMP, true)) {return 0;}
+  if (!prefs.begin(NS_LOGGER, true)) {return 0;}
   const uint32_t v = (uint32_t)prefs.getULong(K_WRITE_COUNT, 0);
   prefs.end();
   return v;
@@ -152,12 +138,12 @@ uint32_t nvmGetPrevBootEpoch() {
   return v;
 }
 
-void nvmDumpPumpState()
+void nvmDumpLoggerState()
 {
-  Serial.println("----- NVM PUMP DUMP BEGIN -----");
+  Serial.println("----- NVM LOGGER DUMP BEGIN -----");
 
-  if (!prefs.begin(NS_PUMP, true)) {
-    Serial.println("NVM dump failed: prefs.begin(NS_PUMP) failed");
+  if (!prefs.begin(NS_LOGGER, true)) {
+    Serial.println("NVM dump failed: prefs.begin(NS_LOGGER) failed");
     return;
   }
 
@@ -168,13 +154,9 @@ void nvmDumpPumpState()
   Serial.printf("has_state: %s\n", hasState ? "true" : "false");
   Serial.printf("day_key:   %s\n", dayKey.c_str());
   Serial.printf("epoch:     %lu\n", (unsigned long)saveEpoch);
-
-  uint32_t gal = prefs.getULong(K_GAL, 0);
-  uint32_t cyc = prefs.getULong(K_CYC, 0);
-  Serial.printf("  gal=%lu cyc=%lu\n", gal, cyc);
   prefs.end();
 
-  Serial.println("----- NVM PUMP DUMP END -----");
+  Serial.println("----- NVM LOGGER DUMP END -----");
 }
 
 void nvmDumpBootState()

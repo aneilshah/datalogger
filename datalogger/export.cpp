@@ -4,10 +4,10 @@
 
 // Project Headers
 #include "global.h"
+#include "logger.h"
+#include "mode.h"
 #include "ntp.h"
 #include "nvm.h"
-#include "pumpData.h"
-#include "pumpFunc.h"
 #include "ramlog.h"
 #include "utils.h"
 
@@ -48,51 +48,47 @@ static void addTitle(WiFiClient &client, const __FlashStringHelper* title) {
 // -----------------------------------------------------------------------------
 // MAIN DATA EXPORT
 // -----------------------------------------------------------------------------
-static void renderExportMainMetrics(WiFiClient &client) {
-  client.println(F("[MAIN METRICS]"));
+static void renderExportMainMetrics(WiFiClient &client)
+{
+  client.println(F("[LOGGER METRICS]"));
 
-  client.print(F("pump_cycles,"));
-  client.println(Pump.getPumpEventCount());
+  const auto &session = Logger.getSessionStatistics();
+  const auto &header  = Logger.getHeader();
 
-  client.print(F("pump_current,"));
-  csvPrintQuoted(client, Pump.getLastEventSSCurText());
-  client.println();
+  client.print(F("events,"));
+  client.println(session.count);
 
-  client.print(F("last_cycle_energy_amp_seconds,"));
-  client.println(String(Pump.getLastCycleEnergyAmpSeconds(), 2));
+  client.print(F("active_seconds,"));
+  client.println(session.total);
 
-  client.print(F("last_cycle_min,"));
-  client.println(String(Pump.getDeltaMin(), 2));
+  client.print(F("shortest_event_seconds,"));
+  client.println(session.shortest);
 
-  client.print(F("avg_cycle_min,"));
-  client.println(String(Pump.getAvgCycleMin(), 2));
+  client.print(F("longest_event_seconds,"));
+  client.println(session.longest);
 
-  client.print(F("stdev_cycle_min,"));
-  client.println(String(Pump.getStDevCycleMin(), 2));
-
-  if (Pump.getPumpEventCount() >= 2) {
-    float deltaMin = Pump.getAvgCycleMin();
-    if (deltaMin < 0.1f) deltaMin = 5.0f;
-
-    const uint16_t  gallonsPerHour = (uint16_t)(5.0f * (60.0f / deltaMin));
-    const uint32_t gallonsPerDayEst = (uint32_t)(5.0f * 60.0f * 24.0f / deltaMin);
-
-    client.print(F("gallons_per_hour,"));
-    client.println(gallonsPerHour);
-
-    client.print(F("gallons_per_day_est,"));
-    client.println(gallonsPerDayEst);
+  if (session.count > 0)
+  {
+    client.print(F("average_event_seconds,"));
+    client.println((float)session.total / (float)session.count, 2);
   }
 
-  client.print(F("cycles_today,"));
-  client.println(CYCLE_TODAY);
+  client.print(F("hours_logged,"));
+  client.println(header.hoursStored);
 
-  client.print(F("gallons_today,"));
-  client.println(GAL_TODAY);
+  client.print(F("samples_taken,"));
+  client.println(header.samplesTaken);
 
+  client.print(F("events_detected,"));
+  client.println(Logger.hasEvents() ? F("1") : F("0"));
 
-  client.print(F("yesterday_was_zero,"));
-  client.println(gYesterdayWasZero ? F("1") : F("0"));
+  client.print(F("session_start,"));
+  client.println("TBD");
+  //client.println(header.startTime);
+
+  client.print(F("session_stop,"));
+  client.println("TBD");
+  //client.println(header.stopTime);
 
   client.print(F("timestamp,"));
   client.println(getTimestamp());
@@ -130,26 +126,26 @@ static void renderExportSystemInfo(WiFiClient &client) {
 }
 
 // -----------------------------------------------------------------------------
-// TREND INFO EXPORT
+// Legger Data EXPORT
 // -----------------------------------------------------------------------------
-static void renderExportTrendInfo(WiFiClient &client) {
-  addTitle(client, F("[TREND INFO]"));
-  client.println(F("date,cycles_per_day,gallons_per_day"));
+static void renderLoggerData(WiFiClient &client) {
+  addTitle(client, F("[LOGGER DATA]"));
+  // client.println(F("date,cycles_per_day,gallons_per_day"));
 
-  const int recordCount = Pump.Daily365.dailyValidCount();
-  for (int i = recordCount - 1; i >= 0; i--) {
-    char date[16];
-    PumpDailyRecord record;
+  // const int recordCount = Pump.Daily365.dailyValidCount();
+  // for (int i = recordCount - 1; i >= 0; i--) {
+  //   char date[16];
+  //   PumpDailyRecord record;
 
-    if (!Pump.Daily365.getDailyRecordAgo(i, record)) continue;
-    getDayKeyForOffset(i + 1, date, sizeof(date));
+  //   if (!Pump.Daily365.getDailyRecordAgo(i, record)) continue;
+  //   getDayKeyForOffset(i + 1, date, sizeof(date));
 
-    client.print(date);
-    client.print(',');
-    client.print(record.cyclesPerDay);
-    client.print(',');
-    client.print(record.gallonsPerDay);
-  }
+  //   client.print(date);
+  //   client.print(',');
+  //   client.print(record.cyclesPerDay);
+  //   client.print(',');
+  //   client.print(record.gallonsPerDay);
+  // }
 }
 
 // -----------------------------------------------------------------------------
@@ -278,7 +274,7 @@ void renderExportCsv(WiFiClient &client) {
   renderExportSystemInfo(client);
   renderExportClockInfo(client);
   renderExportNvmInfo(client);
-  renderExportTrendInfo(client);
+  renderExportLoggerData(client);
   renderExportRamLog(client);
 
 }

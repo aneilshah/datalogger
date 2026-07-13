@@ -3,22 +3,22 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define DAY_KEY_SIZE 16
+
 // ---- Lifecycle ----
 void nvmInit();   // optional; safe to call once in setup()
 
 // ----  block state ----
-// Saves: has_state, day_key, save_epoch,  GAL, CYCLE
+// Saves: has_state, day_key, save_epoch
 bool nvmSaveState(
   const char* dayKey,           // "YYYY_MM_DD"
-  uint32_t saveEpoch,           // epoch seconds (0 ok, but restore-window won't work)
-  uint32_t gal, 
-  uint32_t cyc
+  uint32_t saveEpoch            // epoch seconds (0 ok, but restore-window won't work)
 );
 
 
 //  Block Methods
 void nvmClearState();
-void nvmDumpPumpState();
+void nvmDumpLoggerState();
 
 // Getters
 uint32_t getTotalBlockWriteCount();

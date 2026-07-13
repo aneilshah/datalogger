@@ -239,7 +239,7 @@ bool validClock() {
   return (now > 1767225600 && now < 2556144000); // 2026 - 2050
 }
 
-// UNIQUE TO PUMP - MERGE LATER
+// FROM PUMP - MAYBE NOT NEEDED?
 
 void getCurrentDayKey(char* buf, size_t len) {
   snprintf(buf, len, "%s_%s_%s",
