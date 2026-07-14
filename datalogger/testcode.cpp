@@ -162,7 +162,7 @@ static void loggerDumpTestResults(uint16_t hours)
   loggerDumpNVMHeader();
 
   for (uint16_t hour = 0; hour < hours; hour++)
-    loggerDumpHourBlock(hour, true);
+    loggerDumpNVMHourBlock(hour, true);
 }
 
 static bool saveCurrentHour()
@@ -199,6 +199,10 @@ void loggerSimulateAddingData()
     return;
   }
 
+  // START SESSION
+  Logger.startSession();
+
+  // Simulate Hour 1
   if (!loggerSimulateHour(LOGGER_SIM_FLAT, 1, 10))
   {
     Serial.println("Flat Hour Failed");
@@ -211,6 +215,7 @@ void loggerSimulateAddingData()
     return;
   }
 
+  // Simulate Hour 2
   if (!loggerSimulateHour(LOGGER_SIM_RAMP, 10, 10))
   {
     Serial.println("Ramp Hour Failed");
@@ -223,6 +228,7 @@ void loggerSimulateAddingData()
     return;
   }
 
+  // Simulate Hour 3
   if (!loggerSimulateHour(LOGGER_SIM_BURST, 5, 10))
   {
     Serial.println("Burst Hour Failed");
@@ -235,11 +241,23 @@ void loggerSimulateAddingData()
     return;
   }
 
-  loggerDumpNVMHeader();
+  // And add a partial hour of recording
+  if (!loggerSimulateHour(LOGGER_SIM_BURST, 5, 11, 25))
+  {
+    Serial.println("Burst Half Hour Failed");
+    return;
+  }
 
-  loggerDumpHourBlock(0, true);
-  loggerDumpHourBlock(1, true);
-  loggerDumpHourBlock(2, true);
+  // STOP SESSION
+  delay(5000);
+  Logger.stopSession();
+  loggerDataWriteHeader(Logger.getHeader()); // NVM
+
+  loggerDumpNVMHeader();
+  loggerDumpNVMHourBlock(0, false);  // true = minute details, false = no details
+  loggerDumpNVMHourBlock(1, false);
+  loggerDumpNVMHourBlock(2, false);
+  loggerDumpRAMHourBlock(false);
 
   Serial.println();
   Serial.println("Logger test complete.");
@@ -259,9 +277,10 @@ static bool simulateMinute(uint32_t eventCount, uint32_t duration)
   return Logger.endMinuteBlock();
 }
 
-bool loggerSimulateHour(LoggerSimulation type, uint32_t eventsPerMinute, uint32_t duration) 
+bool loggerSimulateHour(LoggerSimulation type, uint32_t eventsPerMinute, 
+  uint32_t duration, uint8_t minutes) 
 {
-  for (uint8_t minute = 0; minute < 60; minute++)
+  for (uint8_t minute = 0; minute < minutes; minute++)
   {
     uint32_t minuteCount = 0;
 
@@ -347,9 +366,7 @@ void loggerReadWriteDataTest()
 //*****************************************************************************
 // Dump Hour
 //*****************************************************************************
-void loggerDumpHourBlock(
-  uint16_t hourNumber,
-  bool detailed)
+void loggerDumpNVMHourBlock(uint16_t hourNumber, bool detailed)
 {
   EventLogger::HourRecord hour;
 
@@ -443,4 +460,54 @@ void loggerDumpRAMHeader()
   Serial.printf("Start Time   : %s\n", header.startTime);
   Serial.printf("Stop Time    : %s\n", header.stopTime);
   Serial.printf("Flags        : %u\n", header.flags);
+}
+
+//*****************************************************************************
+// Dump RAM Hour Block
+//*****************************************************************************
+void loggerDumpRAMHourBlock(bool detailed)
+{
+  const EventLogger::HourRecord &hour = Logger.getHourRecord();
+
+  Serial.println();
+  Serial.println("===== RAM HOUR =====");
+
+  if (!detailed)
+  {
+    uint32_t totalEvents = 0;
+    uint32_t totalSeconds = 0;
+    uint32_t longest = 0;
+
+    for (int i = 0; i < 60; i++)
+    {
+      const auto &m = hour.minute[i];
+
+      totalEvents += m.count;
+      totalSeconds += m.total;
+
+      if (m.longest > longest)
+        longest = m.longest;
+    }
+
+    Serial.printf("Events   : %lu\n", totalEvents);
+    Serial.printf("Duration : %lu sec\n", totalSeconds);
+    Serial.printf("Longest  : %lu sec\n", longest);
+
+    return;
+  }
+
+  Serial.println("Min  Cnt  Tot  Min  Max  Flg");
+  Serial.println("----------------------------");
+
+  for (int i = 0; i < 60; i++)
+  {
+    const auto &m = hour.minute[i];
+
+    Serial.printf("%02d   ", i);
+    Serial.printf("%2lu   ", m.count);
+    Serial.printf("%3lu   ", m.total);
+    Serial.printf("%3lu   ", m.shortest);
+    Serial.printf("%3lu   ", m.longest);
+    Serial.printf("%u\n", m.flags);
+  }
 }

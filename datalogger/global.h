@@ -51,5 +51,8 @@ extern const char APP_VERSION[];     // (don’t put PROGMEM on the extern)
 #define LOGGER_MAGIC 0x12345678
 #define LOGGER_VERSION 1
 
+// Timestamp Info
+constexpr size_t LOGGER_TIMESTAMP_LENGTH = 24;
+
 // Needs to be last
 #include "utils.h"

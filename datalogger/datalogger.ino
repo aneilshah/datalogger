@@ -156,9 +156,9 @@ void setup() {
   Serial.println("Running Logger Test");
   loggerSimulateAddingData();
   // loggerCreateAndWriteTestNVMData();
-  // loggerDumpHourBlock(0);
-  // loggerDumpHourBlock(1);
-  // loggerDumpHourBlock(2);
+  // loggerDumpNVMHourBlock(0);
+  // loggerDumpNVMHourBlock(1);
+  // loggerDumpNVMHourBlock(2);
   Serial.println("Test Complete");
 
   // Init OTA

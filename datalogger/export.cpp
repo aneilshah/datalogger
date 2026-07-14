@@ -83,12 +83,10 @@ static void renderExportMainMetrics(WiFiClient &client)
   client.println(Logger.hasEvents() ? F("1") : F("0"));
 
   client.print(F("session_start,"));
-  client.println("TBD");
-  //client.println(header.startTime);
+  client.println(header.startTime);
 
   client.print(F("session_stop,"));
-  client.println("TBD");
-  //client.println(header.stopTime);
+  client.println(header.stopTime);
 
   client.print(F("timestamp,"));
   client.println(getTimestamp());

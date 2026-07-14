@@ -461,18 +461,12 @@ static void renderLoggerTable(WiFiClient &client)
     printRow(client, F("Average Event"), String(sessionAvg, 1) + " sec");
   }
 
-  // Timestamp
-  printRow(client, F("Timestamp"), getTimestamp());
+  // Start / Stop Time
+  printRow(client, F("Start Time"), String(header.startTime));
+  printRow(client, F("Stop Time"), String(header.stopTime));
 
-  // Monitor time
-  const float loopsPerSec = (float)LOOPS_PER_SEC;
-  const float monMin = (float)LOOP_COUNT / (60.0f * loopsPerSec);
-  const float monHr  = (float)LOOP_COUNT / (3600.0f * loopsPerSec);
-  const float monDay = (float)LOOP_COUNT / (86400.0f * loopsPerSec);
-
-  if (monHr < 1.0f)       printRow(client, F("Total Monitor Time"), String(monMin, 1) + "m");
-  else if (monDay < 1.0f) printRow(client, F("Total Monitor Time"), String(monHr, 2) + "hr");
-  else                    printRow(client, F("Total Monitor Time"), String(monDay, 2) + "d");
+  // Status
+  printRow(client, F("Logging Status"), String(header.flags));
 
   client.print((const __FlashStringHelper*)HTML_TABLE_CLOSE);
 
@@ -488,6 +482,19 @@ static void renderSystemTable(WiFiClient &client) {
   printRow(client, F("Adaptive Loop Delay"), String(ADAPTIVE_DELAY) + " ms");
 
   client.print((const __FlashStringHelper*)HTML_TABLE_CLOSE);
+
+  // Timestamp
+  printRow(client, F("Timestamp"), getTimestamp());
+
+  // Monitor time
+  const float loopsPerSec = (float)LOOPS_PER_SEC;
+  const float monMin = (float)LOOP_COUNT / (60.0f * loopsPerSec);
+  const float monHr  = (float)LOOP_COUNT / (3600.0f * loopsPerSec);
+  const float monDay = (float)LOOP_COUNT / (86400.0f * loopsPerSec);
+
+  if (monHr < 1.0f)       printRow(client, F("Total Monitor Time"), String(monMin, 1) + "m");
+  else if (monDay < 1.0f) printRow(client, F("Total Monitor Time"), String(monHr, 2) + "hr");
+  else                    printRow(client, F("Total Monitor Time"), String(monDay, 2) + "d");
 
   // Nav Buttons
   renderNavButtons(client, PAGE_SYSTEMS);

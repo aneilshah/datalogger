@@ -1,5 +1,6 @@
 #include "global.h"
 #include "logger.h"
+#include "ntp.h"
 
 #include <string.h>
 
@@ -71,6 +72,31 @@ bool EventLogger::hasEvents() const
 {
   return eventsDetected;
 }
+
+void EventLogger::startSession()
+{
+  strncpy(
+    header.startTime,
+    getTimestamp(),
+    sizeof(header.startTime) - 1);
+
+  header.startTime[sizeof(header.startTime) - 1] = '\0';
+
+  header.stopTime[0] = '\0';
+  Serial.println("Starting Session...");
+}
+
+void EventLogger::stopSession()
+{
+  strncpy(
+    header.stopTime,
+    getTimestamp(),
+    sizeof(header.stopTime) - 1);
+
+  header.stopTime[sizeof(header.stopTime) - 1] = '\0';
+  Serial.println("Stopping Session");
+}
+
 void EventLogger::sample(bool active)
 {
     header.samplesTaken++;

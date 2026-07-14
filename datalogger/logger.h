@@ -64,8 +64,8 @@ public:
     uint32_t magic = 0;
     uint16_t version = 1;
 
-    char startTime[17] = {0};
-    char stopTime[17] = {0};
+    char startTime[LOGGER_TIMESTAMP_LENGTH] = {0};
+    char stopTime[LOGGER_TIMESTAMP_LENGTH] = {0};
 
     uint32_t samplesTaken = 0;
     uint16_t hoursStored = 0;
@@ -93,6 +93,10 @@ public:
 
   // Reset entire logging session
   void clear();
+
+  // Session Functions
+  void startSession();
+  void stopSession();
 
   const EventStatistics& getMinuteStatistics() const;
   const EventStatistics& getHourStatistics() const;
