@@ -12,7 +12,7 @@
 #define OLED_PAUSE_LOGGER 5
 #define OLED_MODE_NO_TIMEOUT 10
 
-#define OLED_HOLD_TIMEOUT 30
+#define OLED_HOLD_TIMEOUT 20
 
 void initDisplay();
 void updateOLED();

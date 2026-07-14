@@ -4,6 +4,7 @@
 // Project Includes
 #include "button.h"
 #include "logger.h"
+#include "loggerData.h"
 #include "oled.h"
 #include "power.h"
 
@@ -27,6 +28,22 @@ const char* getLoggerModeTxt() {
 
 }
 
+bool resetLogger()
+{
+  Logger.clear();    // RAM
+  if (!loggerDataErase()) // NVM
+    return false;
+
+  if (!loggerDataWriteHeader(Logger.getHeader())) // NVM
+    return false;
+
+  return true;
+}
+
+void recoverLogger() {
+  // TODO: CheckBoot status and set the correct mode if needed
+}
+
 void setLoggerMode(uint8_t mode) {
   loggerMode = mode;
   modeTimer = 0;
@@ -39,7 +56,7 @@ uint32_t getModeTimer()  {return modeTimer;}
 
 void initLogger() {
   setLoggerMode(MODE_INIT);
-  Logger.clear();
+  resetLogger();
 }
 
 void processLoggerMode() {

@@ -70,6 +70,7 @@ bool nvmSetZeroBlocks() {
   bool ok = true;
 
   if (!prefs.begin(NS_LOGGER, false)) {
+    Serial.printf("ERROR Accessing NS_LOGGER NVM");
     return false;
   }
 
@@ -143,7 +144,7 @@ void nvmDumpLoggerState()
   Serial.println("----- NVM LOGGER DUMP BEGIN -----");
 
   if (!prefs.begin(NS_LOGGER, true)) {
-    Serial.println("NVM dump failed: prefs.begin(NS_LOGGER) failed");
+    Serial.println("Error Accessing NS_LOGGER NVM");
     return;
   }
 

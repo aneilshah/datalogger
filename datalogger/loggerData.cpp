@@ -38,8 +38,11 @@ bool loggerDataInit()
 //*****************************************************************************
 bool loggerDataErase()
 {
-  if (!prefs.begin(NS_LOGGER, false))
+  Serial.println("Erasing NVM Data");
+  if (!prefs.begin(NS_LOGGER, false)) {
+    Serial.printf("ERROR Accessing NS_LOGGER NVM");
     return false;
+  }
 
   prefs.clear();
   prefs.end();
@@ -52,8 +55,11 @@ bool loggerDataErase()
 //*****************************************************************************
 bool loggerDataWriteHeader(const EventLogger::LogHeader &header)
 {
-  if (!prefs.begin(NS_LOGGER, false))
+  Serial.println("Writing Data Header");
+  if (!prefs.begin(NS_LOGGER, false)) {
+    Serial.printf("ERROR Accessing NS_LOGGER NVM");
     return false;
+  }
 
   bool ok =
     (prefs.putBytes(
@@ -63,6 +69,11 @@ bool loggerDataWriteHeader(const EventLogger::LogHeader &header)
 
   prefs.end();
 
+  if (ok)
+    Serial.println("Success Writing Data Header");
+  else
+    Serial.println("ERROR - Header Write Failed");
+
   return ok;
 }
 
@@ -71,8 +82,11 @@ bool loggerDataWriteHeader(const EventLogger::LogHeader &header)
 //*****************************************************************************
 bool loggerDataReadHeader(EventLogger::LogHeader &header)
 {
-  if (!prefs.begin(NS_LOGGER, true))
+  Serial.println("Reading Data Header");
+  if (!prefs.begin(NS_LOGGER, true)) {
+    Serial.printf("ERROR Accessing NS_LOGGER NVM");
     return false;
+  }
 
   bool ok =
     (prefs.getBytes(
@@ -88,16 +102,19 @@ bool loggerDataReadHeader(EventLogger::LogHeader &header)
 //*****************************************************************************
 // Write Hour
 //*****************************************************************************
-bool loggerDataWriteHour(
+bool loggerDataWriteHourBlock(
   uint16_t hour,
   const EventLogger::HourRecord &hourRecord)
 {
   char key[16];
 
+  Serial.printf("Writing Data Hour %u\n", hour);
   makeHourKey(hour, key);
 
-  if (!prefs.begin(NS_LOGGER, false))
+  if (!prefs.begin(NS_LOGGER, false)) {
+    Serial.printf("ERROR Accessing NS_LOGGER NVM");
     return false;
+  }
 
   bool ok =
     (prefs.putBytes(
@@ -111,18 +128,21 @@ bool loggerDataWriteHour(
 }
 
 //*****************************************************************************
-// Read Hour
+// Read Hour Block
 //*****************************************************************************
-bool loggerDataReadHour(
+bool loggerDataReadHourBlock(
   uint16_t hour,
   EventLogger::HourRecord &hourRecord)
 {
   char key[16];
 
+  Serial.printf("Reading Data Hour %u\n", hour);
   makeHourKey(hour, key);
 
-  if (!prefs.begin(NS_LOGGER, true))
+  if (!prefs.begin(NS_LOGGER, true)) {
+    Serial.printf("ERROR Accessing NS_LOGGER NVM");
     return false;
+  }
 
   bool ok =
     (prefs.getBytes(

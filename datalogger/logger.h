@@ -2,11 +2,22 @@
 
 #include <stdint.h>
 
-enum : uint8_t
+
+enum HourFlags : uint8_t
 {
-    EVENT_CONTINUES = 0x01
+  HOUR_NORMAL   = 0x00,
+  HOUR_PARTIAL  = 0x01,
+  HOUR_PAUSED   = 0x02,
+  HOUR_REBOOT   = 0x04,
 };
 
+enum MinuteFlags : uint8_t
+{
+   FLAG_NONE      = 0x00,
+   FLAG_PARTIAL   = 0x01,
+   FLAG_PAUSED    = 0x02,
+   FLAG_NO_TIME   = 0x04,   // optional
+};
 
 class EventLogger;
 
@@ -18,72 +29,96 @@ class EventLogger
 {
 public:
 
-    struct EventStatistics
+  struct EventStatistics
+  {
+    uint32_t count = 0;
+    uint32_t shortest = 0;
+    uint32_t longest = 0;
+    uint32_t total = 0;
+    uint8_t  flags = 0;
+
+    float average() const
     {
-        uint32_t count = 0;
-        uint32_t shortest = 0;
-        uint32_t longest = 0;
-        uint32_t total = 0;
-        uint8_t  flags = 0;
-    };
-
-    struct HourRecord
+      return count ? (float)total / count : 0.0f;
+    }
+      bool empty() const
     {
-        EventStatistics minute[60];
-    };
+      return count == 0;
+    }
 
-    struct LogHeader
+    bool hasEvents() const
     {
-        uint32_t magic = 0;
-        uint16_t version = 1;
+      return count != 0;
+    }
+  };
 
-        char startTime[17] = {0};
-        char stopTime[17] = {0};
+  struct HourRecord
+  {
+    EventStatistics minute[60];
+    uint8_t flags = 0;
+    uint8_t reserved[3] = {0};   // future-proof / alignment
+  };
 
-        uint32_t samplesTaken = 0;
-        uint16_t hoursStored = 0;
+  struct LogHeader
+  {
+    uint32_t magic = 0;
+    uint16_t version = 1;
 
-        uint16_t crc = 0;
-    };
+    char startTime[17] = {0};
+    char stopTime[17] = {0};
 
-    EventLogger();
+    uint32_t samplesTaken = 0;
+    uint16_t hoursStored = 0;
+    uint8_t flags = 0;
 
-    // Add one sample (typically once per second)
-    void sample(bool active);
+    uint16_t crc = 0;
+  };
 
-    // Finish current minute
-    void endHourBlock();
+  EventLogger();
 
-    // Finish current hour
-    bool endHour();
+  // Add one sample (typically once per second)
+  void sample(bool active);
 
-    // Clear current minute
-    void clearHourBlock();
+  // Finish current minute
+  bool endMinuteBlock();
 
-    // Reset entire logging session
-    void clear();
+  // Finish current hour
+  bool endHour();
 
-    const EventStatistics& getHourStatistics() const;
-    const EventStatistics& getSessionStatistics() const;
+  // Clear current minute
+  void clearMinuteStats();
 
-    const HourRecord& getHourRecord() const;
-    const LogHeader& getHeader() const;
+  // Clear hour stats
+  void clearHour();
 
-    bool hasEvents() const;
+  // Reset entire logging session
+  void clear();
+
+  const EventStatistics& getMinuteStatistics() const;
+  const EventStatistics& getHourStatistics() const;
+  const EventStatistics& getSessionStatistics() const;
+
+  const HourRecord& getHourRecord() const;
+  const LogHeader& getHeader() const;
+
+  bool hasEvents() const;
 
 private:
 
-    void finishEvent();
+  void startEvent();
+  void finishEvent();
 
-    EventStatistics hourStats;
-    EventStatistics sessionStats;
 
-    HourRecord currentHour;
-    LogHeader header;
+  EventStatistics hourStats;
+  EventStatistics minuteStats;
+  EventStatistics sessionStats;
 
-    bool inEvent = false;
-    bool eventsDetected = false;
+  HourRecord currentHour;
+  LogHeader header;
 
-    uint8_t minuteIndex = 0;
-    uint32_t currentDuration = 0;
+  bool inEvent = false;
+  bool eventsDetected = false;
+
+  uint8_t minuteIndex = 0;
+  uint32_t currentDuration = 0;
 };

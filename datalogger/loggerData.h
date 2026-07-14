@@ -19,10 +19,10 @@ bool loggerDataWriteHeader(
 bool loggerDataReadHeader(
   EventLogger::LogHeader &header);
 
-bool loggerDataWriteHour(
+bool loggerDataWriteHourBlock(
   uint16_t hour,
   const EventLogger::HourRecord &hourRecord);
 
-bool loggerDataReadHour(
+bool loggerDataReadHourBlock(
   uint16_t hour,
   EventLogger::HourRecord &hourRecord);

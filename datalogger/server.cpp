@@ -443,7 +443,7 @@ static void renderLoggerTable(WiFiClient &client)
   //------------------------------------------------
 
   printRow(client, F("<b>Session</b>"), F(""));
-  printRow(client, F("Hours Logged"), String(header.hoursStored));
+  printRow(client, F("Hours Stored"), String(header.hoursStored));
   printRow(client, F("Events"), String(session.count));
 
   printRow(client, F("Active Time"), String(session.total) + " sec");

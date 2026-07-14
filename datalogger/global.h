@@ -47,5 +47,9 @@ extern const char APP_VERSION[];     // (don’t put PROGMEM on the extern)
 // Computed Values (DO NOT EDIT)
 #define PROD_MODE (TEST_MODE == 0)
 
+// Header Constants
+#define LOGGER_MAGIC 0x12345678
+#define LOGGER_VERSION 1
+
 // Needs to be last
 #include "utils.h"

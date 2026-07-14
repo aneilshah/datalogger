@@ -344,7 +344,7 @@ static void renderSessionChart(WiFiClient &client)
   {
     Serial.printf("Reading Hour %u... ", hours);
 
-    if (!loggerDataReadHour(hours, hour))
+    if (!loggerDataReadHourBlock(hours, hour))
     {
       Serial.println("FAILED");
       break;

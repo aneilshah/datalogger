@@ -73,7 +73,7 @@ static void renderExportMainMetrics(WiFiClient &client)
     client.println((float)session.total / (float)session.count, 2);
   }
 
-  client.print(F("hours_logged,"));
+  client.print(F("hours_stored,"));
   client.println(header.hoursStored);
 
   client.print(F("samples_taken,"));

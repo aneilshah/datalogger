@@ -153,12 +153,12 @@ void setup() {
   START_TIME = (millis() / 1000); 
 
   // Test Functions
-  //testDataStore(); 
   Serial.println("Running Logger Test");
-  loggerCreateTestData();
-  loggerDumpHour(0);
-  loggerDumpHour(1);
-  loggerDumpHour(2);
+  loggerSimulateAddingData();
+  // loggerCreateAndWriteTestNVMData();
+  // loggerDumpHourBlock(0);
+  // loggerDumpHourBlock(1);
+  // loggerDumpHourBlock(2);
   Serial.println("Test Complete");
 
   // Init OTA

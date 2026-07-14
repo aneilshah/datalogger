@@ -14,6 +14,8 @@ void EventLogger::clear()
   memset(&sessionStats, 0, sizeof(sessionStats));
   memset(&currentHour, 0, sizeof(currentHour));
   memset(&header, 0, sizeof(header));
+  header.magic   = LOGGER_MAGIC;
+  header.version = LOGGER_VERSION;
 
   minuteIndex = 0;
 
@@ -23,18 +25,28 @@ void EventLogger::clear()
   currentDuration = 0;
 }
 
-void EventLogger::clearHourBlock()
+void EventLogger::clearHour() 
 {
+  memset(&currentHour, 0, sizeof(currentHour));
   memset(&hourStats, 0, sizeof(hourStats));
+  minuteIndex = 0;
+}
 
-  if (inEvent)
-    hourStats.flags |= EVENT_CONTINUES;
+void EventLogger::clearMinuteStats()
+{
+  memset(&minuteStats, 0, sizeof(minuteStats));
 }
 
 const EventLogger::EventStatistics&
 EventLogger::getHourStatistics() const
 {
   return hourStats;
+}
+
+const EventLogger::EventStatistics&
+EventLogger::getMinuteStatistics() const
+{
+  return minuteStats;
 }
 
 const EventLogger::EventStatistics&
@@ -61,77 +73,91 @@ bool EventLogger::hasEvents() const
 }
 void EventLogger::sample(bool active)
 {
-  header.samplesTaken++;
+    header.samplesTaken++;
 
-  if (active)
-  {
-      inEvent = true;
+    // Check Leading edge
+    if (active && !inEvent)
+    {
+      startEvent();
+    }
+
+    // Count active second
+    if (inEvent)
+    {
       currentDuration++;
-  }
-  else if (inEvent)
-  {
+    }
+
+    // Check Trailing edge
+    if (!active && inEvent)
+    {
       finishEvent();
-  }
+    }
 }
 
-void EventLogger::endHourBlock()
+bool EventLogger::endMinuteBlock()
 {
-  //
-  // Finish this block if an event is still active.
-  // Continue timing the event into the next block.
-  //
-  if (inEvent)
-  {
-    finishEvent();
-
-    inEvent = true;
-    currentDuration = 0;
-
-    hourStats.flags |= EVENT_CONTINUES;
-  }
-
-  // Save completed minute into current hour.
-  if (minuteIndex < 60)
-  {
-    currentHour.minute[minuteIndex] = hourStats;
-    minuteIndex++;
-  }
-
-  clearHourBlock();
-
-  // Hour complete.
   if (minuteIndex >= 60)
   {
-      minuteIndex = 0;
-      endHour();
+    Serial.println("ERROR: minuteIndex out of range");
+    return false;
   }
+
+  currentHour.minute[minuteIndex] = minuteStats;
+  minuteIndex++;
+
+  clearMinuteStats();
+
+  return true;
 }
 
 bool EventLogger::endHour()
 {
   // Logger only prepares the completed hour.
   // Flash storage is handled elsewhere.
-
-  header.hoursStored++;
-
-  return true;
+    header.hoursStored++;
+    return true;
 }
+
+void EventLogger::startEvent() {
+  eventsDetected = true;
+
+  minuteStats.count++;
+  hourStats.count++;
+  sessionStats.count++;
+
+  inEvent = true;
+  currentDuration = 0;
+}
+
 
 void EventLogger::finishEvent()
 {
   if (currentDuration == 0)
     return;
 
-  eventsDetected = true;
-
   //------------------------------------------------
-  // HourBlock statistics
+  // Minute statistics
   //------------------------------------------------
 
-  hourStats.count++;
+  if (minuteStats.shortest == 0 ||
+      currentDuration < minuteStats.shortest)
+  {
+    minuteStats.shortest = currentDuration;
+  }
+
+  if (currentDuration > minuteStats.longest)
+  {
+    minuteStats.longest = currentDuration;
+  }
+
+  minuteStats.total += currentDuration;
+
+  //------------------------------------------------
+  // Hour statistics
+  //------------------------------------------------
 
   if (hourStats.shortest == 0 ||
-    currentDuration < hourStats.shortest)
+      currentDuration < hourStats.shortest)
   {
     hourStats.shortest = currentDuration;
   }
@@ -147,10 +173,8 @@ void EventLogger::finishEvent()
   // Session statistics
   //------------------------------------------------
 
-  sessionStats.count++;
-
   if (sessionStats.shortest == 0 ||
-    currentDuration < sessionStats.shortest)
+      currentDuration < sessionStats.shortest)
   {
     sessionStats.shortest = currentDuration;
   }
