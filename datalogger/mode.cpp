@@ -34,7 +34,7 @@ bool resetLogger()
   if (!loggerDataErase()) // NVM
     return false;
 
-  if (!loggerDataWriteHeader(Logger.getHeader())) // NVM
+  if (!loggerDataWriteNvmHeader(Logger.getRamHeader())) // NVM
     return false;
 
   return true;

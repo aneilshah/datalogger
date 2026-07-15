@@ -13,11 +13,11 @@
 bool loggerDataInit();
 bool loggerDataErase();
 
-bool loggerDataWriteHeader(
-  const EventLogger::LogHeader &header);
+bool loggerDataWriteNvmHeader(
+  const EventLogger::LogHeader &ramHeader);
 
-bool loggerDataReadHeader(
-  EventLogger::LogHeader &header);
+bool loggerDataReadNvmHeader(
+  EventLogger::LogHeader &nvmHeader);
 
 bool loggerDataWriteHourBlock(
   uint16_t hour,

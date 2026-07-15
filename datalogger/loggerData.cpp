@@ -51,9 +51,9 @@ bool loggerDataErase()
 }
 
 //*****************************************************************************
-// Write Header
+// Write NVM Header
 //*****************************************************************************
-bool loggerDataWriteHeader(const EventLogger::LogHeader &header)
+bool loggerDataWriteNvmHeader(const EventLogger::LogHeader &ramHeader)
 {
   Serial.println("Writing Data Header");
   if (!prefs.begin(NS_LOGGER, false)) {
@@ -64,25 +64,25 @@ bool loggerDataWriteHeader(const EventLogger::LogHeader &header)
   bool ok =
     (prefs.putBytes(
       K_HEADER,
-      &header,
-      sizeof(header)) == sizeof(header));
+      &ramHeader,
+      sizeof(ramHeader)) == sizeof(ramHeader));
 
   prefs.end();
 
   if (ok)
-    Serial.println("Success Writing Data Header");
+    Serial.println("Success Writing NVM Data Header");
   else
-    Serial.println("ERROR - Header Write Failed");
+    Serial.println("ERROR - NVM Header Write Failed");
 
   return ok;
 }
 
 //*****************************************************************************
-// Read Header
+// Read NVM Header
 //*****************************************************************************
-bool loggerDataReadHeader(EventLogger::LogHeader &header)
+bool loggerDataReadNvmHeader(EventLogger::LogHeader &nvmHeader)
 {
-  Serial.println("Reading Data Header");
+  Serial.println("Reading NVM Data Header");
   if (!prefs.begin(NS_LOGGER, true)) {
     Serial.printf("ERROR Accessing NS_LOGGER NVM");
     return false;
@@ -91,8 +91,8 @@ bool loggerDataReadHeader(EventLogger::LogHeader &header)
   bool ok =
     (prefs.getBytes(
       K_HEADER,
-      &header,
-      sizeof(header)) == sizeof(header));
+      &nvmHeader,
+      sizeof(nvmHeader)) == sizeof(nvmHeader));
 
   prefs.end();
 

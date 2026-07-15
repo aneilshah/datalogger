@@ -87,7 +87,7 @@ void updateOLED() {
   horOffset = (offsetTimer / (60 * LOOPS_PER_SEC)) % 10;  // Every 60 seconds, span = 10 pixels  
 
   if (oledMode == OLED_MAIN) {
-    const auto &header  = Logger.getHeader();
+    const auto &ramHeader  = Logger.getRamHeader();
     const auto &session = Logger.getSessionStatistics();
     const auto &hour    = Logger.getHourStatistics();
 
@@ -108,7 +108,7 @@ void updateOLED() {
     // display.drawString(horOffset, 10 + vertOffsetMain, line1);
 
     if (getLoggerMode() == MODE_PAUSED)
-      snprintf(line1, sizeof(line1), "PAUSED [%.1f Hr]", header.hoursStored);
+      snprintf(line1, sizeof(line1), "PAUSED [%.1f Hr]", ramHeader.hoursStored);
     else if (getLoggerMode() == MODE_INIT)
       snprintf(line1, sizeof(line1), "READY [NO DATA]");
 
@@ -155,7 +155,7 @@ void updateOLED() {
     }
     else {
       // Samples
-      snprintf(line4, sizeof(line4), "Samples: %u", header.samplesTaken);
+      snprintf(line4, sizeof(line4), "Samples: %u", ramHeader.samplesTaken);
 
     }
 

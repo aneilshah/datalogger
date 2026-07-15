@@ -66,7 +66,7 @@ static void renderSessionChart(WiFiClient &client);
 
 static void renderLoggerSummary(WiFiClient &client)
 {
-  const auto &header = Logger.getHeader();
+  const auto &ramHeader = Logger.getRamHeader();
   const auto &stats  = Logger.getSessionStatistics();
 
   client.println(F("<div class=\"chart-wrap\">"));
@@ -79,19 +79,19 @@ static void renderLoggerSummary(WiFiClient &client)
   client.println(F("<table class=\"summary\">"));
 
   client.print(F("<tr><td>Started</td><td>"));
-  client.print(header.startTime);
+  client.print(ramHeader.startTime);
   client.println(F("</td></tr>"));
 
   client.print(F("<tr><td>Stopped</td><td>"));
-  client.print(header.stopTime);
+  client.print(ramHeader.stopTime);
   client.println(F("</td></tr>"));
 
   client.print(F("<tr><td>Hours Logged</td><td>"));
-  client.print(header.hoursStored);
+  client.print(ramHeader.hoursStored);
   client.println(F("</td></tr>"));
 
   client.print(F("<tr><td>Samples</td><td>"));
-  client.print(header.samplesTaken);
+  client.print(ramHeader.samplesTaken);
   client.println(F("</td></tr>"));
 
   client.print(F("<tr><td>Total Events</td><td>"));
@@ -330,17 +330,17 @@ static void renderSessionChart(WiFiClient &client)
   uint32_t maxValue = 0;
 
   EventLogger::HourRecord hour;
-  EventLogger::LogHeader header;
+  EventLogger::LogHeader ramHeader;
 
-  if (!loggerDataReadHeader(header))
+  if (!loggerDataReadNvmHeader(ramHeader))
   {
     client.println(F("<div class=\"small\">No logger data.</div></div>"));
     return;
   }
 
-  Serial.printf("Header Hours Stored: %u\n", header.hoursStored);
+  Serial.printf("Header Hours Stored: %u\n", ramHeader.hoursStored);
 
-  for (; hours < header.hoursStored; hours++)
+  for (; hours < ramHeader.hoursStored; hours++)
   {
     Serial.printf("Reading Hour %u... ", hours);
 

@@ -409,7 +409,7 @@ static void renderLoggerTable(WiFiClient &client)
 
   const auto &hour    = Logger.getHourStatistics();
   const auto &session = Logger.getSessionStatistics();
-  const auto &header  = Logger.getHeader();
+  const auto &ramHeader  = Logger.getRamHeader();
 
   const float hourAvg =
     hour.count ? (float)hour.total / hour.count : 0.0f;
@@ -443,7 +443,7 @@ static void renderLoggerTable(WiFiClient &client)
   //------------------------------------------------
 
   printRow(client, F("<b>Session</b>"), F(""));
-  printRow(client, F("Hours Stored"), String(header.hoursStored));
+  printRow(client, F("Hours Stored"), String(ramHeader.hoursStored));
   printRow(client, F("Events"), String(session.count));
 
   printRow(client, F("Active Time"), String(session.total) + " sec");
@@ -462,11 +462,11 @@ static void renderLoggerTable(WiFiClient &client)
   }
 
   // Start / Stop Time
-  printRow(client, F("Start Time"), String(header.startTime));
-  printRow(client, F("Stop Time"), String(header.stopTime));
+  printRow(client, F("Start Time"), String(ramHeader.startTime));
+  printRow(client, F("Stop Time"), String(ramHeader.stopTime));
 
   // Status
-  printRow(client, F("Logging Status"), String(header.flags));
+  printRow(client, F("Logging Status"), String(ramHeader.flags));
 
   client.print((const __FlashStringHelper*)HTML_TABLE_CLOSE);
 

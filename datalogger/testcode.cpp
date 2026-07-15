@@ -93,24 +93,24 @@ void loggerCreateAndWriteTestNVMData()
 {
   loggerDataErase();
 
-  EventLogger::LogHeader header;
+  EventLogger::LogHeader ramHeader;
   EventLogger::HourRecord hour;
 
-  memset(&header, 0, sizeof(header));
+  memset(&ramHeader, 0, sizeof(ramHeader));
 
-  header.magic = LOGGER_MAGIC;
-  header.version = LOGGER_VERSION;
+  ramHeader.magic = LOGGER_MAGIC;
+  ramHeader.version = LOGGER_VERSION;
 
-  strcpy(header.startTime, "2026-07-13 08:00");
-  strcpy(header.stopTime,  "2026-07-13 11:00");
+  strcpy(ramHeader.startTime, "2026-07-13 08:00");
+  strcpy(ramHeader.stopTime,  "2026-07-13 11:00");
 
-  header.samplesTaken = 3 * 3600;
-  header.hoursStored = 3;
-  header.crc = 0;
+  ramHeader.samplesTaken = 3 * 3600;
+  ramHeader.hoursStored = 3;
+  ramHeader.crc = 0;
 
-  if (!loggerDataWriteHeader(header))
+  if (!loggerDataWriteNvmHeader(ramHeader))
   {
-    Serial.println("Header write failed");
+    Serial.println("NVM Header write failed");
     return;
   }
 
@@ -171,14 +171,13 @@ static bool saveCurrentHour()
     return false;
 
   if (!loggerDataWriteHourBlock(
-        Logger.getHeader().hoursStored - 1,
-        Logger.getHourRecord()))
+      Logger.getRamHeader().hoursStored - 1,
+      Logger.getHourRecord()))
   {
     return false;
   }
 
-  if (!loggerDataWriteHeader(
-        Logger.getHeader()))
+  if (!loggerDataWriteNvmHeader(Logger.getRamHeader()))
   {
     return false;
   }
@@ -251,7 +250,7 @@ void loggerSimulateAddingData()
   // STOP SESSION
   delay(5000);
   Logger.stopSession();
-  loggerDataWriteHeader(Logger.getHeader()); // NVM
+  loggerDataWriteNvmHeader(Logger.getRamHeader()); // NVM
 
   loggerDumpNVMHeader();
   loggerDumpNVMHourBlock(0, false);  // true = minute details, false = no details
@@ -318,46 +317,46 @@ bool loggerSimulateHour(LoggerSimulation type, uint32_t eventsPerMinute,
 //*****************************************************************************
 void loggerReadWriteDataTest()
 {
-  EventLogger::LogHeader txHeader;
-  EventLogger::LogHeader rxHeader;
+  EventLogger::LogHeader txRamHeader;
+  EventLogger::LogHeader rxNvmHeader;
 
-  memset(&txHeader, 0, sizeof(txHeader));
-  memset(&rxHeader, 0, sizeof(rxHeader));
+  memset(&txRamHeader, 0, sizeof(txRamHeader));
+  memset(&rxNvmHeader, 0, sizeof(rxNvmHeader));
 
-  txHeader.magic = LOGGER_MAGIC;
-  txHeader.version = 1;
+  txRamHeader.magic = LOGGER_MAGIC;
+  txRamHeader.version = 1;
 
-  strcpy(txHeader.startTime, "2026-07-13 17:30");
-  strcpy(txHeader.stopTime,  "2026-07-13 18:30");
+  strcpy(txRamHeader.startTime, "2026-07-13 17:30");
+  strcpy(txRamHeader.stopTime,  "2026-07-13 18:30");
 
-  txHeader.samplesTaken = 3600;
-  txHeader.hoursStored = 1;
-  txHeader.crc = 0x55AA;
+  txRamHeader.samplesTaken = 3600;
+  txRamHeader.hoursStored = 1;
+  txRamHeader.crc = 0x55AA;
 
   Serial.println();
   Serial.println("===== LOGGER DATA TEST =====");
 
   loggerDataErase();
 
-  if (!loggerDataWriteHeader(txHeader))
+  if (!loggerDataWriteNvmHeader(txRamHeader))
   {
     Serial.println("Header write failed");
     return;
   }
 
-  if (!loggerDataReadHeader(rxHeader))
+  if (!loggerDataReadNvmHeader(rxNvmHeader))
   {
-    Serial.println("Header read failed");
+    Serial.println("NVM Header read failed");
     return;
   }
 
-  Serial.printf("Magic        : %08lX\n", rxHeader.magic);
-  Serial.printf("Version      : %u\n", rxHeader.version);
-  Serial.printf("Start Time   : %s\n", rxHeader.startTime);
-  Serial.printf("Stop Time    : %s\n", rxHeader.stopTime);
-  Serial.printf("Samples      : %lu\n", rxHeader.samplesTaken);
-  Serial.printf("Hours Stored : %u\n", rxHeader.hoursStored);
-  Serial.printf("CRC          : %04X\n", rxHeader.crc);
+  Serial.printf("Magic        : %08lX\n", rxNvmHeader.magic);
+  Serial.printf("Version      : %u\n", rxNvmHeader.version);
+  Serial.printf("Start Time   : %s\n", rxNvmHeader.startTime);
+  Serial.printf("Stop Time    : %s\n", rxNvmHeader.stopTime);
+  Serial.printf("Samples      : %lu\n", rxNvmHeader.samplesTaken);
+  Serial.printf("Hours Stored : %u\n", rxNvmHeader.hoursStored);
+  Serial.printf("CRC          : %04X\n", rxNvmHeader.crc);
 
   Serial.println("===== TEST COMPLETE =====");
 }
@@ -424,24 +423,24 @@ void loggerDumpNVMHourBlock(uint16_t hourNumber, bool detailed)
 //*****************************************************************************
 void loggerDumpNVMHeader()
 {
-  EventLogger::LogHeader header;
+  EventLogger::LogHeader nvmHeader;
 
-  if (!loggerDataReadHeader(header))
+  if (!loggerDataReadNvmHeader(nvmHeader))
   {
-    Serial.println("Read Header Failed");
+    Serial.println("Read NVM Header Failed");
     return;
   }
 
   Serial.println();
   Serial.println("===== HEADER =====");
 
-  Serial.printf("Magic        : %08lX\n", header.magic);
-  Serial.printf("Version      : %u\n", header.version);
-  Serial.printf("Hours Stored : %u\n", header.hoursStored);
-  Serial.printf("Samples      : %lu\n", header.samplesTaken);
-  Serial.printf("Start Time   : %s\n", header.startTime);
-  Serial.printf("Stop Time    : %s\n", header.stopTime);
-  Serial.printf("Flags        : %u\n", header.flags);
+  Serial.printf("Magic        : %08lX\n", nvmHeader.magic);
+  Serial.printf("Version      : %u\n", nvmHeader.version);
+  Serial.printf("Hours Stored : %u\n", nvmHeader.hoursStored);
+  Serial.printf("Samples      : %lu\n", nvmHeader.samplesTaken);
+  Serial.printf("Start Time   : %s\n", nvmHeader.startTime);
+  Serial.printf("Stop Time    : %s\n", nvmHeader.stopTime);
+  Serial.printf("Flags        : %u\n", nvmHeader.flags);
 }
 
 //*****************************************************************************
@@ -449,17 +448,17 @@ void loggerDumpNVMHeader()
 //*****************************************************************************
 void loggerDumpRAMHeader()
 {
-  const EventLogger::LogHeader &header = Logger.getHeader();
+  const EventLogger::LogHeader &ramHeader = Logger.getRamHeader();
 
   Serial.println();
   Serial.println("===== RAM HEADER =====");
 
-  Serial.printf("Version      : %u\n", header.version);
-  Serial.printf("Hours Stored : %u\n", header.hoursStored);
-  Serial.printf("Samples      : %lu\n", header.samplesTaken);
-  Serial.printf("Start Time   : %s\n", header.startTime);
-  Serial.printf("Stop Time    : %s\n", header.stopTime);
-  Serial.printf("Flags        : %u\n", header.flags);
+  Serial.printf("Version      : %u\n", ramHeader.version);
+  Serial.printf("Hours Stored : %u\n", ramHeader.hoursStored);
+  Serial.printf("Samples      : %lu\n", ramHeader.samplesTaken);
+  Serial.printf("Start Time   : %s\n", ramHeader.startTime);
+  Serial.printf("Stop Time    : %s\n", ramHeader.stopTime);
+  Serial.printf("Flags        : %u\n", ramHeader.flags);
 }
 
 //*****************************************************************************

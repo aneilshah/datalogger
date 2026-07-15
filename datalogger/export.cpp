@@ -53,7 +53,7 @@ static void renderExportMainMetrics(WiFiClient &client)
   client.println(F("[LOGGER METRICS]"));
 
   const auto &session = Logger.getSessionStatistics();
-  const auto &header  = Logger.getHeader();
+  const auto &ramHeader  = Logger.getRamHeader();
 
   client.print(F("events,"));
   client.println(session.count);
@@ -74,19 +74,19 @@ static void renderExportMainMetrics(WiFiClient &client)
   }
 
   client.print(F("hours_stored,"));
-  client.println(header.hoursStored);
+  client.println(ramHeader.hoursStored);
 
   client.print(F("samples_taken,"));
-  client.println(header.samplesTaken);
+  client.println(ramHeader.samplesTaken);
 
   client.print(F("events_detected,"));
   client.println(Logger.hasEvents() ? F("1") : F("0"));
 
   client.print(F("session_start,"));
-  client.println(header.startTime);
+  client.println(ramHeader.startTime);
 
   client.print(F("session_stop,"));
-  client.println(header.stopTime);
+  client.println(ramHeader.stopTime);
 
   client.print(F("timestamp,"));
   client.println(getTimestamp());

@@ -14,9 +14,9 @@ void EventLogger::clear()
   memset(&hourStats, 0, sizeof(hourStats));
   memset(&sessionStats, 0, sizeof(sessionStats));
   memset(&currentHour, 0, sizeof(currentHour));
-  memset(&header, 0, sizeof(header));
-  header.magic   = LOGGER_MAGIC;
-  header.version = LOGGER_VERSION;
+  memset(&ramHeader, 0, sizeof(ramHeader));
+  ramHeader.magic   = LOGGER_MAGIC;
+  ramHeader.version = LOGGER_VERSION;
 
   minuteIndex = 0;
 
@@ -63,9 +63,9 @@ EventLogger::getHourRecord() const
 }
 
 const EventLogger::LogHeader&
-EventLogger::getHeader() const
+EventLogger::getRamHeader() const
 {
-  return header;
+  return ramHeader;
 }
 
 bool EventLogger::hasEvents() const
@@ -76,30 +76,30 @@ bool EventLogger::hasEvents() const
 void EventLogger::startSession()
 {
   strncpy(
-    header.startTime,
+    ramHeader.startTime,
     getTimestamp(),
-    sizeof(header.startTime) - 1);
+    sizeof(ramHeader.startTime) - 1);
 
-  header.startTime[sizeof(header.startTime) - 1] = '\0';
+  ramHeader.startTime[sizeof(ramHeader.startTime) - 1] = '\0';
 
-  header.stopTime[0] = '\0';
+  ramHeader.stopTime[0] = '\0';
   Serial.println("Starting Session...");
 }
 
 void EventLogger::stopSession()
 {
   strncpy(
-    header.stopTime,
+    ramHeader.stopTime,
     getTimestamp(),
-    sizeof(header.stopTime) - 1);
+    sizeof(ramHeader.stopTime) - 1);
 
-  header.stopTime[sizeof(header.stopTime) - 1] = '\0';
+  ramHeader.stopTime[sizeof(ramHeader.stopTime) - 1] = '\0';
   Serial.println("Stopping Session");
 }
 
 void EventLogger::sample(bool active)
 {
-    header.samplesTaken++;
+    ramHeader.samplesTaken++;
 
     // Check Leading edge
     if (active && !inEvent)
@@ -136,12 +136,27 @@ bool EventLogger::endMinuteBlock()
   return true;
 }
 
+bool EventLogger::startHour()
+{
+  strncpy(
+    currentHour.startTime,
+    getTimestamp(),
+    sizeof(currentHour.startTime) - 1);
+
+  currentHour.stopTime[0] = '\0';
+  return true;
+}
+
 bool EventLogger::endHour()
 {
   // Logger only prepares the completed hour.
   // Flash storage is handled elsewhere.
-    header.hoursStored++;
-    return true;
+  strncpy(
+    currentHour.stopTime,
+    getTimestamp(),
+    sizeof(currentHour.stopTime) - 1);
+  ramHeader.hoursStored++;
+  return true;
 }
 
 void EventLogger::startEvent() {

@@ -55,6 +55,8 @@ public:
   struct HourRecord
   {
     EventStatistics minute[60];
+    char startTime[LOGGER_TIMESTAMP_LENGTH];
+    char stopTime[LOGGER_TIMESTAMP_LENGTH];
     uint8_t flags = 0;
     uint8_t reserved[3] = {0};   // future-proof / alignment
   };
@@ -82,7 +84,8 @@ public:
   // Finish current minute
   bool endMinuteBlock();
 
-  // Finish current hour
+  // Start / Stop current hour
+  bool startHour();
   bool endHour();
 
   // Clear current minute
@@ -103,7 +106,7 @@ public:
   const EventStatistics& getSessionStatistics() const;
 
   const HourRecord& getHourRecord() const;
-  const LogHeader& getHeader() const;
+  const LogHeader& getRamHeader() const;
 
   bool hasEvents() const;
 
@@ -118,7 +121,7 @@ private:
   EventStatistics sessionStats;
 
   HourRecord currentHour;
-  LogHeader header;
+  LogHeader ramHeader;
 
   bool inEvent = false;
   bool eventsDetected = false;
