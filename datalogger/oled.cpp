@@ -146,7 +146,9 @@ void updateOLED() {
     if (LOOP_COUNT % TotalTime < TimePerStageLoops) {
       // Avg
       float avg = session.count ? (float)session.total / (float)session.count : 0.0f;
-      snprintf(line4, sizeof(line4), "Avg: %.1f", avg);
+      //snprintf(line4, sizeof(line4), "Avg: %.1f", avg);
+      const char* dns = getLocalIP(); 
+      snprintf(line4, sizeof(line4), "DNS: %s", dns);
     }
     else if (LOOP_COUNT % TotalTime < 2 * TimePerStageLoops) {
       // Min / Max

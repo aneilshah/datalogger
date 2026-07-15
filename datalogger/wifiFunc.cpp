@@ -20,6 +20,21 @@ extern WiFiServer server;
 static bool serverStarted = false;
 uint8_t wifiRadioState = WIFI_RADIO_OFF;
 
+
+// Connection List
+struct WifiCredential
+{
+  const char *ssid;
+  const char *password;
+};
+
+static const WifiCredential wifiList[] =
+{
+    { PHONE_WIFI_SSID, PHONE_WIFI_PSW },
+  { HOME_WIFI_SSID,  HOME_WIFI_PSW  },
+
+};
+
 bool wifiLinkUp() {
   return WiFi.status() == WL_CONNECTED &&
          WiFi.localIP() != IPAddress(0,0,0,0) &&
@@ -336,10 +351,27 @@ void connectWifi() {
 
   wifiRadioState = WIFI_RADIO_ON;
   char details[64];
-  snprintf(details, sizeof(details), "Network: %s", WIFI_SSID);
+  snprintf(details, sizeof(details), "Network: %s", HOME_WIFI_SSID);
   newPopupScreen("CONNECTING...", details);
 
-  bool ok = connectDhcpThenStaticHost(WIFI_SSID, WIFI_PSW);
+  //bool ok = connectDhcpThenStaticHost(HOME_WIFI_SSID, HOME_WIFI_PSW);
+
+  bool ok = false;
+
+  for (const auto &wifi : wifiList)
+  {
+    char details[64];
+    snprintf(details, sizeof(details), "Network: %s", wifi.ssid);
+    newPopupScreen("CONNECTING...", details);
+
+    Serial.printf("Trying %s...\n", wifi.ssid);
+
+    if (connectDhcpThenStaticHost(wifi.ssid, wifi.password))
+    {
+      ok = true;
+      break;
+    }
+  }
 
   if (ok) {
     CONN_STATUS = "CONN";
@@ -426,4 +458,17 @@ bool internetOK443() {
   bool ok = c.connect("www.google.com", 443);
   c.stop();
   return ok;
+}
+
+const char* getLocalIP() {
+  static char ip[16];
+
+  snprintf(ip, sizeof(ip),
+    "%u.%u.%u.%u",
+    WiFi.localIP()[0],
+    WiFi.localIP()[1],
+    WiFi.localIP()[2],
+    WiFi.localIP()[3]);
+
+  return ip;
 }

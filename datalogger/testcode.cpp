@@ -383,6 +383,7 @@ void loggerDumpNVMHourBlock(uint16_t hourNumber, bool detailed)
     uint32_t totalEvents = 0;
     uint32_t totalSeconds = 0;
     uint32_t longest = 0;
+    uint32_t shortest = UINT32_MAX;
 
     for (int i = 0; i < 60; i++)
     {
@@ -391,13 +392,35 @@ void loggerDumpNVMHourBlock(uint16_t hourNumber, bool detailed)
       totalEvents += m.count;
       totalSeconds += m.total;
 
-      if (m.longest > longest)
-        longest = m.longest;
+      if (m.count > 0)
+      {
+
+        if (m.longest > longest)
+          longest = m.longest;
+
+        if (m.shortest < shortest)
+          shortest = m.shortest;
+      }
     }
 
+    Serial.printf("Start    : %s\n", hour.startTime);
+    Serial.printf("Stop     : %s\n", hour.stopTime);
     Serial.printf("Events   : %lu\n", totalEvents);
     Serial.printf("Duration : %lu sec\n", totalSeconds);
-    Serial.printf("Longest  : %lu sec\n", longest);
+
+    if (totalEvents > 0)
+    {
+      Serial.printf("Shortest : %lu sec\n", shortest);
+      Serial.printf("Longest  : %lu sec\n", longest);
+      Serial.printf("Average  : %.1f sec\n",
+        (float)totalSeconds / totalEvents);
+    }
+    else
+    {
+      Serial.println("Shortest : ***");
+      Serial.println("Longest  : ***");
+      Serial.println("Average  : ***");
+    }
 
     return;
   }

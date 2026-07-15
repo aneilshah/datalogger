@@ -31,6 +31,7 @@ void EventLogger::clearHour()
   memset(&currentHour, 0, sizeof(currentHour));
   memset(&hourStats, 0, sizeof(hourStats));
   minuteIndex = 0;
+  startHour();
 }
 
 void EventLogger::clearMinuteStats()
@@ -81,8 +82,8 @@ void EventLogger::startSession()
     sizeof(ramHeader.startTime) - 1);
 
   ramHeader.startTime[sizeof(ramHeader.startTime) - 1] = '\0';
-
   ramHeader.stopTime[0] = '\0';
+  startHour();
   Serial.println("Starting Session...");
 }
 

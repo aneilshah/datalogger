@@ -26,6 +26,9 @@ bool dnsReady();
 bool wifiLinkReady();
 bool wifiRadioOn();
 
+// getters
+const char* getLocalIP();
+
 
 
 
