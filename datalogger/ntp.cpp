@@ -292,3 +292,54 @@ void ensureTimeHealthy() {
     configTime(0, 0, "pool.ntp.org", "time.nist.gov");
   }
 }
+
+//*****************************************************************************
+// Add Minutes to Timestamp
+//*****************************************************************************
+bool addMinutesToTimestamp(
+  const char *timestamp,
+  uint32_t minutes,
+  char *result,
+  size_t resultSize)
+{
+  struct tm tm = {};
+
+  if (sscanf(timestamp,
+    "%4d.%2d.%2dT%2d:%2d:%2d",
+    &tm.tm_year,
+    &tm.tm_mon,
+    &tm.tm_mday,
+    &tm.tm_hour,
+    &tm.tm_min,
+    &tm.tm_sec) != 6)
+  {
+    return false;
+  }
+
+  tm.tm_year -= 1900;
+  tm.tm_mon--;
+
+  time_t t = mktime(&tm);
+
+  if (t == (time_t)-1)
+    return false;
+
+  t += (time_t)minutes * 60;
+
+  struct tm *newTm = localtime(&t);
+
+  if (newTm == nullptr)
+    return false;
+
+  snprintf(result,
+    resultSize,
+    "%04d.%02d.%02dT%02d:%02d:%02d",
+    newTm->tm_year + 1900,
+    newTm->tm_mon + 1,
+    newTm->tm_mday,
+    newTm->tm_hour,
+    newTm->tm_min,
+    newTm->tm_sec);
+
+  return true;
+}

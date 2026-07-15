@@ -49,8 +49,8 @@ static const char HTML_HEAD_SCRIPT[] PROGMEM =
 "function exportPage(p){"
 "window.location='/export?p='+encodeURIComponent(p);"
 "}"
-"function exportJsonPage(p){"
-"window.location='/json?p='+encodeURIComponent(p);"
+"function exportDataPage(p){"
+"window.location='/csv?p='+encodeURIComponent(p);"
 "}"
 //"setInterval(function(){loadDoc(curPage);},30000);"
 "window.addEventListener('load',function(){loadDoc(curPage);});"
@@ -393,7 +393,7 @@ static void renderNavButtons(WiFiClient &client, uint8_t active) {
 
   client.println(F("<button class=\"navbtn theme\" onclick=\"setPage('charts')\">CHART</button>"));
   client.println(F("<button class=\"navbtn theme\" onclick=\"exportPage(curPage)\">EXPORT</button>"));
-  client.println(F("<button class=\"navbtn theme\" onclick=\"exportJsonPage(curPage)\">JSON</button>"));
+  client.println(F("<button class=\"navbtn theme\" onclick=\"exportDataPage(curPage)\">DATA</button>"));
   client.println(F("<button class=\"navbtn theme\" onclick=\"loadDoc(curPage)\">REFRESH</button>"));
 
   client.println(F("</div>"));
@@ -602,7 +602,7 @@ void webServer() {
   bool isRoot = false;
   bool isData = false;
   bool isExport = false;
-  bool isJson = false;
+  bool isCsv = false;
   uint8_t page = PAGE_LOGGER;
 
   if (path && path[0] == '/') {
@@ -623,13 +623,13 @@ void webServer() {
       page = parsePageParam(path, len);
     }
 
-    if (len >= 5 && strncmp(path, "/json", 5) == 0) {
-      isJson = true;
+    if (len >= 4 && strncmp(path, "/csv", 4) == 0) {
+      isCsv = true;
       page = parsePageParam(path, len);
     }
   }
 
-  if (!isGet || (!isRoot && !isData && !isExport && !isJson)) {
+  if (!isGet || (!isRoot && !isData && !isExport && !isCsv)) {
     httpNotFound(client);
     client.stop();
     return;
@@ -655,24 +655,25 @@ void webServer() {
     renderExportCsv(client);
   } 
   
-  // Export JSON
-  else if (isJson) {
+  // Export Data CSV File
+  else if (isCsv) {
     char fname[48];
     char ts[32];
     snprintf(ts, sizeof(ts), "%s", getTimestamp());
 
-
-    // Export JSON File
+    // Sanitize File Name
     for (int i = 0; ts[i]; i++) {
-      if (ts[i] == ':' || ts[i] == ' ') ts[i] = '_';
+      if (ts[i] == '.' || ts[i] == ':') ts[i] = '_';
+      if (ts[i] == ' ') ts[i] = '_';  // remove spaces
     }
 
     char suffix[10]; 
     if (TEST_MODE) snprintf(suffix, sizeof(suffix), "_test");
     else snprintf(suffix, sizeof(suffix), "");  
-    snprintf(fname, sizeof(fname), "logger%s_json_%s.json", suffix, ts);
+    snprintf(fname, sizeof(fname), "logger%s_full_data_%s.csv", suffix, ts);
 
-    httpJsonAttachment(client, fname);
+    httpCsvAttachment(client, fname);
+    renderExportCsv(client);
   } 
 
   else { 

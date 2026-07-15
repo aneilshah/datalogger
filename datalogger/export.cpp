@@ -5,6 +5,7 @@
 // Project Headers
 #include "global.h"
 #include "logger.h"
+#include "loggerData.h"
 #include "mode.h"
 #include "ntp.h"
 #include "nvm.h"
@@ -44,6 +45,70 @@ static void addTitle(WiFiClient &client, const __FlashStringHelper* title) {
 // Export (CSV)
 // -----------------------------------------------------------------------------
 
+
+// Helpers
+
+//*****************************************************************************
+// Logger Flags to Text
+//*****************************************************************************
+const char *loggerFlagsToText(
+  uint8_t flags,
+  const LoggerFlagText *table,
+  size_t count)
+{
+  static char text[64];
+
+  text[0] = '\0';
+
+  for (size_t i = 0; i < count; i++)
+  {
+    if (flags & table[i].flag)
+    {
+      if (text[0] != '\0')
+        strcat(text, "|");
+
+      strcat(text, table[i].text);
+    }
+  }
+
+  if (text[0] == '\0')
+    strcpy(text, "NONE");
+
+  return text;
+}
+
+//*****************************************************************************
+// Get Minute Flag Text
+//*****************************************************************************
+const char *getMinuteFlagText(uint8_t flags)
+{
+  return loggerFlagsToText(
+    flags,
+    minuteFlagTable,
+    sizeof(minuteFlagTable) / sizeof(minuteFlagTable[0]));
+}
+
+//*****************************************************************************
+// Get Hour Flag Text
+//*****************************************************************************
+const char *getHourFlagText(uint8_t flags)
+{
+  return loggerFlagsToText(
+    flags,
+    hourFlagTable,
+    sizeof(hourFlagTable) / sizeof(hourFlagTable[0]));
+}
+
+//*****************************************************************************
+// Get Session Flag Text
+//*****************************************************************************
+const char *getSessionFlagText(uint8_t flags)
+{
+  return loggerFlagsToText(
+    flags,
+    sessionFlagTable,
+    sizeof(sessionFlagTable) / sizeof(sessionFlagTable[0]));
+}
 
 // -----------------------------------------------------------------------------
 // MAIN DATA EXPORT
@@ -128,22 +193,9 @@ static void renderExportSystemInfo(WiFiClient &client) {
 // -----------------------------------------------------------------------------
 static void renderLoggerData(WiFiClient &client) {
   addTitle(client, F("[LOGGER DATA]"));
-  // client.println(F("date,cycles_per_day,gallons_per_day"));
 
-  // const int recordCount = Pump.Daily365.dailyValidCount();
-  // for (int i = recordCount - 1; i >= 0; i--) {
-  //   char date[16];
-  //   PumpDailyRecord record;
+  // TODO: Summary Here
 
-  //   if (!Pump.Daily365.getDailyRecordAgo(i, record)) continue;
-  //   getDayKeyForOffset(i + 1, date, sizeof(date));
-
-  //   client.print(date);
-  //   client.print(',');
-  //   client.print(record.cyclesPerDay);
-  //   client.print(',');
-  //   client.print(record.gallonsPerDay);
-  // }
 }
 
 // -----------------------------------------------------------------------------
@@ -249,6 +301,77 @@ static void renderExportRamLog(WiFiClient& client) {
     client.println();
   }
 }
+
+// Logger Data CSV Export
+static void renderExportLoggerDataCSV(WiFiClient& client)
+{
+  addTitle(client, F("[LOGGER DATA]"));
+
+  client.println(
+    F("timestamp,hour,minute,events,duration,shortest,longest,average,flag"));
+
+  EventLogger::LogHeader header;
+
+  if (!loggerDataReadNvmHeader(header))
+    return;
+
+  EventLogger::HourRecord hour;
+
+  char timestamp[LOGGER_TIMESTAMP_LENGTH];
+
+  for (uint16_t hourNumber = 0;
+       hourNumber < header.hoursStored;
+       hourNumber++)
+  {
+    if (!loggerDataReadHourBlock(hourNumber, hour))
+      continue;
+
+    for (uint8_t minute = 0; minute < 60; minute++)
+    {
+      const auto &m = hour.minute[minute];
+
+      addMinutesToTimestamp(
+        hour.startTime,
+        minute,
+        timestamp,
+        sizeof(timestamp));
+
+      float average = 0.0f;
+
+      if (m.count > 0)
+        average = (float)m.total / m.count;
+
+      csvPrintQuoted(client, timestamp);
+      client.print(",");
+
+      client.print(hourNumber);
+      client.print(",");
+
+      client.print(minute);
+      client.print(",");
+
+      client.print(m.count);
+      client.print(",");
+
+      client.print(m.total);
+      client.print(",");
+
+      client.print(m.shortest);
+      client.print(",");
+
+      client.print(m.longest);
+      client.print(",");
+
+      client.print(average, 1);
+      client.print(",");
+
+      csvPrintQuoted(client, getMinuteFlagText(m.flags));
+
+      client.println();
+    }
+  }
+}
+
 
 //------------------------------------------------------
 // RENDER
