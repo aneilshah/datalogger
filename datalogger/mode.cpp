@@ -106,9 +106,7 @@ bool initLogger()
 
   if (boot.hoursStored != Logger.getRamHeader().hoursStored)
   {
-    Serial.println("Hour count mismatch. Resetting logger.");
-    resetLogger();
-    return false;
+    Serial.println("Hour count mismatch - RAM vs NVM.");
   }
 
   // Valid logger found (TODO: Switch to LOGGING/ACTIVE later)
@@ -165,6 +163,7 @@ void processLoggerMode() {
     if (modalEvent()) {
       lowPowerModeInit();
       setLoggerMode(MODE_LOGGING);
+      Logger.startSession();
     }
     else if (shortPress()) {
       setLoggerMode(MODE_INIT);

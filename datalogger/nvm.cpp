@@ -13,9 +13,6 @@ static const char* NS_LOGGER = "logger";
 static const char* NS_BOOT = "boot";
 
 // Keys (logger namespace)
-static const char* K_HAS_STATE  = "has_state";
-static const char* K_DAY_KEY    = "day_key";
-static const char* K_SAVE_EPOCH = "save_epoch";
 static const char* K_WRITE_COUNT = "write_count";  // Export this one
 
 // Keys (boot namespace)
@@ -47,9 +44,6 @@ bool nvmSaveState(
   uint8_t hour = getHourInt();
 
   bool ok = true;
-  ok &= prefs.putBool(K_HAS_STATE, true);
-  ok &= (prefs.putString(K_DAY_KEY, dayKey) > 0);
-  ok &= (prefs.putULong(K_SAVE_EPOCH, (unsigned long)saveEpoch) > 0);
   ok &= (prefs.putULong(K_WRITE_COUNT, newWriteCount) > 0);
 
   prefs.end();
@@ -60,9 +54,6 @@ void nvmClearState() {
   if (!prefs.begin(NS_LOGGER, false)) return;
 
   // Dont remove K_WRITE_COUNT
-  prefs.remove(K_HAS_STATE);
-  prefs.remove(K_DAY_KEY);
-  prefs.remove(K_SAVE_EPOCH);
   prefs.end();
 }
 
@@ -73,16 +64,6 @@ bool nvmSetZeroBlocks() {
     Serial.printf("ERROR Accessing NS_LOGGER NVM");
     return false;
   }
-
-  // Default / clean values
-  char dayKey[DAY_KEY_SIZE]; 
-  const uint32_t nowEpoch = getCurrentEpoch();
-  getCurrentDayKey(dayKey, sizeof(dayKey));
-
-  ok &= prefs.putBool(K_HAS_STATE, true);
-
-  ok &= (prefs.putString(K_DAY_KEY, dayKey) > 0);
-  ok &= (prefs.putULong(K_SAVE_EPOCH, nowEpoch) > 0);
 
   // Dont change K_WRITE_COUNT
 
@@ -196,14 +177,8 @@ void nvmDumpLoggerState()
     Serial.println("Error Accessing NS_LOGGER NVM");
     return;
   }
-
-  bool hasState = prefs.getBool(K_HAS_STATE, false);
-  String dayKey = prefs.getString(K_DAY_KEY, "");
-  uint32_t saveEpoch = (uint32_t)prefs.getULong(K_SAVE_EPOCH, 0);
-
-  Serial.printf("has_state: %s\n", hasState ? "true" : "false");
-  Serial.printf("day_key:   %s\n", dayKey.c_str());
-  Serial.printf("epoch:     %lu\n", (unsigned long)saveEpoch);
+  uint32_t writeCount = prefs.getUInt(K_WRITE_COUNT, 0);
+  Serial.printf("Write Count : %lu\n", (unsigned long)writeCount);
   prefs.end();
 
   Serial.println("----- NVM LOGGER DUMP END -----");

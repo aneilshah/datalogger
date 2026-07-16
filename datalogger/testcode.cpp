@@ -434,7 +434,7 @@ void loggerDumpNVMHeader()
   }
 
   Serial.println();
-  Serial.println("===== HEADER =====");
+  Serial.println("===== NVM SESSION HEADER =====");
 
   Serial.printf("Magic        : %08lX\n", nvmHeader.magic);
   Serial.printf("Version      : %u\n", nvmHeader.version);
