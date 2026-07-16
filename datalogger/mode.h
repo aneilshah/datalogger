@@ -16,7 +16,8 @@
 extern EventLogger Logger;
 
 void processLoggerMode();
-void initLogger();
+bool initLogger();
 bool resetLogger();
+bool restoreLoggerSession();
 uint8_t getLoggerMode();
 uint32_t getModeTimer();

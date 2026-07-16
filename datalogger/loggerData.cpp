@@ -8,6 +8,9 @@
 #include "global.h"
 #include "logger.h"
 #include "loggerData.h"
+#include "mode.h"
+#include "ntp.h"
+#include "nvm.h"
 
 static Preferences prefs;
 
@@ -153,4 +156,43 @@ bool loggerDataReadHourBlock(
   prefs.end();
 
   return ok;
+}
+
+// Complete the Hours
+bool loggerDataFinishHour()
+{
+  // Finish the current hour
+  if (!Logger.endHour())
+    return false;
+
+  // Save completed hour to NVM
+  if (!loggerDataWriteHourBlock(
+    Logger.getRamHeader().hoursStored - 1,
+    Logger.getHourRecord()))
+  {
+    return false;
+  }
+
+  // Update boot state
+  NvmBootState boot;
+
+  if (bootStateRead(boot))
+  {
+    boot.hoursStored = Logger.getRamHeader().hoursStored;
+
+    strncpy(
+      boot.saveTimestamp,
+      getTimestamp(),
+      sizeof(boot.saveTimestamp) - 1);
+
+    boot.saveTimestamp[sizeof(boot.saveTimestamp) - 1] = '\0';
+
+    bootStateWrite(boot);
+  }
+
+  // Prepare next hour
+  Logger.clearHour();
+  Logger.startHour();
+
+  return true;
 }

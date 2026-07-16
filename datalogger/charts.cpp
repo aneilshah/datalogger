@@ -325,7 +325,7 @@ static void renderSessionChart(WiFiClient &client)
   // Read all completed hours
   //---------------------------------------------------------
 
-  uint32_t values[336];
+  uint32_t values[LOGGER_MAX_HOURS];
   uint16_t hours = 0;
   uint32_t maxValue = 0;
 

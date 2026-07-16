@@ -165,27 +165,6 @@ static void loggerDumpTestResults(uint16_t hours)
     loggerDumpNVMHourBlock(hour, true);
 }
 
-static bool saveCurrentHour()
-{
-  if (!Logger.endHour())
-    return false;
-
-  if (!loggerDataWriteHourBlock(
-      Logger.getRamHeader().hoursStored - 1,
-      Logger.getHourRecord()))
-  {
-    return false;
-  }
-
-  if (!loggerDataWriteNvmHeader(Logger.getRamHeader()))
-  {
-    return false;
-  }
-
-  Logger.clearHour();
-
-  return true;
-}
 
 //*****************************************************************************
 // Logger Simulate Adding Data
@@ -208,7 +187,7 @@ void loggerSimulateAddingData()
     return;
   }
 
-  if (!saveCurrentHour())
+  if (!loggerDataFinishHour())
   {
     Serial.println("Save Hour 0 Failed");
     return;
@@ -221,7 +200,7 @@ void loggerSimulateAddingData()
     return;
   }
 
-  if (!saveCurrentHour())
+  if (!loggerDataFinishHour())
   {
     Serial.println("Save Hour 1 Failed");
     return;
@@ -234,7 +213,7 @@ void loggerSimulateAddingData()
     return;
   }
 
-  if (!saveCurrentHour())
+  if (!loggerDataFinishHour())
   {
     Serial.println("Save Hour 2 Failed");
     return;

@@ -68,6 +68,11 @@ static const LoggerFlagText sessionFlagTable[] =
   { SESSION_FLAG_RECOVERED,"RECOVERED"},
 };
 
+// Flag Helpers
+const char *getHourFlagText(uint8_t flags);
+const char *getMinuteFlagText(uint8_t flags);
+const char *getSessionFlagText(uint8_t flags);
+
 class EventLogger;
 
 //-----------------------------------------------------
@@ -144,7 +149,7 @@ public:
   void clearHour();
 
   // Reset entire logging session
-  void clear();
+  void clearRam();
 
   // Session Functions
   void startSession();
@@ -156,7 +161,8 @@ public:
 
   const HourRecord& getHourRecord() const;
   const LogHeader& getRamHeader() const;
-
+  bool setRamHeader(const LogHeader& header);
+  
   bool hasEvents() const;
 
 private:

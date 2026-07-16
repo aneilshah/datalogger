@@ -8,12 +8,15 @@
 // ---- Lifecycle ----
 void nvmInit();   // optional; safe to call once in setup()
 
-// ----  block state ----
-// Saves: has_state, day_key, save_epoch
-bool nvmSaveState(
-  const char* dayKey,           // "YYYY_MM_DD"
-  uint32_t saveEpoch            // epoch seconds (0 ok, but restore-window won't work)
-);
+struct  NvmBootState
+{
+  bool    sessionActive;
+  uint8_t sessionFlags;
+
+  uint16_t hoursStored;
+
+  char saveTimestamp[LOGGER_TIMESTAMP_LENGTH];
+};
 
 
 //  Block Methods
@@ -21,15 +24,19 @@ void nvmClearState();
 void nvmDumpLoggerState();
 void nvmDumpBootState();
 
+bool bootStateRead(NvmBootState &boot);
+bool bootStateWrite(const NvmBootState &boot);
+bool bootStateClear();
+
 // Getters
 uint32_t getTotalBlockWriteCount();
 
 
 // ---- Boot stats (update once per reboot) ----
-// Increments boot_count and updates last_boot_epoch / prev_boot_epoch.
+// Increments boot_count
 void nvmUpdateBootStats(uint32_t nowEpoch);
 
 // Read boot stats (optional convenience)
 uint32_t nvmGetBootCount();
-uint32_t nvmGetLastBootEpoch();
-uint32_t nvmGetPrevBootEpoch();
+
+bool bootStateReset();

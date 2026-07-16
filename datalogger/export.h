@@ -4,6 +4,6 @@
 
 // Main export entry point
 void renderExportCsv(WiFiClient &client);
-void renderExportloggerDataCsv(WiFiClient &client);
+void renderExportLoggerDataCsv(WiFiClient &client);
 
 

@@ -46,70 +46,6 @@ static void addTitle(WiFiClient &client, const __FlashStringHelper* title) {
 // -----------------------------------------------------------------------------
 
 
-// Helpers
-
-//*****************************************************************************
-// Logger Flags to Text
-//*****************************************************************************
-const char *loggerFlagsToText(
-  uint8_t flags,
-  const LoggerFlagText *table,
-  size_t count)
-{
-  static char text[64];
-
-  text[0] = '\0';
-
-  for (size_t i = 0; i < count; i++)
-  {
-    if (flags & table[i].flag)
-    {
-      if (text[0] != '\0')
-        strcat(text, "|");
-
-      strcat(text, table[i].text);
-    }
-  }
-
-  if (text[0] == '\0')
-    strcpy(text, "NONE");
-
-  return text;
-}
-
-//*****************************************************************************
-// Get Minute Flag Text
-//*****************************************************************************
-const char *getMinuteFlagText(uint8_t flags)
-{
-  return loggerFlagsToText(
-    flags,
-    minuteFlagTable,
-    sizeof(minuteFlagTable) / sizeof(minuteFlagTable[0]));
-}
-
-//*****************************************************************************
-// Get Hour Flag Text
-//*****************************************************************************
-const char *getHourFlagText(uint8_t flags)
-{
-  return loggerFlagsToText(
-    flags,
-    hourFlagTable,
-    sizeof(hourFlagTable) / sizeof(hourFlagTable[0]));
-}
-
-//*****************************************************************************
-// Get Session Flag Text
-//*****************************************************************************
-const char *getSessionFlagText(uint8_t flags)
-{
-  return loggerFlagsToText(
-    flags,
-    sessionFlagTable,
-    sizeof(sessionFlagTable) / sizeof(sessionFlagTable[0]));
-}
-
 // -----------------------------------------------------------------------------
 // MAIN DATA EXPORT
 // -----------------------------------------------------------------------------
@@ -268,17 +204,34 @@ static void renderExportClockInfo(WiFiClient &client) {
 // -----------------------------------------------------------------------------
 // NVM EXPORT
 // -----------------------------------------------------------------------------
-static void renderExportNvmInfo(WiFiClient &client) {
-  addTitle(client, F("[NVM INFO]"));
+static void renderExportNvmInfo(WiFiClient &client)
+{
+  addTitle(client, F("[NVM BOOT INFO]"));
 
   client.print(F("nvm_boot_count,"));
   client.println(nvmGetBootCount());
 
-  client.print(F("nvm_last_boot_epoch,"));
-  client.println(nvmGetLastBootEpoch());
+  NvmBootState boot;
 
-  client.print(F("nvm_prev_boot_epoch,"));
-  client.println(nvmGetPrevBootEpoch());
+  if (!bootStateRead(boot))
+  {
+    client.println(F("boot_state,Not Found"));
+    return;
+  }
+
+  client.print(F("session_active,"));
+  client.println(boot.sessionActive ? F("Yes") : F("No"));
+
+  client.print(F("session_flags,"));
+  client.println(getSessionFlagText(boot.sessionFlags));
+
+  client.print(F("hours_stored,"));
+  client.println(boot.hoursStored);
+
+  client.print(F("last_save,"));
+  client.println(boot.saveTimestamp);
+
+  client.println();
 }
 
 static void renderExportRamLog(WiFiClient& client) {
@@ -303,9 +256,63 @@ static void renderExportRamLog(WiFiClient& client) {
 }
 
 // Logger Data CSV Export
-static void renderExportLoggerDataCSV(WiFiClient& client)
+void renderExportLoggerDataCsv(WiFiClient& client)
 {
-  addTitle(client, F("[LOGGER DATA]"));
+  //*****************************************************************************
+  // Session Summary
+  //*****************************************************************************
+  const auto &session = Logger.getSessionStatistics();
+  const auto &ramHeader = Logger.getRamHeader();
+
+  client.print(F("# App Version,"));
+  client.println(APP_VERSION);
+
+  client.print(F("# Export Timestamp,"));
+  client.println(getTimestamp());
+
+  client.println();
+
+  client.println(F("# Session"));
+
+  client.print(F("# Start Time,"));
+  client.println(ramHeader.startTime);
+
+  client.print(F("# Stop Time,"));
+  client.println(ramHeader.stopTime);
+
+  client.print(F("# Hours Stored,"));
+  client.println(ramHeader.hoursStored);
+
+  client.print(F("# Events,"));
+  client.println(session.count);
+
+  client.print(F("# Active Seconds,"));
+  client.println(session.total);
+
+  if (session.count > 0)
+  {
+    client.print(F("# Shortest Event,"));
+    client.println(session.shortest);
+
+    client.print(F("# Longest Event,"));
+    client.println(session.longest);
+
+    client.print(F("# Average Event,"));
+    client.println((float)session.total / session.count, 1);
+  }
+  else
+  {
+    client.println(F("# Shortest Event,0"));
+    client.println(F("# Longest Event,0"));
+    client.println(F("# Average Event,0.0"));
+  }
+
+  client.print(F("# Session Flags,"));
+  client.println(getSessionFlagText(ramHeader.flags));
+
+  client.println();
+
+  // DATA EXPORT
 
   client.println(
     F("timestamp,hour,minute,events,duration,shortest,longest,average,flag"));

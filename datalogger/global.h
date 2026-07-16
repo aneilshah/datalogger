@@ -24,6 +24,7 @@ extern const char APP_VERSION[];     // (don’t put PROGMEM on the extern)
 #define VERBOSE 0
 #define LOG_TIME 0  // serial log for execution times
 #define ALLOW_WEBPAGE_POLLING 0
+constexpr uint16_t LOGGER_MAX_HOURS = 336;
 
 // Constants
 #define OFF 0

@@ -1,15 +1,82 @@
 #include "global.h"
 #include "logger.h"
 #include "ntp.h"
+#include "nvm.h"
 
 #include <string.h>
 
-EventLogger::EventLogger()
+
+// Flag Helpers
+
+//*****************************************************************************
+// Logger Flags to Text
+//*****************************************************************************
+const char *loggerFlagsToText(
+  uint8_t flags,
+  const LoggerFlagText *table,
+  size_t count)
 {
-  clear();
+  static char text[64];
+
+  text[0] = '\0';
+
+  for (size_t i = 0; i < count; i++)
+  {
+    if (flags & table[i].flag)
+    {
+      if (text[0] != '\0')
+        strcat(text, "|");
+
+      strcat(text, table[i].text);
+    }
+  }
+
+  if (text[0] == '\0')
+    strcpy(text, "NONE");
+
+  return text;
 }
 
-void EventLogger::clear()
+//*****************************************************************************
+// Get Minute Flag Text
+//*****************************************************************************
+const char *getMinuteFlagText(uint8_t flags)
+{
+  return loggerFlagsToText(
+    flags,
+    minuteFlagTable,
+    sizeof(minuteFlagTable) / sizeof(minuteFlagTable[0]));
+}
+
+//*****************************************************************************
+// Get Hour Flag Text
+//*****************************************************************************
+const char *getHourFlagText(uint8_t flags)
+{
+  return loggerFlagsToText(
+    flags,
+    hourFlagTable,
+    sizeof(hourFlagTable) / sizeof(hourFlagTable[0]));
+}
+
+//*****************************************************************************
+// Get Session Flag Text
+//*****************************************************************************
+const char *getSessionFlagText(uint8_t flags)
+{
+  return loggerFlagsToText(
+    flags,
+    sessionFlagTable,
+    sizeof(sessionFlagTable) / sizeof(sessionFlagTable[0]));
+}
+
+
+EventLogger::EventLogger()
+{
+  clearRam();
+}
+
+void EventLogger::clearRam()
 {
   memset(&hourStats, 0, sizeof(hourStats));
   memset(&sessionStats, 0, sizeof(sessionStats));
@@ -31,6 +98,14 @@ void EventLogger::clearHour()
   memset(&currentHour, 0, sizeof(currentHour));
   memset(&hourStats, 0, sizeof(hourStats));
   minuteIndex = 0;
+
+  if (ramHeader.hoursStored >= LOGGER_MAX_HOURS)
+  {
+    stopSession();
+    return;
+  }
+
+  // Start the next Hour
   startHour();
 }
 
@@ -57,16 +132,20 @@ EventLogger::getSessionStatistics() const
   return sessionStats;
 }
 
-const EventLogger::HourRecord&
-EventLogger::getHourRecord() const
+const EventLogger::HourRecord& EventLogger::getHourRecord() const
 {
   return currentHour;
 }
 
-const EventLogger::LogHeader&
-EventLogger::getRamHeader() const
+const EventLogger::LogHeader& EventLogger::getRamHeader() const
 {
   return ramHeader;
+}
+
+bool EventLogger::setRamHeader(const LogHeader& header)
+{
+    ramHeader = header;
+    return true;
 }
 
 bool EventLogger::hasEvents() const
@@ -76,26 +155,56 @@ bool EventLogger::hasEvents() const
 
 void EventLogger::startSession()
 {
-  strncpy(
-    ramHeader.startTime,
-    getTimestamp(),
-    sizeof(ramHeader.startTime) - 1);
-
+  // Set the Ram header
+  strncpy(ramHeader.startTime, getTimestamp(), sizeof(ramHeader.startTime) - 1);
   ramHeader.startTime[sizeof(ramHeader.startTime) - 1] = '\0';
   ramHeader.stopTime[0] = '\0';
+
+  // Set the Boot State
+  NvmBootState boot = {};
+  boot.sessionActive = true;
+  boot.sessionFlags  = SESSION_FLAG_NONE;
+  boot.hoursStored   = 0;
+  strncpy(boot.saveTimestamp, getTimestamp(), sizeof(boot.saveTimestamp) - 1);
+  boot.saveTimestamp[sizeof(boot.saveTimestamp) - 1] = '\0';
+  bootStateWrite(boot);
+
+  // Initialize
   startHour();
+
   Serial.println("Starting Session...");
 }
 
 void EventLogger::stopSession()
 {
+  const char *timestamp = getTimestamp();
+
+  // Set the RAM header
   strncpy(
     ramHeader.stopTime,
-    getTimestamp(),
+    timestamp,
     sizeof(ramHeader.stopTime) - 1);
 
   ramHeader.stopTime[sizeof(ramHeader.stopTime) - 1] = '\0';
-  Serial.println("Stopping Session");
+
+  // Update Boot State
+  NvmBootState boot;
+
+  if (bootStateRead(boot))
+  {
+    boot.sessionActive = false;
+
+    strncpy(
+      boot.saveTimestamp,
+      timestamp,
+      sizeof(boot.saveTimestamp) - 1);
+
+    boot.saveTimestamp[sizeof(boot.saveTimestamp) - 1] = '\0';
+
+    bootStateWrite(boot);
+  }
+
+  Serial.println("Stopping Session...");
 }
 
 void EventLogger::sample(bool active)
@@ -170,7 +279,6 @@ void EventLogger::startEvent() {
   inEvent = true;
   currentDuration = 0;
 }
-
 
 void EventLogger::finishEvent()
 {

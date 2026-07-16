@@ -670,10 +670,10 @@ void webServer() {
     char suffix[10]; 
     if (TEST_MODE) snprintf(suffix, sizeof(suffix), "_test");
     else snprintf(suffix, sizeof(suffix), "");  
-    snprintf(fname, sizeof(fname), "logger%s_full_data_%s.csv", suffix, ts);
+    snprintf(fname, sizeof(fname), "logger_data%_%s.csv", suffix, ts);
 
     httpCsvAttachment(client, fname);
-    renderExportCsv(client);
+    renderExportLoggerDataCsv(client);
   } 
 
   else { 

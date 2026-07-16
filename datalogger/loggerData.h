@@ -26,3 +26,5 @@ bool loggerDataWriteHourBlock(
 bool loggerDataReadHourBlock(
   uint16_t hour,
   EventLogger::HourRecord &hourRecord);
+
+bool loggerDataFinishHour();

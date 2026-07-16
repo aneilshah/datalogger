@@ -2,6 +2,7 @@
 #include <Preferences.h>
 #include <string.h>
 #include "global.h"
+#include "logger.h"
 #include "ntp.h"
 #include "nvm.h"
 
@@ -19,8 +20,7 @@ static const char* K_WRITE_COUNT = "write_count";  // Export this one
 
 // Keys (boot namespace)
 static const char* K_BOOT_COUNT     = "boot_count";
-static const char* K_LAST_BOOT_EPOCH = "last_boot_epoch";
-static const char* K_PREV_BOOT_EPOCH = "prev_boot_epoch";
+static const char* K_BOOT_STATE     = "boot_state";
 
 
 void nvmInit() {
@@ -105,36 +105,85 @@ uint32_t getTotalBlockWriteCount() {
 // BOOT INFO
 //-------------------------------------------------
 
+//*****************************************************************************
+// Read Boot State
+//*****************************************************************************
+bool bootStateRead(NvmBootState &boot)
+{
+  if (!prefs.begin(NS_BOOT, true))
+    return false;
+
+  size_t len = prefs.getBytesLength(K_BOOT_STATE);
+
+  if (len != sizeof(NvmBootState))
+  {
+    prefs.end();
+    return false;
+  }
+
+  bool ok = (prefs.getBytes(
+    K_BOOT_STATE,
+    &boot,
+    sizeof(NvmBootState)) == sizeof(NvmBootState));
+
+  prefs.end();
+  return ok;
+}
+
+//*****************************************************************************
+// Write Boot State
+//*****************************************************************************
+bool bootStateWrite(const NvmBootState &boot)
+{
+  if (!prefs.begin(NS_BOOT, false))
+    return false;
+
+  bool ok = (prefs.putBytes(
+    K_BOOT_STATE,
+    &boot,
+    sizeof(NvmBootState)) == sizeof(NvmBootState));
+
+  prefs.end();
+  return ok;
+}
+
+//*****************************************************************************
+// Clear Boot State
+//*****************************************************************************
+bool bootStateClear()
+{
+  if (!prefs.begin(NS_BOOT, false))
+    return false;
+
+  bool ok = prefs.remove(K_BOOT_STATE);
+
+  prefs.end();
+  return ok;
+}
+
+bool bootStateReset()
+{
+  NvmBootState boot = {};
+
+  boot.sessionActive = false;
+  boot.sessionFlags  = SESSION_FLAG_NONE;
+  boot.hoursStored   = 0;
+  boot.saveTimestamp[0] = '\0';
+
+  return bootStateWrite(boot);
+}
+
 void nvmUpdateBootStats(uint32_t nowEpoch) {
   if (!prefs.begin(NS_BOOT, false)) return;
 
   const uint32_t bootCount = (uint32_t)prefs.getUInt(K_BOOT_COUNT, 0);
-  const uint32_t lastBoot  = (uint32_t)prefs.getUInt(K_LAST_BOOT_EPOCH, 0);
-
   prefs.putUInt(K_BOOT_COUNT, bootCount + 1);
-  prefs.putUInt(K_PREV_BOOT_EPOCH, lastBoot);
-  prefs.putUInt(K_LAST_BOOT_EPOCH, nowEpoch);
-
   prefs.end();
 }
 
 uint32_t nvmGetBootCount() {
   if (!prefs.begin(NS_BOOT, true)) return 0;
   const uint32_t v = (uint32_t)prefs.getUInt(K_BOOT_COUNT, 0);
-  prefs.end();
-  return v;
-}
-
-uint32_t nvmGetLastBootEpoch() {
-  if (!prefs.begin(NS_BOOT, true)) return 0;
-  const uint32_t v = (uint32_t)prefs.getUInt(K_LAST_BOOT_EPOCH, 0);
-  prefs.end();
-  return v;
-}
-
-uint32_t nvmGetPrevBootEpoch() {
-  if (!prefs.begin(NS_BOOT, true)) return 0;
-  const uint32_t v = (uint32_t)prefs.getUInt(K_PREV_BOOT_EPOCH, 0);
   prefs.end();
   return v;
 }
@@ -164,20 +213,26 @@ void nvmDumpBootState()
 {
   Serial.println("----- NVM BOOT DUMP BEGIN -----");
 
-  if (!prefs.begin(NS_BOOT, true)) {
-    Serial.println("NVM dump failed: prefs.begin(NS_BOOT) failed");
+  NvmBootState boot;
+
+  if (!bootStateRead(boot))
+  {
+    Serial.println("Boot state not found.");
+    Serial.println("----- NVM BOOT DUMP END -----");
     return;
   }
 
-  uint32_t bootCount = prefs.getUInt(K_BOOT_COUNT, 0);
-  uint32_t lastBoot  = prefs.getUInt(K_LAST_BOOT_EPOCH, 0);
-  uint32_t prevBoot  = prefs.getUInt(K_PREV_BOOT_EPOCH, 0);
+  Serial.printf("Session Active : %s\n",
+    boot.sessionActive ? "Yes" : "No");
 
-  Serial.printf("boot_count:      %lu\n", (unsigned long)bootCount);
-  Serial.printf("last_boot_epoch: %lu\n", (unsigned long)lastBoot);
-  Serial.printf("prev_boot_epoch: %lu\n", (unsigned long)prevBoot);
+  Serial.printf("Session Flags  : %s\n",
+    getSessionFlagText(boot.sessionFlags));
 
-  prefs.end();
+  Serial.printf("Hours Stored   : %u\n",
+    boot.hoursStored);
+
+  Serial.printf("Last Save      : %s\n",
+    boot.saveTimestamp);
+
   Serial.println("----- NVM BOOT DUMP END -----");
 }
-
