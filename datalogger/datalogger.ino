@@ -153,12 +153,8 @@ void setup() {
   START_TIME = (millis() / 1000); 
 
   // Test Functions
-  Serial.println("Running Logger Test");
-  loggerSimulateAddingData();
-  // loggerCreateAndWriteTestNVMData();
-  // loggerDumpNVMHourBlock(0);
-  // loggerDumpNVMHourBlock(1);
-  // loggerDumpNVMHourBlock(2);
+  //Serial.println("Running Logger Test");
+  //loggerSimulateAddingData();
   Serial.println("Test Complete");
 
   // Init OTA
@@ -196,12 +192,12 @@ void loop() {
 }
 
 void loop100ms() {
-  // Run Simulation if needed
-  if (TEST_MODE) simulateLogger();
-
   // Read Inputs
   readDigitalButton();
   readADC();
+
+  // Run Simulation if needed
+  if (TEST_MODE) simulateLogger();
 
   // Run Main Logic
   processLoggerMode();
@@ -233,7 +229,6 @@ void loop1Sec() {
   if (ONE_SEC_TIMER_MS < 1000 && ADAPTIVE_DELAY < 100) ADAPTIVE_DELAY++;
   else if (ONE_SEC_TIMER_MS > 1000 && ADAPTIVE_DELAY > 80) ADAPTIVE_DELAY--;
 
-
   // process 1 second tasks
   readDigital();
   readTouchSwitch();
@@ -241,6 +236,12 @@ void loop1Sec() {
 
   // Keep NTP Clock Valid
   if (wifiOK()) updateNTP();
+
+  // Simulate Logger Data in Test Mode
+  if (TEST_MODE) {
+    bool evt = simulateEvent();
+    Logger.sample(evt);
+  }
 
   // update loop counter
   count_1s++;
@@ -278,7 +279,27 @@ void loop1Min() {
   ensureTimeHealthy();
 
   // Run normal scheduled hourly tasks
+  checkForOneMinuteTasks();
   checkForOneHourTasks();
+}
+
+void checkForOneMinuteTasks()
+{
+  static int8_t lastMinute = -1;
+
+  if (!validClock()) return;
+
+  uint8_t minute = getMinInt();
+
+  if (lastMinute < 0) {
+      lastMinute = minute;
+      return;
+  }
+
+  if (minute != lastMinute) {
+    loop1MinuteOnTheClockMinute(minute);
+    lastMinute = minute;
+  }
 }
 
 void checkForOneHourTasks() {
@@ -301,7 +322,7 @@ void checkForOneHourTasks() {
     ((hour > 0 && lastHour == hour - 1) || (hour == 0 && lastHour == 23));
 
   if (hour != lastHour && advanced) {
-    loop1Hour(hour);
+    loop1HourOnTheClockHour(hour);
     if (hour == 0) loop1DayMidnight();
     lastHour = hour;
   } 
@@ -311,14 +332,22 @@ void checkForOneHourTasks() {
   }
 }
 
-// One Hour Tasks - On the hour
-void loop1Hour(int hour) {
-  Serial.println();
-  Serial.print("*** RUNNING 1 HOUR LOOP [");
-  Serial.print(hour);
-  Serial.println("]");
-
+// One minute tasks on the clock Minute
+void loop1MinuteOnTheClockMinute(int minute) {
+  if (Logger.isLoggingActive())
+    Logger.endMinuteBlock();
 }
+
+// One Hour Tasks - On the hour
+void loop1HourOnTheClockHour(int hour) {
+  Serial.println();
+  Serial.printf("*** RUNNING 1 HOUR LOOP [%d]", hour);
+
+  if (Logger.isLoggingActive())
+    Logger.endHour();
+}
+
+
 
 // Midnight
 void loop1DayMidnight() {

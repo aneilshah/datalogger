@@ -11,8 +11,8 @@ void nvmInit();   // optional; safe to call once in setup()
 struct  NvmBootState
 {
   bool    sessionActive;
+  bool    sessionPaused;
   uint8_t sessionFlags;
-
   uint16_t hoursStored;
 
   char saveTimestamp[LOGGER_TIMESTAMP_LENGTH];

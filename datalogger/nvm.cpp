@@ -147,6 +147,7 @@ bool bootStateReset()
   NvmBootState boot = {};
 
   boot.sessionActive = false;
+  boot.sessionPaused = false;
   boot.sessionFlags  = SESSION_FLAG_NONE;
   boot.hoursStored   = 0;
   boot.saveTimestamp[0] = '\0';
@@ -199,6 +200,9 @@ void nvmDumpBootState()
 
   Serial.printf("Session Active : %s\n",
     boot.sessionActive ? "Yes" : "No");
+
+  Serial.printf("Session Paused : %s\n",
+    boot.sessionPaused ? "Yes" : "No");
 
   Serial.printf("Session Flags  : %s\n",
     getSessionFlagText(boot.sessionFlags));

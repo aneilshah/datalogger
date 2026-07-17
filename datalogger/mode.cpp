@@ -119,7 +119,7 @@ bool initLogger()
   }
 
   // Session was ACTIVE, so Set REBOOT Flag
-  boot.sessionFlags |= SESSION_FLAG_REBOOTED;
+  boot.sessionFlags |= SESSION_FLAG_REBOOT;
 
   if (!bootStateWrite(boot))
   {

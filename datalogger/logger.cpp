@@ -1,5 +1,6 @@
 #include "global.h"
 #include "logger.h"
+#include "loggerData.h"
 #include "ntp.h"
 #include "nvm.h"
 
@@ -160,9 +161,13 @@ void EventLogger::startSession()
   ramHeader.startTime[sizeof(ramHeader.startTime) - 1] = '\0';
   ramHeader.stopTime[0] = '\0';
 
+  // Save session header into NVM
+  loggerDataWriteNvmHeader(ramHeader);
+
   // Set the Boot State
   NvmBootState boot = {};
   boot.sessionActive = true;
+  boot.sessionPaused = false;
   boot.sessionFlags  = SESSION_FLAG_NONE;
   boot.hoursStored   = 0;
   strncpy(boot.saveTimestamp, getTimestamp(), sizeof(boot.saveTimestamp) - 1);
@@ -193,6 +198,7 @@ void EventLogger::stopSession()
   if (bootStateRead(boot))
   {
     boot.sessionActive = false;
+    boot.sessionPaused = false;
 
     strncpy(
       boot.saveTimestamp,
@@ -340,4 +346,19 @@ void EventLogger::finishEvent()
   inEvent = false;
 }
 
+// Status
+
+bool EventLogger::isLoggingActive() 
+{
+  NvmBootState boot;
+  bootStateRead(boot);
+  return boot.sessionActive;
+}
+
+bool EventLogger::isLoggingPaused() 
+{
+  NvmBootState boot;
+  bootStateRead(boot);
+  return boot.sessionPaused;
+}
 

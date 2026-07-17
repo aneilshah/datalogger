@@ -2,33 +2,26 @@
 
 #include <stdint.h>
 
+enum MinuteFlags : uint8_t
+{
+  MINUTE_FLAG_NONE     = 0x00,
+  MINUTE_FLAG_PARTIAL  = 0x01,
+  MINUTE_FLAG_REBOOT   = 0x02,
+  MINUTE_FLAG_PAUSED   = 0x08
+};
 
 enum HourFlags : uint8_t
 {
-  HOUR_FLAG_NONE     = 0x00,
-  HOUR_FLAG_PARTIAL  = 0x01,   // Less than 60 completed minutes
-  HOUR_FLAG_REBOOT   = 0x02,   // Started after reboot/recovery
-  HOUR_FLAG_TIMESET  = 0x04    // RTC changed during this hour
+  HOUR_FLAG_NONE       = 0x00,
+  HOUR_FLAG_PARTIAL    = 0x01,
+  HOUR_FLAG_REBOOT     = 0x02,
 };
 
-enum MinuteFlags : uint8_t
-{
-  MINUTE_FLAG_NONE      = 0x00,
-  MINUTE_FLAG_PARTIAL   = 0x01,   // Event crossed minute boundary
-  MINUTE_FLAG_PAUSED    = 0x02,   // Monitoring paused
-  MINUTE_FLAG_TIMESET   = 0x04,   // Clock changed during minute
-  MINUTE_FLAG_REBOOT    = 0x08    // Recovered after reboot
-};
-
-//*****************************************************************************
-// Session Flags
-//*****************************************************************************
 enum SessionFlags : uint8_t
 {
-  SESSION_FLAG_NONE      = 0x00,
-  SESSION_FLAG_REBOOTED  = 0x01,
-  SESSION_FLAG_TIMESET   = 0x02,
-  SESSION_FLAG_RECOVERED = 0x04
+  SESSION_FLAG_NONE       = 0x00,
+  SESSION_FLAG_REBOOT     = 0x02,
+  SESSION_FLAG_RECOVERED  = 0x08
 };
 
 //*****************************************************************************
@@ -47,7 +40,6 @@ static const LoggerFlagText minuteFlagTable[] =
 {
   { MINUTE_FLAG_PARTIAL, "PARTIAL" },
   { MINUTE_FLAG_PAUSED,  "PAUSED"  },
-  { MINUTE_FLAG_TIMESET, "TIMESET" },
   { MINUTE_FLAG_REBOOT,  "REBOOT"  },
 };
 
@@ -58,13 +50,11 @@ static const LoggerFlagText hourFlagTable[] =
 {
   { HOUR_FLAG_PARTIAL, "PARTIAL" },
   { HOUR_FLAG_REBOOT,  "REBOOT"  },
-  { HOUR_FLAG_TIMESET, "TIMESET" },
 };
 
 static const LoggerFlagText sessionFlagTable[] =
 {
-  { SESSION_FLAG_REBOOTED, "REBOOTED" },
-  { SESSION_FLAG_TIMESET,  "TIMESET"  },
+  { SESSION_FLAG_REBOOT, "REBOOTED" },
   { SESSION_FLAG_RECOVERED,"RECOVERED"},
 };
 
@@ -155,21 +145,25 @@ public:
   void startSession();
   void stopSession();
 
+  // Statuses
+  bool isLoggingActive();
+  bool isLoggingPaused();
+  bool hasEvents() const;
+
+  // Getters
   const EventStatistics& getMinuteStatistics() const;
   const EventStatistics& getHourStatistics() const;
   const EventStatistics& getSessionStatistics() const;
-
   const HourRecord& getHourRecord() const;
   const LogHeader& getRamHeader() const;
+
+  // Setters
   bool setRamHeader(const LogHeader& header);
   
-  bool hasEvents() const;
-
 private:
 
   void startEvent();
   void finishEvent();
-
 
   EventStatistics hourStats;
   EventStatistics minuteStats;

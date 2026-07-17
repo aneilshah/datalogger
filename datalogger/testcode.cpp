@@ -512,3 +512,51 @@ void loggerDumpRAMHourBlock(bool detailed)
     Serial.printf("%u\n", m.flags);
   }
 }
+
+//*****************************************************************************
+// Simulated Event
+//*****************************************************************************
+
+//*****************************************************************************
+
+
+// Expected Test Results
+//
+// Event Count
+//   - Approximately 50-70 events per hour.
+//
+// Event Duration
+//   - Average duration approximately 10 seconds.
+//   - Minimum duration typically 1-2 seconds.
+//   - Maximum duration occasionally 30-60 seconds.
+//
+// Minute Statistics
+//   - Most minutes contain 0-2 events.
+//   - Occasional busy minutes contain 3-5 events.
+//   - Some minutes contain no activity.
+//
+// Hour Statistics
+//   - Total active time approximately 10-20 minutes per hour.
+//   - Event counts and durations should vary naturally between hours.
+//*****************************************************************************
+
+
+bool simulateEvent()
+{
+  static bool active = false;
+
+  if (active)
+  {
+    // 90% chance to remain active
+    if (random(100) >= 90)
+      active = false;
+  }
+  else
+  {
+    // 2% chance to start an event
+    if (random(100) < 2)
+      active = true;
+  }
+
+  return active;
+}

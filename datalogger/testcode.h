@@ -17,3 +17,6 @@ void loggerCreateAndWriteTestNVMData();
 bool loggerSimulateHour(LoggerSimulation type, uint32_t eventsPerMinute, 
   uint32_t duration, uint8_t minutes = 60);
 static bool simulateMinute(uint32_t eventCount, uint32_t duration);
+
+// Simulate Event Reader
+bool simulateEvent();
