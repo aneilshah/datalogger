@@ -12,7 +12,6 @@ struct  NvmBootState
 {
   bool    sessionActive;
   bool    sessionPaused;
-  uint8_t sessionFlags;
   uint16_t hoursStored;
   char saveTimestamp[LOGGER_TIMESTAMP_LENGTH];
 };
@@ -29,6 +28,12 @@ bool bootStateClear();
 
 // Getters
 uint32_t getTotalBlockWriteCount();
+bool sessionPaused();
+bool sessionActive();
+
+// Setters
+bool setBootPaused(bool val);
+bool setBootActive(bool val);
 
 
 // ---- Boot stats (update once per reboot) ----
@@ -39,3 +44,7 @@ void nvmUpdateBootStats(uint32_t nowEpoch);
 uint32_t nvmGetBootCount();
 
 bool bootStateReset();
+
+// Debug
+void dumpNamespace(const char *ns);
+

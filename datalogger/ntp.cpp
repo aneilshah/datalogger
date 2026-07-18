@@ -304,6 +304,7 @@ bool addMinutesToTimestamp(
 {
   struct tm tm = {};
 
+  int seconds = 0;
   if (sscanf(timestamp,
     "%4d.%2d.%2dT%2d:%2d:%2d",
     &tm.tm_year,
@@ -311,7 +312,7 @@ bool addMinutesToTimestamp(
     &tm.tm_mday,
     &tm.tm_hour,
     &tm.tm_min,
-    &tm.tm_sec) != 6)
+    &seconds /*&tm.tm_sec*/) != 6)
   {
     return false;
   }

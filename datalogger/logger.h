@@ -7,7 +7,7 @@ enum MinuteFlags : uint8_t
   MINUTE_FLAG_NONE     = 0x00,
   MINUTE_FLAG_PARTIAL  = 0x01,
   MINUTE_FLAG_REBOOT   = 0x02,
-  MINUTE_FLAG_PAUSED   = 0x08
+  MINUTE_FLAG_PAUSED   = 0x04
 };
 
 enum HourFlags : uint8_t
@@ -15,12 +15,15 @@ enum HourFlags : uint8_t
   HOUR_FLAG_NONE       = 0x00,
   HOUR_FLAG_PARTIAL    = 0x01,
   HOUR_FLAG_REBOOT     = 0x02,
+  HOUR_FLAG_PAUSED     = 0x04
 };
 
 enum SessionFlags : uint8_t
 {
   SESSION_FLAG_NONE       = 0x00,
+  SESSION_FLAG_PARTIAL    = 0x01,
   SESSION_FLAG_REBOOT     = 0x02,
+  SESSION_FLAG_PAUSED     = 0x04,
   SESSION_FLAG_RECOVERED  = 0x08
 };
 
@@ -62,6 +65,7 @@ static const LoggerFlagText sessionFlagTable[] =
 const char *getHourFlagText(uint8_t flags);
 const char *getMinuteFlagText(uint8_t flags);
 const char *getSessionFlagText(uint8_t flags);
+
 
 class EventLogger;
 
@@ -160,6 +164,8 @@ public:
 
   // Setters
   bool setRamHeader(const LogHeader& header);
+  void setSessionFlag(uint16_t flag);
+  void clearSessionFlag(uint16_t flag);
   
 private:
 

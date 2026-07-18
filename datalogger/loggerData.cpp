@@ -173,6 +173,9 @@ bool loggerDataFinishHour()
     return false;
   }
 
+  // Save session header into NVM
+  loggerDataWriteNvmHeader(Logger.getRamHeader());
+
   // Update boot state
   NvmBootState boot;
 

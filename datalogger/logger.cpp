@@ -71,6 +71,19 @@ const char *getSessionFlagText(uint8_t flags)
     sizeof(sessionFlagTable) / sizeof(sessionFlagTable[0]));
 }
 
+// Setters
+
+void EventLogger::setSessionFlag(uint16_t flag)
+{
+  ramHeader.flags |= flag;
+}
+
+void EventLogger::clearSessionFlag(uint16_t flag)
+{
+  ramHeader.flags &= ~flag;
+}
+
+
 
 EventLogger::EventLogger()
 {
@@ -168,7 +181,6 @@ void EventLogger::startNewSession()
   NvmBootState boot = {};
   boot.sessionActive = true;
   boot.sessionPaused = false;
-  boot.sessionFlags  = SESSION_FLAG_NONE;
   boot.hoursStored   = 0;
   strncpy(boot.saveTimestamp, getTimestamp(), sizeof(boot.saveTimestamp) - 1);
   boot.saveTimestamp[sizeof(boot.saveTimestamp) - 1] = '\0';
@@ -181,7 +193,7 @@ void EventLogger::startNewSession()
 }
 
 void restartSession() {
-  
+
 }
 
 void EventLogger::stopSession()
@@ -248,6 +260,12 @@ bool EventLogger::endMinuteBlock()
     return false;
   }
 
+  if (sessionPaused) {
+    minuteStats.flags |= MINUTE_FLAG_PAUSED;
+    currentHour.flags |= HOUR_FLAG_PAUSED;
+    ramHeader.flags |= SESSION_FLAG_PAUSED;
+  }
+
   currentHour.minute[minuteIndex] = minuteStats;
   minuteIndex++;
 
@@ -276,6 +294,14 @@ bool EventLogger::endHour()
     getTimestamp(),
     sizeof(currentHour.stopTime) - 1);
   ramHeader.hoursStored++;
+
+  // Set partial flag if hour has less than 60 minutes
+  if (minuteIndex < 60)
+  {
+      currentHour.flags |= HOUR_FLAG_PARTIAL;
+      ramHeader.flags |= SESSION_FLAG_PARTIAL;
+  }
+
   return true;
 }
 

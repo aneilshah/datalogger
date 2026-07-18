@@ -222,8 +222,8 @@ static void renderExportNvmInfo(WiFiClient &client)
   client.print(F("session_active,"));
   client.println(boot.sessionActive ? F("Yes") : F("No"));
 
-  client.print(F("session_flags,"));
-  client.println(getSessionFlagText(boot.sessionFlags));
+  client.print(F("session_paused,"));
+  client.println(boot.sessionPaused ? F("Yes") : F("No"));
 
   client.print(F("hours_stored,"));
   client.println(boot.hoursStored);
@@ -315,11 +315,11 @@ void renderExportLoggerDataCsv(WiFiClient& client)
   // DATA EXPORT
 
   client.println(
-    F("timestamp,hour,minute,events,duration,shortest,longest,average,flag"));
+    F("timestamp,hour,minute,events,duration,shortest,longest,average,flagTxt,flags"));
 
-  EventLogger::LogHeader header;
+  EventLogger::LogHeader nvmHeader;
 
-  if (!loggerDataReadNvmHeader(header))
+  if (!loggerDataReadNvmHeader(nvmHeader))
     return;
 
   EventLogger::HourRecord hour;
@@ -327,7 +327,7 @@ void renderExportLoggerDataCsv(WiFiClient& client)
   char timestamp[LOGGER_TIMESTAMP_LENGTH];
 
   for (uint16_t hourNumber = 0;
-       hourNumber < header.hoursStored;
+       hourNumber < nvmHeader.hoursStored;
        hourNumber++)
   {
     if (!loggerDataReadHourBlock(hourNumber, hour))
@@ -373,6 +373,10 @@ void renderExportLoggerDataCsv(WiFiClient& client)
       client.print(",");
 
       csvPrintQuoted(client, getMinuteFlagText(m.flags));
+      client.print(",");
+      client.print("0x");
+      if (m.flags < 0x10) client.print('0');
+      client.print(m.flags, HEX);
 
       client.println();
     }

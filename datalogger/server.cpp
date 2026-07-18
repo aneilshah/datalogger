@@ -481,7 +481,6 @@ static void renderSystemTable(WiFiClient &client) {
   printRow(client, F("1 Sec Run Time"), String(LOOP_TIME) + " ms");
   printRow(client, F("Adaptive Loop Delay"), String(ADAPTIVE_DELAY) + " ms");
 
-  client.print((const __FlashStringHelper*)HTML_TABLE_CLOSE);
 
   // Timestamp
   printRow(client, F("Timestamp"), getTimestamp());
@@ -495,6 +494,9 @@ static void renderSystemTable(WiFiClient &client) {
   if (monHr < 1.0f)       printRow(client, F("Total Monitor Time"), String(monMin, 1) + "m");
   else if (monDay < 1.0f) printRow(client, F("Total Monitor Time"), String(monHr, 2) + "hr");
   else                    printRow(client, F("Total Monitor Time"), String(monDay, 2) + "d");
+
+  // END OF TABLE
+  client.print((const __FlashStringHelper*)HTML_TABLE_CLOSE);
 
   // Nav Buttons
   renderNavButtons(client, PAGE_SYSTEMS);
@@ -670,7 +672,7 @@ void webServer() {
     char suffix[10]; 
     if (TEST_MODE) snprintf(suffix, sizeof(suffix), "_test");
     else snprintf(suffix, sizeof(suffix), "");  
-    snprintf(fname, sizeof(fname), "logger_data%_%s.csv", suffix, ts);
+    snprintf(fname, sizeof(fname), "logger_data%s_%s.csv", suffix, ts);
 
     httpCsvAttachment(client, fname);
     renderExportLoggerDataCsv(client);

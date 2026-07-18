@@ -30,9 +30,8 @@ struct WifiCredential
 
 static const WifiCredential wifiList[] =
 {
-    { PHONE_WIFI_SSID, PHONE_WIFI_PSW },
   { HOME_WIFI_SSID,  HOME_WIFI_PSW  },
-
+  { PHONE_WIFI_SSID, PHONE_WIFI_PSW },
 };
 
 bool wifiLinkUp() {

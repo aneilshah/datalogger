@@ -6,6 +6,10 @@
 #include "ntp.h"
 #include "nvm.h"
 
+// For Debug Only
+#include <nvs.h>
+#include <nvs_flash.h>
+
 static Preferences prefs;
 
 // Namespaces
@@ -148,7 +152,6 @@ bool bootStateReset()
 
   boot.sessionActive = false;
   boot.sessionPaused = false;
-  boot.sessionFlags  = SESSION_FLAG_NONE;
   boot.hoursStored   = 0;
   boot.saveTimestamp[0] = '\0';
 
@@ -168,6 +171,63 @@ uint32_t nvmGetBootCount() {
   const uint32_t v = (uint32_t)prefs.getUInt(K_BOOT_COUNT, 0);
   prefs.end();
   return v;
+}
+
+bool sessionPaused() {
+  NvmBootState boot;
+  if (bootStateRead(boot)) {
+    return boot.sessionPaused;
+  }
+  else return false;
+}
+
+bool sessionActive() {
+  NvmBootState boot;
+  if (bootStateRead(boot)) {
+    return boot.sessionActive;
+  }
+  else return false;
+}
+
+bool setBootPaused(bool val){
+  // Update Boot State
+  NvmBootState boot;
+
+  if (bootStateRead(boot))
+  {
+    boot.sessionPaused = val;
+
+    strncpy(
+      boot.saveTimestamp,
+      getTimestamp(),
+      sizeof(boot.saveTimestamp) - 1);
+
+    boot.saveTimestamp[sizeof(boot.saveTimestamp) - 1] = '\0';
+
+    return bootStateWrite(boot);
+  }
+  return false;
+}
+
+
+bool setBootActive(bool val){
+  // Update Boot State
+  NvmBootState boot;
+
+  if (bootStateRead(boot))
+  {
+    boot.sessionActive = val;
+
+    strncpy(
+      boot.saveTimestamp,
+      getTimestamp(),
+      sizeof(boot.saveTimestamp) - 1);
+
+    boot.saveTimestamp[sizeof(boot.saveTimestamp) - 1] = '\0';
+
+    return bootStateWrite(boot);
+  }
+  return false;  
 }
 
 void nvmDumpLoggerState()
@@ -204,9 +264,6 @@ void nvmDumpBootState()
   Serial.printf("Session Paused : %s\n",
     boot.sessionPaused ? "Yes" : "No");
 
-  Serial.printf("Session Flags  : %s\n",
-    getSessionFlagText(boot.sessionFlags));
-
   Serial.printf("Hours Stored   : %u\n",
     boot.hoursStored);
 
@@ -214,4 +271,28 @@ void nvmDumpBootState()
     boot.saveTimestamp);
 
   Serial.println("----- NVM BOOT DUMP END -----");
+}
+
+void dumpNamespace(const char *ns)
+{
+    nvs_iterator_t it = nvs_entry_find(
+        NVS_DEFAULT_PART_NAME,
+        ns,
+        NVS_TYPE_ANY);
+
+    while (it != nullptr)
+    {
+        nvs_entry_info_t info;
+        nvs_entry_info(it, &info);
+
+        Serial.printf(
+            "Namespace: %s  Key: %s  Type: %d\n",
+            info.namespace_name,
+            info.key,
+            info.type);
+
+        it = nvs_entry_next(it);
+    }
+
+    nvs_release_iterator(it);
 }

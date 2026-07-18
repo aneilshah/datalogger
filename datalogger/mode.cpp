@@ -44,8 +44,12 @@ uint32_t getModeTimer()  {return modeTimer;}
 
 bool resetLogger()
 {
-  // Clear RAM
+  // Clear RAM and Sessions
   Logger.clearRam();
+  Logger.clearHour();
+  Logger.clearMinuteStats();
+
+
   setLoggerMode(MODE_INIT);
   oledMain();
 
@@ -75,18 +79,21 @@ void gotoInit() {
 
 void gotoLogging() {
   lowPowerModeInit();
+  setBootPaused(false);
+  setBootActive(true);
   setLoggerMode(MODE_LOGGING);
 }
 
 void gotoPaused() {
   resumeFullPowerMode();
   oledMain();
+  setBootPaused(true);
   setLoggerMode(MODE_PAUSED);
 }
 
 void gotoCheckReset() {
-
-
+  setLoggerMode(MODE_CHECK_RESET);
+  oledModal("RESET DATA?");
 }
 
 void gotoCheckStart() {
@@ -120,16 +127,16 @@ bool initLogger()
   }
 
   // Read logger header
-  EventLogger::LogHeader header;
+  EventLogger::LogHeader nvmHeader;
 
-  if (!loggerDataReadNvmHeader(header))
+  if (!loggerDataReadNvmHeader(nvmHeader))
   {
-    Serial.println("Invalid logger header. Resetting logger.");
+    Serial.println("Invalid logger NVM header. Resetting logger.");
     resetLogger();
     return false;
   }
 
-  Logger.setRamHeader(header);
+  Logger.setRamHeader(nvmHeader);
 
   // Validate header
   if (Logger.getRamHeader().magic != LOGGER_MAGIC)
@@ -159,7 +166,10 @@ bool initLogger()
   }
 
   // Session was ACTIVE
-  boot.sessionFlags |= SESSION_FLAG_REBOOT;
+  Logger.setSessionFlag(SESSION_FLAG_REBOOT);
+
+  // We successfully recovered this session
+  Logger.setSessionFlag(SESSION_FLAG_RECOVERED);
 
   // Check for PAUSED
   if (boot.sessionPaused) {  
@@ -243,8 +253,7 @@ void processLoggerMode() {
       setLoggerMode(MODE_LOGGING);
     }
     else if (shortPress()) {
-      setLoggerMode(MODE_CHECK_RESET);
-      oledModal("RESET DATA?");
+      gotoCheckReset();
     }
   }
 

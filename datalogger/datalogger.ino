@@ -119,6 +119,7 @@ void setup() {
   loggerDataInit();
   nvmDumpBootState();
   nvmDumpLoggerState();
+  dumpNamespace("logger");
 
   // Randomize
   randomSeed((uint32_t)esp_random());
@@ -238,9 +239,15 @@ void loop1Sec() {
   if (wifiOK()) updateNTP();
 
   // Simulate Logger Data in Test Mode
-  if (TEST_MODE) {
+  if (sessionActive())
+  {  
+    if (TEST_MODE) {
     bool evt = simulateEvent();
     Logger.sample(evt);
+    }
+    else {
+      // TODO: Read Event Hardware 
+    }
   }
 
   // update loop counter
@@ -344,7 +351,7 @@ void loop1HourOnTheClockHour(int hour) {
   Serial.printf("*** RUNNING 1 HOUR LOOP [%d]", hour);
 
   if (Logger.isLoggingActive())
-    Logger.endHour();
+    loggerDataFinishHour();
 }
 
 
