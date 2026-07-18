@@ -178,7 +178,7 @@ void loggerSimulateAddingData()
   }
 
   // START SESSION
-  Logger.startSession();
+  Logger.startNewSession();
 
   // Simulate Hour 1
   if (!loggerSimulateHour(LOGGER_SIM_FLAT, 1, 10))

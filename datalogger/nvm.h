@@ -14,7 +14,6 @@ struct  NvmBootState
   bool    sessionPaused;
   uint8_t sessionFlags;
   uint16_t hoursStored;
-
   char saveTimestamp[LOGGER_TIMESTAMP_LENGTH];
 };
 

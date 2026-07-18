@@ -47,6 +47,7 @@ bool resetLogger()
   // Clear RAM
   Logger.clearRam();
   setLoggerMode(MODE_INIT);
+  oledMain();
 
   // Erase logger data
   if (!loggerDataErase())
@@ -61,6 +62,47 @@ bool resetLogger()
     return false;
 
   return true;
+}
+
+// Handle Transitions
+// Set Mode, Power Mode, OLED, etc
+
+void gotoInit() {
+  resumeFullPowerMode();
+  setLoggerMode(MODE_INIT);
+  oledMain();
+}
+
+void gotoLogging() {
+  lowPowerModeInit();
+  setLoggerMode(MODE_LOGGING);
+}
+
+void gotoPaused() {
+  resumeFullPowerMode();
+  oledMain();
+  setLoggerMode(MODE_PAUSED);
+}
+
+void gotoCheckReset() {
+
+
+}
+
+void gotoCheckStart() {
+  setLoggerMode(MODE_CHECK_START);
+  oledModal("START LOGGING?");
+}
+
+void gotoCheckRestart() {
+  setLoggerMode(MODE_CHECK_RESTART);
+  oledModal("RESTART LOGGING?");
+}
+
+void gotoCheckPause() {
+  resumeHalfPowerMode();
+  oledModal("PAUSE LOGGING?");
+  setLoggerMode(MODE_CHECK_PAUSE);
 }
 
 bool initLogger()
@@ -109,17 +151,25 @@ bool initLogger()
     Serial.println("Hour count mismatch - RAM vs NVM.");
   }
 
-  // Valid logger found (TODO: Switch to LOGGING/ACTIVE later)
-  setLoggerMode(MODE_PAUSED);
-
   if (!boot.sessionActive)
   {
     Serial.println("No active session.");
+    setLoggerMode(MODE_INIT);
     return false;
   }
 
-  // Session was ACTIVE, so Set REBOOT Flag
+  // Session was ACTIVE
   boot.sessionFlags |= SESSION_FLAG_REBOOT;
+
+  // Check for PAUSED
+  if (boot.sessionPaused) {  
+    gotoPaused();
+  }
+
+  // else was LOGGING
+  else {
+    gotoLogging();
+  }
 
   if (!bootStateWrite(boot))
   {
@@ -136,61 +186,49 @@ void processLoggerMode() {
   // Init Mode, full power not running
   if (loggerMode == MODE_INIT) {
     if (shortPress()) {
-      setLoggerMode(MODE_CHECK_START);
-      oledModal("START LOGGING?");
+      gotoCheckStart();
     }
   }
 
   // Logging Mode
   else if (loggerMode == MODE_LOGGING) {
     if (shortPress()) {
-      setLoggerMode(MODE_CHECK_PAUSE);
-      resumeHalfPowerMode();
-      oledModal("PAUSE LOGGING?");
+      gotoCheckPause();
     }
   }
 
   // Paused, has data
   else if (loggerMode == MODE_PAUSED) {
     if (shortPress()) {
-      setLoggerMode(MODE_CHECK_RESTART);
-      oledModal("RESTART LOGGING?");
+      gotoCheckRestart();
     }
   }
 
   // Checking to start logging from init
   else if (loggerMode == MODE_CHECK_START) {
     if (modalEvent()) {
-      lowPowerModeInit();
-      setLoggerMode(MODE_LOGGING);
-      Logger.startSession();
+      gotoLogging();
+      Logger.startNewSession();
     }
     else if (shortPress()) {
-      setLoggerMode(MODE_INIT);
+      gotoInit();
     }
   }
 
   // Check if user wants to Reset Logger
   else if (loggerMode == MODE_CHECK_RESET) {
     if (modalEvent()) {
-      lowPowerModeInit();
-      // TODO: ADD RESET CODE HERE (logger.reset() etc)
-      setLoggerMode(MODE_INIT);
+      gotoInit();
     }
     else if (shortPress()) {
-      setLoggerMode(MODE_PAUSED);
-      oledMain();
+      gotoPaused();
     }
   }
 
   // Check if user wants to Pause Logging
   else if (loggerMode == MODE_CHECK_PAUSE) {
     if (modalEvent()) {
-      resumeFullPowerMode();
-      //TODO: Might need new OLED screen here?
-      Serial.println("OLED MAIN");
-      oledMain();
-      setLoggerMode(MODE_PAUSED);
+      gotoPaused();
     }
     else if (shortPress()) {
       setLoggerMode(MODE_LOGGING);

@@ -20,10 +20,12 @@ void wakeUp() {
 }
 
 void resumeFullPowerMode() {
+  if (powerMode != POWER_FULL) {
+    ledOn();
+    oledOn();
+    connectWifi();
+  }
   powerMode = POWER_FULL;
-  ledOn();
-  oledOn();
-  connectWifi();
 }
 
 void resumeHalfPowerMode() {

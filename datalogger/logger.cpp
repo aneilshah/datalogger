@@ -154,7 +154,7 @@ bool EventLogger::hasEvents() const
   return eventsDetected;
 }
 
-void EventLogger::startSession()
+void EventLogger::startNewSession()
 {
   // Set the Ram header
   strncpy(ramHeader.startTime, getTimestamp(), sizeof(ramHeader.startTime) - 1);
@@ -178,6 +178,10 @@ void EventLogger::startSession()
   startHour();
 
   Serial.println("Starting Session...");
+}
+
+void restartSession() {
+  
 }
 
 void EventLogger::stopSession()

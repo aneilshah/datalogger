@@ -142,7 +142,8 @@ public:
   void clearRam();
 
   // Session Functions
-  void startSession();
+  void startNewSession();
+  void restartSession();
   void stopSession();
 
   // Statuses
