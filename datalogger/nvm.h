@@ -1,5 +1,8 @@
 // nvm.h
 #pragma once
+#include "mode.h"
+
+// Just in case
 #include <stdint.h>
 #include <stddef.h>
 
@@ -10,8 +13,7 @@ void nvmInit();   // optional; safe to call once in setup()
 
 struct  NvmBootState
 {
-  bool    sessionActive;
-  bool    sessionPaused;
+  LoggerMode loggerMode;
   uint16_t hoursStored;
   char saveTimestamp[LOGGER_TIMESTAMP_LENGTH];
 };
@@ -28,12 +30,11 @@ bool bootStateClear();
 
 // Getters
 uint32_t getTotalBlockWriteCount();
-bool sessionPaused();
-bool sessionActive();
+LoggerMode getBootLoggerMode();
+const char* getBootLoggerModeTxt();
 
 // Setters
-bool setBootPaused(bool val);
-bool setBootActive(bool val);
+bool setBootLoggerMode(LoggerMode mode);
 
 
 // ---- Boot stats (update once per reboot) ----

@@ -220,11 +220,13 @@ static void renderExportNvmInfo(Print &out)
     return;
   }
 
-  out.print(F("session_active,"));
-  out.println(boot.sessionActive ? F("Yes") : F("No"));
-
-  out.print(F("session_paused,"));
-  out.println(boot.sessionPaused ? F("Yes") : F("No"));
+  out.print(F("boot_logger_mode,0x"));
+  uint8_t mode = static_cast<uint8_t>(boot.loggerMode);
+  if (mode < 0x10) out.print('0');
+  out.print(mode, HEX);
+  out.print(F(" ("));
+  out.print(getBootLoggerModeTxt());
+  out.println(')');
 
   out.print(F("hours_stored,"));
   out.println(boot.hoursStored);
@@ -338,12 +340,14 @@ void renderExportLoggerDataCsv(Print &out)
     if (!loggerDataReadHourBlock(hourNumber, hour))
       continue;
 
+
+    const char* startTime = hour.startTime;
     for (uint8_t minute = 0; minute < 60; minute++)
     {
       const auto &m = hour.minute[minute];
 
       addMinutesToTimestamp(
-        hour.startTime,
+        startTime,
         minute,
         timestamp,
         sizeof(timestamp));

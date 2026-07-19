@@ -75,6 +75,15 @@ bool nvmSetZeroBlocks() {
   return ok;
 }
 
+// HELPERS
+const char* getBootLoggerModeTxt() {
+  LoggerMode mode = getBootLoggerMode();
+  if (mode == LoggerMode::RESET) return "INIT";
+  if (mode == LoggerMode::LOGGING) return "LOGGING";
+  if (mode == LoggerMode::STOPPED) return "STOPPED";
+  else return "UNKNOWN_MODE";
+}
+
 //-------------------------------------------------
 // NVM Getters
 //-------------------------------------------------
@@ -150,8 +159,7 @@ bool bootStateReset()
 {
   NvmBootState boot = {};
 
-  boot.sessionActive = false;
-  boot.sessionPaused = false;
+  boot.loggerMode = LoggerMode::RESET;
   boot.hoursStored   = 0;
   boot.saveTimestamp[0] = '\0';
 
@@ -166,6 +174,8 @@ void nvmUpdateBootStats(uint32_t nowEpoch) {
   prefs.end();
 }
 
+// Getters
+
 uint32_t nvmGetBootCount() {
   if (!prefs.begin(NS_BOOT, true)) return 0;
   const uint32_t v = (uint32_t)prefs.getUInt(K_BOOT_COUNT, 0);
@@ -173,50 +183,25 @@ uint32_t nvmGetBootCount() {
   return v;
 }
 
-bool sessionPaused() {
-  NvmBootState boot;
-  if (bootStateRead(boot)) {
-    return boot.sessionPaused;
-  }
-  else return false;
+LoggerMode getBootLoggerMode()
+{
+    NvmBootState boot{};
+
+    if (!bootStateRead(boot))
+        return LoggerMode::RESET;
+
+    return boot.loggerMode;
 }
 
-bool sessionActive() {
-  NvmBootState boot;
-  if (bootStateRead(boot)) {
-    return boot.sessionActive;
-  }
-  else return false;
-}
+// Setters
 
-bool setBootPaused(bool val){
+bool setBootLoggerMode(LoggerMode mode){
   // Update Boot State
   NvmBootState boot;
 
   if (bootStateRead(boot))
   {
-    boot.sessionPaused = val;
-
-    strncpy(
-      boot.saveTimestamp,
-      getTimestamp(),
-      sizeof(boot.saveTimestamp) - 1);
-
-    boot.saveTimestamp[sizeof(boot.saveTimestamp) - 1] = '\0';
-
-    return bootStateWrite(boot);
-  }
-  return false;
-}
-
-
-bool setBootActive(bool val){
-  // Update Boot State
-  NvmBootState boot;
-
-  if (bootStateRead(boot))
-  {
-    boot.sessionActive = val;
+    boot.loggerMode = mode;
 
     strncpy(
       boot.saveTimestamp,
@@ -229,6 +214,8 @@ bool setBootActive(bool val){
   }
   return false;  
 }
+
+// Diagnostics
 
 void nvmDumpLoggerState()
 {
@@ -258,40 +245,27 @@ void nvmDumpBootState()
     return;
   }
 
-  Serial.printf("Session Active : %s\n",
-    boot.sessionActive ? "Yes" : "No");
-
-  Serial.printf("Session Paused : %s\n",
-    boot.sessionPaused ? "Yes" : "No");
-
-  Serial.printf("Hours Stored   : %u\n",
-    boot.hoursStored);
-
-  Serial.printf("Last Save      : %s\n",
-    boot.saveTimestamp);
-
+  Serial.printf("Logger Mode : %s\n", getBootLoggerModeTxt());
+  Serial.printf("Hours Stored   : %u\n", boot.hoursStored);
+  Serial.printf("Last Save      : %s\n", boot.saveTimestamp);
   Serial.println("----- NVM BOOT DUMP END -----");
 }
 
 void dumpNamespace(const char *ns)
 {
-    nvs_iterator_t it = nvs_entry_find(
-        NVS_DEFAULT_PART_NAME,
-        ns,
-        NVS_TYPE_ANY);
-
+    nvs_iterator_t it = nvs_entry_find(NVS_DEFAULT_PART_NAME, ns, NVS_TYPE_ANY);
     while (it != nullptr)
     {
-        nvs_entry_info_t info;
-        nvs_entry_info(it, &info);
+      nvs_entry_info_t info;
+      nvs_entry_info(it, &info);
 
-        Serial.printf(
-            "Namespace: %s  Key: %s  Type: %d\n",
-            info.namespace_name,
-            info.key,
-            info.type);
+      Serial.printf(
+        "Namespace: %s  Key: %s  Type: %d\n",
+        info.namespace_name,
+        info.key,
+        info.type);
 
-        it = nvs_entry_next(it);
+      it = nvs_entry_next(it);
     }
 
     nvs_release_iterator(it);

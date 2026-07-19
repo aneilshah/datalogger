@@ -12,34 +12,53 @@
 
 
 // File Data
-static uint8_t loggerMode = MODE_INIT;
+static LoggerMode loggerMode = LoggerMode::RESET;
+static MenuScreen menuScreen = MenuScreen::RESET;
 EventLogger Logger;
 static uint32_t modeTimer = 0;
+static uint32_t screenTimer = 0;
 
 // Methods
 
 const char* getLoggerModeTxt() {
-  if (loggerMode == MODE_INIT) return "INIT";
-  if (loggerMode == MODE_LOGGING) return "LOGGING";
-  if (loggerMode == MODE_PAUSED) return "PAUSED";
-  if (loggerMode == MODE_CHECK_START) return "CHECK_START";
-  if (loggerMode == MODE_CHECK_RESET) return "CHECK_RESET";
-  if (loggerMode == MODE_CHECK_PAUSE) return "CHECK_PAUSE";
-  if (loggerMode == MODE_CHECK_RESTART) return "CHECK_RESTART";
-  else return "UNKNOWN";
+  if (loggerMode == LoggerMode::RESET) return "RESET";
+  if (loggerMode == LoggerMode::LOGGING) return "LOGGING";
+  if (loggerMode == LoggerMode::PAUSED) return "PAUSED";
+  if (loggerMode == LoggerMode::STOPPED) return "STOPPED";
+  else return "UNKNOWN_MODE";
+}
+
+const char* getMenuScreenTxt() {
+  if (menuScreen == MenuScreen::RESET) return "RESET";
+  if (menuScreen == MenuScreen::LOGGING) return "LOGGING";
+  if (menuScreen == MenuScreen::PAUSED) return "PAUSED";
+  if (menuScreen == MenuScreen::STOPPED) return "STOPED";
+  if (menuScreen == MenuScreen::CHECK_START) return "CHECK_START";
+  if (menuScreen == MenuScreen::CHECK_RESET) return "CHECK_RESET";
+  if (menuScreen == MenuScreen::CHECK_PAUSE) return "CHECK_PAUSE";
+  if (menuScreen == MenuScreen::CHECK_RESTART) return "CHECK_RESTART";
+  else return "UNKNOWN_SCREEN";
 
 }
 
-void setLoggerMode(uint8_t mode) {
+void setLoggerMode(LoggerMode mode) {
   loggerMode = mode;
   modeTimer = 0;
-  clearModalEvent();
+  setBootLoggerMode(mode);
   Serial.printf("Logger Mode: %s\n", getLoggerModeTxt());
 }
 
+void setMenuScreen(MenuScreen screen) {
+  menuScreen = screen;
+  screenTimer = 0;
+  clearModalEvent();
+  Serial.printf("Menu Screen: %s\n", getMenuScreenTxt());
+}
 
-uint8_t getLoggerMode() {return loggerMode;}
+LoggerMode getLoggerMode() {return loggerMode;}
+MenuScreen getMenuScreen() {return menuScreen;}
 uint32_t getModeTimer()  {return modeTimer;}
+uint32_t getScreenTimer()  {return screenTimer;}
 
 
 bool resetLogger()
@@ -50,7 +69,8 @@ bool resetLogger()
   Logger.clearMinuteStats();
 
 
-  setLoggerMode(MODE_INIT);
+  setLoggerMode(LoggerMode::RESET);
+  setMenuScreen(MenuScreen::RESET);
   oledMain();
 
   // Erase logger data
@@ -73,43 +93,49 @@ bool resetLogger()
 
 void gotoInit() {
   resumeFullPowerMode();
-  setLoggerMode(MODE_INIT);
+  setLoggerMode(LoggerMode::RESET);
+  setMenuScreen(MenuScreen::RESET);
   oledMain();
 }
 
 void gotoLogging() {
   lowPowerModeInit();
-  setBootPaused(false);
-  setBootActive(true);
-  setLoggerMode(MODE_LOGGING);
+  setLoggerMode(LoggerMode::LOGGING);
+  setMenuScreen(MenuScreen::LOGGING);
+  setBootLoggerMode(LoggerMode::LOGGING);
 }
 
 void gotoPaused() {
   resumeFullPowerMode();
   oledMain();
-  setBootPaused(true);
-  setLoggerMode(MODE_PAUSED);
+  setLoggerMode(LoggerMode::PAUSED);
+}
+
+void gotoStopped() {
+  resumeFullPowerMode();
+  oledMain();
+  setLoggerMode(LoggerMode::STOPPED);  
 }
 
 void gotoCheckReset() {
-  setLoggerMode(MODE_CHECK_RESET);
+  setMenuScreen(MenuScreen::CHECK_RESET);
   oledModal("RESET DATA?");
 }
 
 void gotoCheckStart() {
-  setLoggerMode(MODE_CHECK_START);
+  setMenuScreen(MenuScreen::CHECK_START);
   oledModal("START LOGGING?");
 }
 
 void gotoCheckRestart() {
-  setLoggerMode(MODE_CHECK_RESTART);
+  setMenuScreen(MenuScreen::CHECK_RESTART);
   oledModal("RESTART LOGGING?");
 }
 
 void gotoCheckPause() {
   resumeHalfPowerMode();
   oledModal("PAUSE LOGGING?");
-  setLoggerMode(MODE_CHECK_PAUSE);
+  setMenuScreen(MenuScreen::CHECK_PAUSE);
 }
 
 bool initLogger()
@@ -158,27 +184,26 @@ bool initLogger()
     Serial.println("Hour count mismatch - RAM vs NVM.");
   }
 
-  if (!boot.sessionActive)
+  LoggerMode mode = boot.loggerMode;
+
+  switch (mode)
   {
-    Serial.println("No active session.");
-    setLoggerMode(MODE_INIT);
-    return false;
-  }
+    case LoggerMode::PAUSED:
+      gotoPaused();
+      break;
 
-  // Session was ACTIVE
-  Logger.setSessionFlag(SESSION_FLAG_REBOOT);
+    case LoggerMode::STOPPED:
+      gotoStopped();
+      break;
 
-  // We successfully recovered this session
-  Logger.setSessionFlag(SESSION_FLAG_RECOVERED);
+    case LoggerMode::LOGGING:
+      gotoLogging();
+      break;
 
-  // Check for PAUSED
-  if (boot.sessionPaused) {  
-    gotoPaused();
-  }
-
-  // else was LOGGING
-  else {
-    gotoLogging();
+    case LoggerMode::RESET:
+    default:
+      gotoInit();
+      break;
   }
 
   if (!bootStateWrite(boot))
@@ -194,28 +219,28 @@ bool initLogger()
 void processLoggerMode() {
 
   // Init Mode, full power not running
-  if (loggerMode == MODE_INIT) {
+  if (menuScreen == MenuScreen::RESET) {
     if (shortPress()) {
       gotoCheckStart();
     }
   }
 
   // Logging Mode
-  else if (loggerMode == MODE_LOGGING) {
+  else if (menuScreen == MenuScreen::LOGGING) {
     if (shortPress()) {
       gotoCheckPause();
     }
   }
 
   // Paused, has data
-  else if (loggerMode == MODE_PAUSED) {
+  else if (menuScreen == MenuScreen::PAUSED) {
     if (shortPress()) {
       gotoCheckRestart();
     }
   }
 
   // Checking to start logging from init
-  else if (loggerMode == MODE_CHECK_START) {
+  else if (menuScreen == MenuScreen::CHECK_START) {
     if (modalEvent()) {
       gotoLogging();
       Logger.startNewSession();
@@ -226,7 +251,7 @@ void processLoggerMode() {
   }
 
   // Check if user wants to Reset Logger
-  else if (loggerMode == MODE_CHECK_RESET) {
+  else if (menuScreen == MenuScreen::CHECK_RESET) {
     if (modalEvent()) {
       resetLogger();
     }
@@ -236,32 +261,32 @@ void processLoggerMode() {
   }
 
   // Check if user wants to Pause Logging
-  else if (loggerMode == MODE_CHECK_PAUSE) {
+  else if (menuScreen == MenuScreen::CHECK_PAUSE) {
     if (modalEvent()) {
       gotoPaused();
     }
     else if (shortPress()) {
-      setLoggerMode(MODE_LOGGING);
+      setLoggerMode(LoggerMode::LOGGING);
       oledOff();
     }
   }
 
   // Check if user wants to Restart from Paused state
-  else if (loggerMode == MODE_CHECK_RESTART) {
+  else if (menuScreen == MenuScreen::CHECK_RESTART) {
     if (modalEvent()) {
       lowPowerModeInit();
-      setLoggerMode(MODE_LOGGING);
+      gotoLogging();
     }
     else if (shortPress()) {
       gotoCheckReset();
     }
   }
 
-  // Default to Init Mode, should not get here
+  // Default to Init Mode (Reset), should not get here
   else {
-    setLoggerMode(MODE_INIT);
-    // Todo: reset logger?  Go to Error Banner?
+    resetLogger();
   }
 
   modeTimer++;
+  screenTimer++;
 }

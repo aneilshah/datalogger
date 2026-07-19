@@ -107,9 +107,9 @@ void updateOLED() {
     //   snprintf(line1, sizeof(line1), "WIFI: RADIO OFF");
     // display.drawString(horOffset, 10 + vertOffsetMain, line1);
 
-    if (getLoggerMode() == MODE_PAUSED)
+    if (getLoggerMode() == LoggerMode::PAUSED)
       snprintf(line1, sizeof(line1), "PAUSED [%.1f Hr]", ramHeader.hoursStored);
-    else if (getLoggerMode() == MODE_INIT)
+    else if (getLoggerMode() == LoggerMode::RESET)
       snprintf(line1, sizeof(line1), "READY [NO DATA]");
 
     else

@@ -151,8 +151,6 @@ public:
   void stopSession();
 
   // Statuses
-  bool isLoggingActive();
-  bool isLoggingPaused();
   bool hasEvents() const;
 
   // Getters

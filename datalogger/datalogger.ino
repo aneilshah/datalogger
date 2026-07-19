@@ -239,7 +239,7 @@ void loop1Sec() {
   if (wifiOK()) updateNTP();
 
   // Simulate Logger Data in Test Mode
-  if (sessionActive())
+  if (getLoggerMode() == LoggerMode::LOGGING || getLoggerMode() == LoggerMode::PAUSED)
   {  
     if (TEST_MODE) {
     bool evt = simulateEvent();
@@ -341,7 +341,7 @@ void checkForOneHourTasks() {
 
 // One minute tasks on the clock Minute
 void loop1MinuteOnTheClockMinute(int minute) {
-  if (Logger.isLoggingActive())
+  if (getLoggerMode() == LoggerMode::LOGGING || getLoggerMode() == LoggerMode::PAUSED)
     Logger.endMinuteBlock();
 }
 
@@ -350,7 +350,7 @@ void loop1HourOnTheClockHour(int hour) {
   Serial.println();
   Serial.printf("*** RUNNING 1 HOUR LOOP [%d]", hour);
 
-  if (Logger.isLoggingActive())
+  if (getLoggerMode() == LoggerMode::LOGGING || getLoggerMode() == LoggerMode::PAUSED)
     loggerDataFinishHour();
 }
 

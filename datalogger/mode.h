@@ -5,13 +5,26 @@
 // Logger Modes
 //-----------------------------------------------------
 
-#define MODE_INIT     0
-#define MODE_LOGGING  1
-#define MODE_PAUSED   2
-#define MODE_CHECK_START 3
-#define MODE_CHECK_RESET 4
-#define MODE_CHECK_PAUSE 5
-#define MODE_CHECK_RESTART 6
+enum class LoggerMode : uint8_t
+{
+  RESET,
+  LOGGING,
+  PAUSED,
+  STOPPED
+};
+
+enum class MenuScreen : uint8_t
+{
+  RESET,
+  LOGGING,
+  PAUSED,
+  STOPPED,
+  CHECK_START,
+  CHECK_RESET,
+  CHECK_RESTART,
+  CHECK_PAUSE,
+  CHECK_STOP
+};
 
 extern EventLogger Logger;
 
@@ -19,5 +32,9 @@ void processLoggerMode();
 bool initLogger();
 bool resetLogger();
 bool restoreLoggerSession();
-uint8_t getLoggerMode();
+LoggerMode getLoggerMode();
+MenuScreen getMenuScreen();
+const char* getLoggerModeTxt();
+const char* getMenuScreenTxt();
 uint32_t getModeTimer();
+uint32_t getScreenTimer();

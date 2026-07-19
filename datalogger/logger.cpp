@@ -1,9 +1,11 @@
 #include "global.h"
 #include "logger.h"
 #include "loggerData.h"
+#include "mode.h"
 #include "ntp.h"
 #include "nvm.h"
 
+// Just in case
 #include <string.h>
 
 
@@ -179,8 +181,7 @@ void EventLogger::startNewSession()
 
   // Set the Boot State
   NvmBootState boot = {};
-  boot.sessionActive = true;
-  boot.sessionPaused = false;
+  boot.loggerMode = LoggerMode::LOGGING;
   boot.hoursStored   = 0;
   strncpy(boot.saveTimestamp, getTimestamp(), sizeof(boot.saveTimestamp) - 1);
   boot.saveTimestamp[sizeof(boot.saveTimestamp) - 1] = '\0';
@@ -213,9 +214,7 @@ void EventLogger::stopSession()
 
   if (bootStateRead(boot))
   {
-    boot.sessionActive = false;
-    boot.sessionPaused = false;
-
+    boot.loggerMode = LoggerMode::STOPPED;
     strncpy(
       boot.saveTimestamp,
       timestamp,
@@ -260,7 +259,7 @@ bool EventLogger::endMinuteBlock()
     return false;
   }
 
-  if (sessionPaused()) {
+  if (getLoggerMode() == LoggerMode::PAUSED) {
     minuteStats.flags |= MINUTE_FLAG_PAUSED;
     currentHour.flags |= HOUR_FLAG_PAUSED;
     ramHeader.flags |= SESSION_FLAG_PAUSED;
@@ -374,21 +373,5 @@ void EventLogger::finishEvent()
 
   currentDuration = 0;
   inEvent = false;
-}
-
-// Status
-
-bool EventLogger::isLoggingActive() 
-{
-  NvmBootState boot;
-  bootStateRead(boot);
-  return boot.sessionActive;
-}
-
-bool EventLogger::isLoggingPaused() 
-{
-  NvmBootState boot;
-  bootStateRead(boot);
-  return boot.sessionPaused;
 }
 
