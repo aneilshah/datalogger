@@ -96,22 +96,21 @@ void updateOLED() {
     display.setFont(ArialMT_Plain_10);
 
     // Line 0: HEADER
-    if (TEST_MODE) snprintf(line0, sizeof(line0), "DATA LOG %s T", APP_VERSION);
-    else           snprintf(line0, sizeof(line0), "DATA LOG %s", APP_VERSION);
+    char suffix[3] = "";
+    if (TEST_MODE) {
+      strcpy(suffix, " T");
+    }
+    
+    snprintf(line0, sizeof(line0), "DATA LOG %s%S", APP_VERSION, suffix);
     display.drawString(horOffset, vertOffsetMain, line0);
 
     // Line 1: Status
-    // if (wifiRadioOn())
-    //   snprintf(line1, sizeof(line1), "WIFI: %s", CONN_STATUS);
-    // else
-    //   snprintf(line1, sizeof(line1), "WIFI: RADIO OFF");
-    // display.drawString(horOffset, 10 + vertOffsetMain, line1);
-
-    if (getLoggerMode() == LoggerMode::PAUSED)
-      snprintf(line1, sizeof(line1), "PAUSED [%.1f Hr]", ramHeader.hoursStored);
-    else if (getLoggerMode() == LoggerMode::RESET)
+    const LoggerMode mode = getLoggerMode();
+    const char* modeText = getLoggerModeTxt();
+    if (mode == LoggerMode::RESET)
       snprintf(line1, sizeof(line1), "READY [NO DATA]");
-
+    else if (mode == LoggerMode::LOGGING || mode == LoggerMode::PAUSED || mode == LoggerMode::STOPPED )
+      snprintf(line1, sizeof(line1), "%s [%.1f Hr]", modeText, ramHeader.hoursStored);
     else
       snprintf(line1, sizeof(line1), "TBD MODE");
 

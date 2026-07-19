@@ -34,9 +34,11 @@ const char* getMenuScreenTxt() {
   if (menuScreen == MenuScreen::PAUSED) return "PAUSED";
   if (menuScreen == MenuScreen::STOPPED) return "STOPED";
   if (menuScreen == MenuScreen::CHECK_START) return "CHECK_START";
-  if (menuScreen == MenuScreen::CHECK_RESET) return "CHECK_RESET";
   if (menuScreen == MenuScreen::CHECK_PAUSE) return "CHECK_PAUSE";
   if (menuScreen == MenuScreen::CHECK_RESTART) return "CHECK_RESTART";
+  if (menuScreen == MenuScreen::CHECK_STOP) return "CHECK_STOP";
+  if (menuScreen == MenuScreen::CHECK_RESET) return "CHECK_RESET";
+  if (menuScreen == MenuScreen::CHECK_RESET_AND_START) return "CHECK_RESET_AND_START";
   else return "UNKNOWN_SCREEN";
 
 }
@@ -109,17 +111,26 @@ void gotoPaused() {
   resumeFullPowerMode();
   oledMain();
   setLoggerMode(LoggerMode::PAUSED);
+  setMenuScreen(MenuScreen::PAUSED);
+  loggerDataWriteNvmHeader(Logger.getRamHeader()); // NVM
 }
 
 void gotoStopped() {
   resumeFullPowerMode();
   oledMain();
-  setLoggerMode(LoggerMode::STOPPED);  
+  setLoggerMode(LoggerMode::STOPPED);
+  setMenuScreen(MenuScreen::STOPPED);
+  Logger.stopSession();  
 }
 
 void gotoCheckReset() {
   setMenuScreen(MenuScreen::CHECK_RESET);
-  oledModal("RESET DATA?");
+  oledModal("!! RESET DATA?");
+}
+
+void gotoCheckResetAndStart() {
+  setMenuScreen(MenuScreen::CHECK_RESET_AND_START);
+  oledModal("!! RESET AND RESTART?");
 }
 
 void gotoCheckStart() {
@@ -130,6 +141,11 @@ void gotoCheckStart() {
 void gotoCheckRestart() {
   setMenuScreen(MenuScreen::CHECK_RESTART);
   oledModal("RESTART LOGGING?");
+}
+
+void gotoCheckStop() {
+  setMenuScreen(MenuScreen::CHECK_STOP);
+  oledModal("STOP LOGGING?");
 }
 
 void gotoCheckPause() {
@@ -239,6 +255,13 @@ void processLoggerMode() {
     }
   }
 
+  // Stopped, has data
+  else if (menuScreen == MenuScreen::STOPPED) {
+    if (shortPress()) {
+      gotoCheckReset();
+    }
+  }
+
   // Checking to start logging from init
   else if (menuScreen == MenuScreen::CHECK_START) {
     if (modalEvent()) {
@@ -256,7 +279,19 @@ void processLoggerMode() {
       resetLogger();
     }
     else if (shortPress()) {
-      gotoPaused();
+      gotoCheckResetAndStart();
+    }
+  }
+
+  // Check if user wants to Reset Logger and Restart
+  else if (menuScreen == MenuScreen::CHECK_RESET_AND_START) {
+    if (modalEvent()) {
+      resetLogger();
+      gotoLogging();
+      Logger.startNewSession();
+    }
+    else if (shortPress()) {
+      gotoStopped();
     }
   }
 
@@ -266,8 +301,8 @@ void processLoggerMode() {
       gotoPaused();
     }
     else if (shortPress()) {
-      setLoggerMode(LoggerMode::LOGGING);
-      oledOff();
+      gotoLogging();
+      loggerDataWriteNvmHeader(Logger.getRamHeader()); // NVM
     }
   }
 
@@ -278,7 +313,17 @@ void processLoggerMode() {
       gotoLogging();
     }
     else if (shortPress()) {
-      gotoCheckReset();
+      gotoCheckStop();
+    }
+  }
+
+  // Check if user wants to Restart from Paused state
+  else if (menuScreen == MenuScreen::CHECK_STOP) {
+    if (modalEvent()) {
+      gotoStopped();
+    }
+    else if (shortPress()) {
+      gotoPaused();
     }
   }
 
