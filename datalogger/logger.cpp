@@ -260,7 +260,7 @@ bool EventLogger::endMinuteBlock()
     return false;
   }
 
-  if (sessionPaused) {
+  if (sessionPaused()) {
     minuteStats.flags |= MINUTE_FLAG_PAUSED;
     currentHour.flags |= HOUR_FLAG_PAUSED;
     ramHeader.flags |= SESSION_FLAG_PAUSED;
