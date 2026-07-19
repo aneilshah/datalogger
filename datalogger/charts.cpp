@@ -7,9 +7,11 @@
 #include "charts.h"
 
 // Project Files
+#include "bufferedPrint.h"
 #include "loggerData.h"
 #include "mode.h"
 
+// Just in case
 #include <stdio.h>
 
 //*****************************************************************************
@@ -55,82 +57,82 @@ static uint32_t niceScale(uint32_t value)
 // Forward declarations
 //*****************************************************************************
 
-static void renderLoggerSummary(WiFiClient &client);
-static void renderLastHourChart(WiFiClient &client);
-static void renderSessionChart(WiFiClient &client);
+static void renderLoggerSummary(Print &out);
+static void renderLastHourChart(Print &out);
+static void renderSessionChart(Print &out);
 
 
 //*****************************************************************************
 // Logger Summary
 //*****************************************************************************
 
-static void renderLoggerSummary(WiFiClient &client)
+static void renderLoggerSummary(Print &out)
 {
   const auto &ramHeader = Logger.getRamHeader();
   const auto &stats  = Logger.getSessionStatistics();
 
-  client.println(F("<div class=\"chart-wrap\">"));
+  out.println(F("<div class=\"chart-wrap\">"));
 
-  client.println(
+  out.println(
       F("<div class=\"chart-title\">"
         "Logger Summary"
         "</div>"));
 
-  client.println(F("<table class=\"summary\">"));
+  out.println(F("<table class=\"summary\">"));
 
-  client.print(F("<tr><td>Started</td><td>"));
-  client.print(ramHeader.startTime);
-  client.println(F("</td></tr>"));
+  out.print(F("<tr><td>Started</td><td>"));
+  out.print(ramHeader.startTime);
+  out.println(F("</td></tr>"));
 
-  client.print(F("<tr><td>Stopped</td><td>"));
-  client.print(ramHeader.stopTime);
-  client.println(F("</td></tr>"));
+  out.print(F("<tr><td>Stopped</td><td>"));
+  out.print(ramHeader.stopTime);
+  out.println(F("</td></tr>"));
 
-  client.print(F("<tr><td>Hours Logged</td><td>"));
-  client.print(ramHeader.hoursStored);
-  client.println(F("</td></tr>"));
+  out.print(F("<tr><td>Hours Logged</td><td>"));
+  out.print(ramHeader.hoursStored);
+  out.println(F("</td></tr>"));
 
-  client.print(F("<tr><td>Samples</td><td>"));
-  client.print(ramHeader.samplesTaken);
-  client.println(F("</td></tr>"));
+  out.print(F("<tr><td>Samples</td><td>"));
+  out.print(ramHeader.samplesTaken);
+  out.println(F("</td></tr>"));
 
-  client.print(F("<tr><td>Total Events</td><td>"));
-  client.print(stats.count);
-  client.println(F("</td></tr>"));
+  out.print(F("<tr><td>Total Events</td><td>"));
+  out.print(stats.count);
+  out.println(F("</td></tr>"));
 
-  client.print(F("<tr><td>Active Seconds</td><td>"));
-  client.print(stats.total);
-  client.println(F("</td></tr>"));
+  out.print(F("<tr><td>Active Seconds</td><td>"));
+  out.print(stats.total);
+  out.println(F("</td></tr>"));
 
-  client.print(F("<tr><td>Shortest</td><td>"));
-  client.print(stats.shortest);
-  client.println(F(" sec</td></tr>"));
+  out.print(F("<tr><td>Shortest</td><td>"));
+  out.print(stats.shortest);
+  out.println(F(" sec</td></tr>"));
 
-  client.print(F("<tr><td>Longest</td><td>"));
-  client.print(stats.longest);
-  client.println(F(" sec</td></tr>"));
+  out.print(F("<tr><td>Longest</td><td>"));
+  out.print(stats.longest);
+  out.println(F(" sec</td></tr>"));
 
-  client.print(F("<tr><td>Events Detected</td><td>"));
+  out.print(F("<tr><td>Events Detected</td><td>"));
 
   if (Logger.hasEvents())
-    client.print(F("YES"));
+    out.print(F("YES"));
   else
-    client.print(F("NO"));
+    out.print(F("NO"));
 
-  client.println(F("</td></tr>"));
-  client.println(F("</table>"));
-  client.println(F("</div>"));
+  out.println(F("</td></tr>"));
+  out.println(F("</table>"));
+  out.println(F("</div>"));
 }
 
 //*****************************************************************************
 // Last Hour Chart
 //*****************************************************************************
 
-static void renderLastHourChart(WiFiClient &client)
+static void renderLastHourChart(Print &out)
 {
   const auto &hour = Logger.getHourRecord();
 
-  client.println(
+  out.println(
     F("<div class=\"chart-wrap\">"
       "<div class=\"chart-title\">"
       "Last Hour"
@@ -154,25 +156,25 @@ static void renderLastHourChart(WiFiClient &client)
   // SVG
   //---------------------------------------------------------
 
-  client.print(F("<svg class=\"chart\" viewBox=\"0 0 "));
-  client.print(W);
-  client.print(' ');
-  client.print(H);
-  client.println(F("\" xmlns=\"http://www.w3.org/2000/svg\">"));
+  out.print(F("<svg class=\"chart\" viewBox=\"0 0 "));
+  out.print(W);
+  out.print(' ');
+  out.print(H);
+  out.println(F("\" xmlns=\"http://www.w3.org/2000/svg\">"));
 
   //---------------------------------------------------------
   // Background
   //---------------------------------------------------------
 
-  client.print(F("<rect x=\""));
-  client.print(PAD_LEFT);
-  client.print(F("\" y=\""));
-  client.print(PAD_TOP);
-  client.print(F("\" width=\""));
-  client.print(PLOT_W);
-  client.print(F("\" height=\""));
-  client.print(PLOT_H);
-  client.println(F("\" fill=\"#fafafa\" stroke=\"#d0d0d0\"/>"));
+  out.print(F("<rect x=\""));
+  out.print(PAD_LEFT);
+  out.print(F("\" y=\""));
+  out.print(PAD_TOP);
+  out.print(F("\" width=\""));
+  out.print(PLOT_W);
+  out.print(F("\" height=\""));
+  out.print(PLOT_H);
+  out.println(F("\" fill=\"#fafafa\" stroke=\"#d0d0d0\"/>"));
 
   //---------------------------------------------------------
   // Horizontal grid
@@ -185,22 +187,22 @@ static void renderLastHourChart(WiFiClient &client)
     PLOT_H -
     (PLOT_H * i / 5);
 
-    client.print(F("<line x1=\""));
-    client.print(PAD_LEFT);
-    client.print(F("\" y1=\""));
-    client.print(y);
-    client.print(F("\" x2=\""));
-    client.print(PAD_LEFT + PLOT_W);
-    client.print(F("\" y2=\""));
-    client.print(y);
-    client.println(F("\" stroke=\"#d0d0d0\"/>"));
-    client.print(F("<text text-anchor=\"end\" x=\""));
-    client.print(PAD_LEFT - 5);
-    client.print(F("\" y=\""));
-    client.print(y + 4);
-    client.print(F("\">"));
-    client.print((maxValue * i) / 5);
-    client.println(F("</text>"));
+    out.print(F("<line x1=\""));
+    out.print(PAD_LEFT);
+    out.print(F("\" y1=\""));
+    out.print(y);
+    out.print(F("\" x2=\""));
+    out.print(PAD_LEFT + PLOT_W);
+    out.print(F("\" y2=\""));
+    out.print(y);
+    out.println(F("\" stroke=\"#d0d0d0\"/>"));
+    out.print(F("<text text-anchor=\"end\" x=\""));
+    out.print(PAD_LEFT - 5);
+    out.print(F("\" y=\""));
+    out.print(y + 4);
+    out.print(F("\">"));
+    out.print((maxValue * i) / 5);
+    out.println(F("</text>"));
   }
 
   //---------------------------------------------------------
@@ -220,60 +222,43 @@ static void renderLastHourChart(WiFiClient &client)
 
   for (uint8_t i = 0; i < 60; i++)
   {
-      uint32_t value =
-          hour.minute[i].count;
-
+      uint32_t value = hour.minute[i].count;
       float fraction = 0.0f;
 
-      if (maxValue)
-          fraction =
-              (float)value /
-              (float)maxValue;
+      if (maxValue) fraction = (float)value / (float)maxValue;
 
-      int barHeight =
-          (int)(fraction * PLOT_H);
+      int barHeight = (int)(fraction * PLOT_H);
+      int x = PAD_LEFT + (int)(i * spacing);
+      int y = PAD_TOP + PLOT_H - barHeight;
 
-      int x =
-          PAD_LEFT +
-          (int)(i * spacing);
+      out.print(F("<rect x=\""));
+      out.print(x);
 
-      int y =
-          PAD_TOP +
-          PLOT_H -
-          barHeight;
+      out.print(F("\" y=\""));
+      out.print(y);
 
-      client.print(F("<rect x=\""));
-      client.print(x);
+      out.print(F("\" width=\""));
+      out.print((int)width);
 
-      client.print(F("\" y=\""));
-      client.print(y);
+      out.print(F("\" height=\""));
+      out.print(barHeight);
 
-      client.print(F("\" width=\""));
-      client.print((int)width);
+      out.print(F("\" fill=\"#2F6F73\">"));
+      out.print(F("<title>Minute "));
+      out.print(i);
+      out.print(F("&#10;Events: "));
+      out.print(value);
 
-      client.print(F("\" height=\""));
-      client.print(barHeight);
+      out.print(F("&#10;Shortest: "));
+      out.print(hour.minute[i].shortest);
 
-      client.print(F("\" fill=\"#2F6F73\">"));
+      out.print(F(" sec&#10;Longest: "));
+      out.print(hour.minute[i].longest);
 
-      client.print(F("<title>Minute "));
+      out.print(F(" sec&#10;Active: "));
+      out.print(hour.minute[i].total);
 
-      client.print(i);
-
-      client.print(F("&#10;Events: "));
-
-      client.print(value);
-
-      client.print(F("&#10;Shortest: "));
-      client.print(hour.minute[i].shortest);
-
-      client.print(F(" sec&#10;Longest: "));
-      client.print(hour.minute[i].longest);
-
-      client.print(F(" sec&#10;Active: "));
-      client.print(hour.minute[i].total);
-
-      client.println(F(" sec</title></rect>"));
+      out.println(F(" sec</title></rect>"));
   }
 
   //---------------------------------------------------------
@@ -282,40 +267,32 @@ static void renderLastHourChart(WiFiClient &client)
 
   for (uint8_t i = 0; i < 60; i += 5)
   {
-    int x =
-        PAD_LEFT +
-        (int)(i * spacing);
+    int x = PAD_LEFT + (int)(i * spacing);
 
-    client.print(F("<text text-anchor=\"middle\" x=\""));
-
-    client.print(x);
-
-    client.print(F("\" y=\""));
-
-    client.print(H - 5);
-
-    client.print(F("\">"));
+    out.print(F("<text text-anchor=\"middle\" x=\""));
+    out.print(x);
+    out.print(F("\" y=\""));
+    out.print(H - 5);
+    out.print(F("\">"));
 
     if (i < 10)
-        client.print('0');
+      out.print('0');
 
-    client.print(i);
-
-    client.println(F("</text>"));
+    out.print(i);
+    out.println(F("</text>"));
   }
 
-  client.println(F("</svg>"));
-
-  client.println(F("</div>"));
+  out.println(F("</svg>"));
+  out.println(F("</div>"));
 }
 
 //*****************************************************************************
 // Session Chart
 //*****************************************************************************
 
-static void renderSessionChart(WiFiClient &client)
+static void renderSessionChart(Print &out)
 {
-  client.println(
+  out.println(
     F("<div class=\"chart-wrap\">"
       "<div class=\"chart-title\">"
       "Full Session"
@@ -334,7 +311,7 @@ static void renderSessionChart(WiFiClient &client)
 
   if (!loggerDataReadNvmHeader(ramHeader))
   {
-    client.println(F("<div class=\"small\">No logger data.</div></div>"));
+    out.println(F("<div class=\"small\">No logger data.</div></div>"));
     return;
   }
 
@@ -396,7 +373,7 @@ static void renderSessionChart(WiFiClient &client)
 
   if (hours == 0)
   {
-    client.println(
+    out.println(
       F("<div class=\"small\">"
         "No logger history."
         "</div></div>"));
@@ -410,25 +387,25 @@ static void renderSessionChart(WiFiClient &client)
   // SVG
   //---------------------------------------------------------
 
-  client.print(F("<svg class=\"chart\" viewBox=\"0 0 "));
-  client.print(W);
-  client.print(' ');
-  client.print(H);
-  client.println(F("\" xmlns=\"http://www.w3.org/2000/svg\">"));
+  out.print(F("<svg class=\"chart\" viewBox=\"0 0 "));
+  out.print(W);
+  out.print(' ');
+  out.print(H);
+  out.println(F("\" xmlns=\"http://www.w3.org/2000/svg\">"));
 
   //---------------------------------------------------------
   // Background
   //---------------------------------------------------------
 
-  client.print(F("<rect x=\""));
-  client.print(PAD_LEFT);
-  client.print(F("\" y=\""));
-  client.print(PAD_TOP);
-  client.print(F("\" width=\""));
-  client.print(PLOT_W);
-  client.print(F("\" height=\""));
-  client.print(PLOT_H);
-  client.println(F("\" fill=\"#fafafa\" stroke=\"#d0d0d0\"/>"));
+  out.print(F("<rect x=\""));
+  out.print(PAD_LEFT);
+  out.print(F("\" y=\""));
+  out.print(PAD_TOP);
+  out.print(F("\" width=\""));
+  out.print(PLOT_W);
+  out.print(F("\" height=\""));
+  out.print(PLOT_H);
+  out.println(F("\" fill=\"#fafafa\" stroke=\"#d0d0d0\"/>"));
 
   //---------------------------------------------------------
   // Grid
@@ -436,28 +413,25 @@ static void renderSessionChart(WiFiClient &client)
 
   for (uint8_t i = 0; i <= 5; i++)
   {
-    int y =
-      PAD_TOP +
-      PLOT_H -
-      (PLOT_H * i / 5);
+    int y = PAD_TOP + PLOT_H - (PLOT_H * i / 5);
 
-    client.print(F("<line x1=\""));
-    client.print(PAD_LEFT);
-    client.print(F("\" y1=\""));
-    client.print(y);
-    client.print(F("\" x2=\""));
-    client.print(PAD_LEFT + PLOT_W);
-    client.print(F("\" y2=\""));
-    client.print(y);
-    client.println(F("\" stroke=\"#d0d0d0\"/>"));
+    out.print(F("<line x1=\""));
+    out.print(PAD_LEFT);
+    out.print(F("\" y1=\""));
+    out.print(y);
+    out.print(F("\" x2=\""));
+    out.print(PAD_LEFT + PLOT_W);
+    out.print(F("\" y2=\""));
+    out.print(y);
+    out.println(F("\" stroke=\"#d0d0d0\"/>"));
 
-    client.print(F("<text text-anchor=\"end\" x=\""));
-    client.print(PAD_LEFT - 5);
-    client.print(F("\" y=\""));
-    client.print(y + 4);
-    client.print(F("\">"));
-    client.print((maxValue * i) / 5);
-    client.println(F("</text>"));
+    out.print(F("<text text-anchor=\"end\" x=\""));
+    out.print(PAD_LEFT - 5);
+    out.print(F("\" y=\""));
+    out.print(y + 4);
+    out.print(F("\">"));
+    out.print((maxValue * i) / 5);
+    out.println(F("</text>"));
   }
 
   //---------------------------------------------------------
@@ -477,9 +451,7 @@ static void renderSessionChart(WiFiClient &client)
     float fraction = 0.0f;
 
     if (maxValue)
-      fraction =
-          (float)values[i] /
-          (float)maxValue;
+      fraction = (float)values[i] / (float)maxValue;
 
     int barHeight =
       (int)(fraction * PLOT_H);
@@ -493,21 +465,21 @@ static void renderSessionChart(WiFiClient &client)
       PLOT_H -
       barHeight;
 
-    client.print(F("<rect x=\""));
-    client.print(x);
-    client.print(F("\" y=\""));
-    client.print(y);
-    client.print(F("\" width=\""));
-    client.print((int)width);
-    client.print(F("\" height=\""));
-    client.print(barHeight);
-    client.print(F("\" fill=\"#2F6F73\">"));
+    out.print(F("<rect x=\""));
+    out.print(x);
+    out.print(F("\" y=\""));
+    out.print(y);
+    out.print(F("\" width=\""));
+    out.print((int)width);
+    out.print(F("\" height=\""));
+    out.print(barHeight);
+    out.print(F("\" fill=\"#2F6F73\">"));
 
-    client.print(F("<title>Hour "));
-    client.print(i + 1);
-    client.print(F("&#10;Events: "));
-    client.print(values[i]);
-    client.println(F("</title></rect>"));
+    out.print(F("<title>Hour "));
+    out.print(i + 1);
+    out.print(F("&#10;Events: "));
+    out.print(values[i]);
+    out.println(F("</title></rect>"));
   }
 
   //---------------------------------------------------------
@@ -516,21 +488,19 @@ static void renderSessionChart(WiFiClient &client)
 
   for (uint16_t i = 0; i < hours; i += 24)
   {
-    int x =
-        PAD_LEFT +
-        (int)(i * spacing);
+    int x = PAD_LEFT + (int)(i * spacing);
 
-    client.print(F("<text text-anchor=\"middle\" x=\""));
-    client.print(x);
-    client.print(F("\" y=\""));
-    client.print(H - 5);
-    client.print(F("\">D"));
-    client.print((i / 24) + 1);
-    client.println(F("</text>"));
+    out.print(F("<text text-anchor=\"middle\" x=\""));
+    out.print(x);
+    out.print(F("\" y=\""));
+    out.print(H - 5);
+    out.print(F("\">D"));
+    out.print((i / 24) + 1);
+    out.println(F("</text>"));
   }
 
-  client.println(F("</svg>"));
-  client.println(F("</div>"));
+  out.println(F("</svg>"));
+  out.println(F("</div>"));
 }
 
 //*****************************************************************************
@@ -539,7 +509,9 @@ static void renderSessionChart(WiFiClient &client)
 
 void renderLoggerCharts(WiFiClient &client)
 {
-  renderLoggerSummary(client);
-  renderLastHourChart(client);
-  renderSessionChart(client);
+  BufferedPrint out(client);
+
+  renderLoggerSummary(out);
+  renderLastHourChart(out);
+  renderSessionChart(out);
 }

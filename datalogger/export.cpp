@@ -4,6 +4,7 @@
 
 // Project Headers
 #include "global.h"
+#include "bufferedPrint.h"
 #include "logger.h"
 #include "loggerData.h"
 #include "mode.h"
@@ -18,14 +19,14 @@ extern uint16_t ADAPTIVE_DELAY;
 // -----------------------------------------------------------------------------
 // CSV Helpers
 // -----------------------------------------------------------------------------
-static void csvPrintQuoted(WiFiClient &client, const String &s) {
-  client.print('"');
+static void csvPrintQuoted(Print &out, const String &s) {
+  out.print('"');
   for (size_t i = 0; i < s.length(); i++) {
     const char c = s[i];
-    if (c == '"') client.print('"');
-    client.print(c);
+    if (c == '"') out.print('"');
+    out.print(c);
   }
-  client.print('"');
+  out.print('"');
 }
 
 
@@ -255,72 +256,78 @@ static void renderExportRamLog(WiFiClient& client) {
   }
 }
 
-// Logger Data CSV Export
-void renderExportLoggerDataCsv(WiFiClient& client)
+void renderExportLoggerDataCsv(WiFiClient &client)
 {
+  BufferedPrint out(client);
+
   //*****************************************************************************
   // Session Summary
   //*****************************************************************************
   const auto &session = Logger.getSessionStatistics();
   const auto &ramHeader = Logger.getRamHeader();
 
-  client.print(F("# App Version,"));
-  client.println(APP_VERSION);
+  out.print(F("# App Version,"));
+  out.println(APP_VERSION);
 
-  client.print(F("# Export Timestamp,"));
-  client.println(getTimestamp());
+  out.print(F("# Export Timestamp,"));
+  out.println(getTimestamp());
 
-  client.println();
+  out.println();
 
-  client.println(F("# Session"));
+  out.println(F("# Session"));
 
-  client.print(F("# Start Time,"));
-  client.println(ramHeader.startTime);
+  out.print(F("# Start Time,"));
+  out.println(ramHeader.startTime);
 
-  client.print(F("# Stop Time,"));
-  client.println(ramHeader.stopTime);
+  out.print(F("# Stop Time,"));
+  out.println(ramHeader.stopTime);
 
-  client.print(F("# Hours Stored,"));
-  client.println(ramHeader.hoursStored);
+  out.print(F("# Hours Stored,"));
+  out.println(ramHeader.hoursStored);
 
-  client.print(F("# Events,"));
-  client.println(session.count);
+  out.print(F("# Events,"));
+  out.println(session.count);
 
-  client.print(F("# Active Seconds,"));
-  client.println(session.total);
+  out.print(F("# Active Seconds,"));
+  out.println(session.total);
 
   if (session.count > 0)
   {
-    client.print(F("# Shortest Event,"));
-    client.println(session.shortest);
+    out.print(F("# Shortest Event,"));
+    out.println(session.shortest);
 
-    client.print(F("# Longest Event,"));
-    client.println(session.longest);
+    out.print(F("# Longest Event,"));
+    out.println(session.longest);
 
-    client.print(F("# Average Event,"));
-    client.println((float)session.total / session.count, 1);
+    out.print(F("# Average Event,"));
+    out.println((float)session.total / session.count, 1);
   }
   else
   {
-    client.println(F("# Shortest Event,0"));
-    client.println(F("# Longest Event,0"));
-    client.println(F("# Average Event,0.0"));
+    out.println(F("# Shortest Event,0"));
+    out.println(F("# Longest Event,0"));
+    out.println(F("# Average Event,0.0"));
   }
 
-  client.print(F("# Session Flags,"));
-  client.println(getSessionFlagText(ramHeader.flags));
+  out.print(F("# Session Flags,"));
+  out.println(getSessionFlagText(ramHeader.flags));
 
-  client.println();
+  out.println();
 
-  // DATA EXPORT
+  //*****************************************************************************
+  // Data
+  //*****************************************************************************
 
-  client.println(
-    F("timestamp,hour,minute,events,duration,shortest,longest,average,flagTxt,flags"));
+  out.println(
+    F("timestamp,hour,minute,events,duration,shortest,longest,average,flag"));
 
   EventLogger::LogHeader nvmHeader;
 
   if (!loggerDataReadNvmHeader(nvmHeader))
+  {
+    out.flush();
     return;
+  }
 
   EventLogger::HourRecord hour;
 
@@ -348,39 +355,37 @@ void renderExportLoggerDataCsv(WiFiClient& client)
       if (m.count > 0)
         average = (float)m.total / m.count;
 
-      csvPrintQuoted(client, timestamp);
-      client.print(",");
+      csvPrintQuoted(out, timestamp);
+      out.print(',');
 
-      client.print(hourNumber);
-      client.print(",");
+      out.print(hourNumber);
+      out.print(',');
 
-      client.print(minute);
-      client.print(",");
+      out.print(minute);
+      out.print(',');
 
-      client.print(m.count);
-      client.print(",");
+      out.print(m.count);
+      out.print(',');
 
-      client.print(m.total);
-      client.print(",");
+      out.print(m.total);
+      out.print(',');
 
-      client.print(m.shortest);
-      client.print(",");
+      out.print(m.shortest);
+      out.print(',');
 
-      client.print(m.longest);
-      client.print(",");
+      out.print(m.longest);
+      out.print(',');
 
-      client.print(average, 1);
-      client.print(",");
+      out.print(average, 1);
+      out.print(',');
 
-      csvPrintQuoted(client, getMinuteFlagText(m.flags));
-      client.print(",");
-      client.print("0x");
-      if (m.flags < 0x10) client.print('0');
-      client.print(m.flags, HEX);
+      csvPrintQuoted(out, getMinuteFlagText(m.flags));
 
-      client.println();
+      out.println();
     }
   }
+
+  out.flush();
 }
 
 
