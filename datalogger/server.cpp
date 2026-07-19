@@ -1,5 +1,7 @@
+// Project Includes
 #include "global.h"
 
+#include "bufferedPrint.h"
 #include "charts.h"
 #include "diag.h"
 #include "export.h"
@@ -262,66 +264,66 @@ static const char HTML_BOTTOM[] PROGMEM =
 // -------------------------
 // HTTP helpers
 // -------------------------
-static inline void httpOkHtml(WiFiClient &client) {
-  client.println("HTTP/1.1 200 OK");
-  client.println("Content-type:text/html");
-  client.println("Connection: close");
-  client.println("Cache-Control: no-store");
-  client.println();
+static inline void httpOkHtml(Print &out) {
+  out.println("HTTP/1.1 200 OK");
+  out.println("Content-type:text/html");
+  out.println("Connection: close");
+  out.println("Cache-Control: no-store");
+  out.println();
 }
 
-static inline void httpNotFound(WiFiClient &client) {
-  client.println("HTTP/1.1 404 Not Found");
-  client.println("Connection: close");
-  client.println();
+static inline void httpNotFound(Print &out) {
+  out.println("HTTP/1.1 404 Not Found");
+  out.println("Connection: close");
+  out.println();
 }
 
-static inline void httpCsvAttachment(WiFiClient &client, const char *filename) {
-  client.println("HTTP/1.1 200 OK");
-  client.println("Content-Type: text/csv");
-  client.print("Content-Disposition: attachment; filename=\"");
-  client.print(filename);
-  client.println("\"");
-  client.println("Cache-Control: no-store");
-  client.println("Connection: close");
-  client.println();
+static inline void httpCsvAttachment(Print &out, const char *filename) {
+  out.println("HTTP/1.1 200 OK");
+  out.println("Content-Type: text/csv");
+  out.print("Content-Disposition: attachment; filename=\"");
+  out.print(filename);
+  out.println("\"");
+  out.println("Cache-Control: no-store");
+  out.println("Connection: close");
+  out.println();
 }
 
-static inline void httpJsonAttachment(WiFiClient &client, const char *filename) {
-  client.println("HTTP/1.1 200 OK");
-  client.println("Content-Type: application/json");
-  client.print("Content-Disposition: attachment; filename=\"");
-  client.print(filename);
-  client.println("\"");
-  client.println("Cache-Control: no-store");
-  client.println("Connection: close");
-  client.println();
+static inline void httpJsonAttachment(Print &out, const char *filename) {
+  out.println("HTTP/1.1 200 OK");
+  out.println("Content-Type: application/json");
+  out.print("Content-Disposition: attachment; filename=\"");
+  out.print(filename);
+  out.println("\"");
+  out.println("Cache-Control: no-store");
+  out.println("Connection: close");
+  out.println();
 }
 
 // -------------------------
 // Table helpers (streamed, minimal Strings)
 // -------------------------
-static inline void printRowOpen(WiFiClient &client, const __FlashStringHelper *label) {
-  client.print(F("<tr><td>"));
-  client.print(label);
-  client.print(F("</td><td><span class=\"sensor\">"));
+static inline void printRowOpen(Print &out, const __FlashStringHelper *label) {
+  out.print(F("<tr><td>"));
+  out.print(label);
+  out.print(F("</td><td><span class=\"sensor\">"));
 }
 
-static inline void printRowClose(WiFiClient &client) {
-  client.println(F("</span></td></tr>"));
+static inline void printRowClose(Print &out) {
+  out.println(F("</span></td></tr>"));
 }
 
 template<typename T>
-static inline void printRow(WiFiClient &client, const __FlashStringHelper *label, T value) {
-  printRowOpen(client, label);
-  client.print(value);
-  printRowClose(client);
+static inline void printRow(Print &out, const __FlashStringHelper *label, T value) {
+  printRowOpen(out, label);
+  out.print(value);
+  printRowClose(out);
 }
 
-static inline void printRow(WiFiClient &client, const __FlashStringHelper *label, uint8_t value) {
-  printRowOpen(client, label);
-  client.print((unsigned int)value);  // force numeric
-  printRowClose(client);
+static inline void printRow(Print &out, const __FlashStringHelper *label, uint8_t value) {
+  printRowOpen(out, label);
+  out.print((unsigned int)value);  // force numeric
+  printRowClose(out);
 }
 
 // Reads first request line without allocating big Strings; returns true if got a line.
@@ -367,45 +369,45 @@ static uint8_t parsePageParam(const char *path, size_t pathLen) {
 
 // Navigation Buttons 
 // LOGGER / SYS / CON / UTIL / WIFI / CHART / EXPORT* / REFERSH*)
-static void renderNavButtons(WiFiClient &client, uint8_t active) {
-  client.println(F("<div class=\"nav\">"));
+static void renderNavButtons(Print &out, uint8_t active) {
+  out.println(F("<div class=\"nav\">"));
 
-  client.print(F("<button class=\"navbtn "));
-  client.print(active == PAGE_LOGGER ? "active" : "white");
-  client.println(F("\" onclick=\"setPage('logger')\">LOGGER</button>"));
+  out.print(F("<button class=\"navbtn "));
+  out.print(active == PAGE_LOGGER ? "active" : "white");
+  out.println(F("\" onclick=\"setPage('logger')\">LOGGER</button>"));
 
-  client.print(F("<button class=\"navbtn "));
-  client.print(active == PAGE_SYSTEMS ? "active" : "white");
-  client.println(F("\" onclick=\"setPage('systems')\">SYS</button>"));
+  out.print(F("<button class=\"navbtn "));
+  out.print(active == PAGE_SYSTEMS ? "active" : "white");
+  out.println(F("\" onclick=\"setPage('systems')\">SYS</button>"));
 
-  client.print(F("<button class=\"navbtn "));
-  client.print(active == PAGE_CONN ? "active" : "white");
-  client.println(F("\" onclick=\"setPage('conn')\">CONN</button>"));
+  out.print(F("<button class=\"navbtn "));
+  out.print(active == PAGE_CONN ? "active" : "white");
+  out.println(F("\" onclick=\"setPage('conn')\">CONN</button>"));
 
-  client.print(F("<button class=\"navbtn "));
-  client.print(active == PAGE_UTIL ? "active" : "white");
-  client.println(F("\" onclick=\"setPage('util')\">UTIL</button>"));
+  out.print(F("<button class=\"navbtn "));
+  out.print(active == PAGE_UTIL ? "active" : "white");
+  out.println(F("\" onclick=\"setPage('util')\">UTIL</button>"));
 
 
-  client.print(F("<button class=\"navbtn "));
-  client.print(active == PAGE_WIFI ? "active" : "white");
-  client.println(F("\" onclick=\"setPage('wifi')\">WIFI</button>"));
+  out.print(F("<button class=\"navbtn "));
+  out.print(active == PAGE_WIFI ? "active" : "white");
+  out.println(F("\" onclick=\"setPage('wifi')\">WIFI</button>"));
 
-  client.println(F("<button class=\"navbtn theme\" onclick=\"setPage('charts')\">CHART</button>"));
-  client.println(F("<button class=\"navbtn theme\" onclick=\"exportPage(curPage)\">EXPORT</button>"));
-  client.println(F("<button class=\"navbtn theme\" onclick=\"exportDataPage(curPage)\">DATA</button>"));
-  client.println(F("<button class=\"navbtn theme\" onclick=\"loadDoc(curPage)\">REFRESH</button>"));
+  out.println(F("<button class=\"navbtn theme\" onclick=\"setPage('charts')\">CHART</button>"));
+  out.println(F("<button class=\"navbtn theme\" onclick=\"exportPage(curPage)\">EXPORT</button>"));
+  out.println(F("<button class=\"navbtn theme\" onclick=\"exportDataPage(curPage)\">DATA</button>"));
+  out.println(F("<button class=\"navbtn theme\" onclick=\"loadDoc(curPage)\">REFRESH</button>"));
 
-  client.println(F("</div>"));
+  out.println(F("</div>"));
 }
 
 // -------------------------
 // Renderers (dynamic /data)
 // -------------------------
 
-static void renderLoggerTable(WiFiClient &client)
+static void renderLoggerTable(Print &out)
 {
-  client.print((const __FlashStringHelper*)LOGGER_TABLE_OPEN);
+  out.print((const __FlashStringHelper*)LOGGER_TABLE_OPEN);
 
   const auto &hour    = Logger.getHourStatistics();
   const auto &session = Logger.getSessionStatistics();
@@ -421,69 +423,69 @@ static void renderLoggerTable(WiFiClient &client)
   // Current Hour
   //------------------------------------------------
 
-  printRow(client, F("<b>Current Hour</b>"), F(""));
-  printRow(client, F("Events"), String(hour.count));
-  printRow(client, F("Active Time"), String(hour.total) + " sec");
+  printRow(out, F("<b>Current Hour</b>"), F(""));
+  printRow(out, F("Events"), String(hour.count));
+  printRow(out, F("Active Time"), String(hour.total) + " sec");
 
   if (hour.count == 0)
   {
-    printRow(client, F("Shortest Event"), F("***"));
-    printRow(client, F("Longest Event"),  F("***"));
-    printRow(client, F("Average Event"),  F("***"));
+    printRow(out, F("Shortest Event"), F("***"));
+    printRow(out, F("Longest Event"),  F("***"));
+    printRow(out, F("Average Event"),  F("***"));
   }
   else
   {
-    printRow(client, F("Shortest Event"), String(hour.shortest) + " sec");
-    printRow(client, F("Longest Event"), String(hour.longest) + " sec");
-    printRow(client, F("Average Event"), String(hourAvg, 1) + " sec");
+    printRow(out, F("Shortest Event"), String(hour.shortest) + " sec");
+    printRow(out, F("Longest Event"), String(hour.longest) + " sec");
+    printRow(out, F("Average Event"), String(hourAvg, 1) + " sec");
   }
 
   //------------------------------------------------
   // Session
   //------------------------------------------------
 
-  printRow(client, F("<b>Session</b>"), F(""));
-  printRow(client, F("Hours Stored"), String(ramHeader.hoursStored));
-  printRow(client, F("Events"), String(session.count));
+  printRow(out, F("<b>Session</b>"), F(""));
+  printRow(out, F("Hours Stored"), String(ramHeader.hoursStored));
+  printRow(out, F("Events"), String(session.count));
 
-  printRow(client, F("Active Time"), String(session.total) + " sec");
+  printRow(out, F("Active Time"), String(session.total) + " sec");
 
   if (session.count == 0)
   {
-    printRow(client, F("Shortest Event"), F("***"));
-    printRow(client, F("Longest Event"),  F("***"));
-    printRow(client, F("Average Event"),  F("***"));
+    printRow(out, F("Shortest Event"), F("***"));
+    printRow(out, F("Longest Event"),  F("***"));
+    printRow(out, F("Average Event"),  F("***"));
   }
   else
   {
-    printRow(client, F("Shortest Event"), String(session.shortest) + " sec");
-    printRow(client, F("Longest Event"), String(session.longest) + " sec");
-    printRow(client, F("Average Event"), String(sessionAvg, 1) + " sec");
+    printRow(out, F("Shortest Event"), String(session.shortest) + " sec");
+    printRow(out, F("Longest Event"), String(session.longest) + " sec");
+    printRow(out, F("Average Event"), String(sessionAvg, 1) + " sec");
   }
 
   // Start / Stop Time
-  printRow(client, F("Start Time"), String(ramHeader.startTime));
-  printRow(client, F("Stop Time"), String(ramHeader.stopTime));
+  printRow(out, F("Start Time"), String(ramHeader.startTime));
+  printRow(out, F("Stop Time"), String(ramHeader.stopTime));
 
   // Status
-  printRow(client, F("Logging Status"), String(ramHeader.flags));
+  printRow(out, F("Logging Status"), String(ramHeader.flags));
 
-  client.print((const __FlashStringHelper*)HTML_TABLE_CLOSE);
+  out.print((const __FlashStringHelper*)HTML_TABLE_CLOSE);
 
-  renderNavButtons(client, PAGE_LOGGER);
+  renderNavButtons(out, PAGE_LOGGER);
 }
 
 
-static void renderSystemTable(WiFiClient &client) {
-  client.print((const __FlashStringHelper*)SYSTEM_TABLE_OPEN);
+static void renderSystemTable(Print &out) {
+  out.print((const __FlashStringHelper*)SYSTEM_TABLE_OPEN);
 
-  printRow(client, F("Loop Count (100ms)"), String(LOOP_COUNT));
-  printRow(client, F("1 Sec Run Time"), String(LOOP_TIME) + " ms");
-  printRow(client, F("Adaptive Loop Delay"), String(ADAPTIVE_DELAY) + " ms");
+  printRow(out, F("Loop Count (100ms)"), String(LOOP_COUNT));
+  printRow(out, F("1 Sec Run Time"), String(LOOP_TIME) + " ms");
+  printRow(out, F("Adaptive Loop Delay"), String(ADAPTIVE_DELAY) + " ms");
 
 
   // Timestamp
-  printRow(client, F("Timestamp"), getTimestamp());
+  printRow(out, F("Timestamp"), getTimestamp());
 
   // Monitor time
   const float loopsPerSec = (float)LOOPS_PER_SEC;
@@ -491,70 +493,70 @@ static void renderSystemTable(WiFiClient &client) {
   const float monHr  = (float)LOOP_COUNT / (3600.0f * loopsPerSec);
   const float monDay = (float)LOOP_COUNT / (86400.0f * loopsPerSec);
 
-  if (monHr < 1.0f)       printRow(client, F("Total Monitor Time"), String(monMin, 1) + "m");
-  else if (monDay < 1.0f) printRow(client, F("Total Monitor Time"), String(monHr, 2) + "hr");
-  else                    printRow(client, F("Total Monitor Time"), String(monDay, 2) + "d");
+  if (monHr < 1.0f)       printRow(out, F("Total Monitor Time"), String(monMin, 1) + "m");
+  else if (monDay < 1.0f) printRow(out, F("Total Monitor Time"), String(monHr, 2) + "hr");
+  else                    printRow(out, F("Total Monitor Time"), String(monDay, 2) + "d");
 
   // END OF TABLE
-  client.print((const __FlashStringHelper*)HTML_TABLE_CLOSE);
+  out.print((const __FlashStringHelper*)HTML_TABLE_CLOSE);
 
   // Nav Buttons
-  renderNavButtons(client, PAGE_SYSTEMS);
+  renderNavButtons(out, PAGE_SYSTEMS);
 }
 
 
-static void renderConnTable(WiFiClient &client) {
-  client.print((const __FlashStringHelper*)CONN_TABLE_OPEN);
+static void renderConnTable(Print &out) {
+  out.print((const __FlashStringHelper*)CONN_TABLE_OPEN);
 
   // Nav Buttons
-  renderNavButtons(client, PAGE_CONN);
+  renderNavButtons(out, PAGE_CONN);
 }
 
-static void renderUtilTable(WiFiClient &client) {
-  client.print((const __FlashStringHelper*)UTIL_TABLE_OPEN);
+static void renderUtilTable(Print &out) {
+  out.print((const __FlashStringHelper*)UTIL_TABLE_OPEN);
 
 
   // Nav Buttons
-  renderNavButtons(client, PAGE_UTIL);
+  renderNavButtons(out, PAGE_UTIL);
 }
 
 
 
-static void renderWifiTable(WiFiClient &client) {
-  client.print((const __FlashStringHelper*)WIFI_TABLE_OPEN);
+static void renderWifiTable(Print &out) {
+  out.print((const __FlashStringHelper*)WIFI_TABLE_OPEN);
 
-  printRow(client, F("WiFi State"), diagState.getWifiState());
-  printRow(client, F("WiFi RSSI"), diagState.getWifiRSSI());
-  printRow(client, F("WiFi BSSID"), diagState.getWifiBSSID());
-  printRow(client, F("WiFi GW"), diagState.getWifiGW());
-  printRow(client, F("WiFi IP"), diagState.getWifiIP());
-  printRow(client, F("WiFi DNS"), diagState.getWifiDNS());
-  printRow(client, F("WiFi Errors"), String(WIFI_ERR));
+  printRow(out, F("WiFi State"), diagState.getWifiState());
+  printRow(out, F("WiFi RSSI"), diagState.getWifiRSSI());
+  printRow(out, F("WiFi BSSID"), diagState.getWifiBSSID());
+  printRow(out, F("WiFi GW"), diagState.getWifiGW());
+  printRow(out, F("WiFi IP"), diagState.getWifiIP());
+  printRow(out, F("WiFi DNS"), diagState.getWifiDNS());
+  printRow(out, F("WiFi Errors"), String(WIFI_ERR));
 
   // Nav Buttons
-  renderNavButtons(client, PAGE_WIFI);
+  renderNavButtons(out, PAGE_WIFI);
 }
 
-static void renderChartsPage(WiFiClient &client) {
+static void renderChartsPage(Print &out) {
 
-  client.println(F("<h3>Charts</h3>"));
+  out.println(F("<h3>Charts</h3>"));
   // Charts
-  renderLoggerCharts(client);
+  renderLoggerCharts(out);
 
 
   // Nav Buttons
-  renderNavButtons(client, PAGE_CHARTS);
+  renderNavButtons(out, PAGE_CHARTS);
 }
 
-static void renderData(WiFiClient &client, uint8_t page) {
+static void renderData(Print &out, uint8_t page) {
   switch (page) {
-    case PAGE_SYSTEMS: renderSystemTable(client);  break;
-    case PAGE_CHARTS:  renderChartsPage(client);   break;
-    case PAGE_CONN:    renderConnTable(client);    break;
-    case PAGE_UTIL:    renderUtilTable(client);   break;
-    case PAGE_WIFI:    renderWifiTable(client);    break;
+    case PAGE_SYSTEMS: renderSystemTable(out);  break;
+    case PAGE_CHARTS:  renderChartsPage(out);   break;
+    case PAGE_CONN:    renderConnTable(out);    break;
+    case PAGE_UTIL:    renderUtilTable(out);   break;
+    case PAGE_WIFI:    renderWifiTable(out);    break;
     case PAGE_LOGGER:
-    default:           renderLoggerTable(client);    break;
+    default:           renderLoggerTable(out);    break;
   }
 }
 
@@ -562,26 +564,26 @@ static void renderData(WiFiClient &client, uint8_t page) {
 // -------------------------
 // Shell (served at "/")
 // -------------------------
-static void renderPageShell(WiFiClient &client) {
-  client.print((const __FlashStringHelper*)HTML_HEAD_A);
-  client.print((const __FlashStringHelper*)HTML_HEAD_SCRIPT);
-  client.print((const __FlashStringHelper*)HTML_HEAD_STYLE);
-  client.print(NAV_LEFT_MODE ? "nav-left" : "nav-bottom");
-  client.println(F("\">"));
+static void renderPageShell(Print &out) {
+  out.print((const __FlashStringHelper*)HTML_HEAD_A);
+  out.print((const __FlashStringHelper*)HTML_HEAD_SCRIPT);
+  out.print((const __FlashStringHelper*)HTML_HEAD_STYLE);
+  out.print(NAV_LEFT_MODE ? "nav-left" : "nav-bottom");
+  out.println(F("\">"));
 
-  client.println(F("<div class=\"page-wrap\">"));
-  client.println(F("<div class=\"title-wrap\">"));
-  client.print(F("<h3>Shahman Data Logger "));
-  client.print(APP_VERSION);
-  if (TEST_MODE) client.print(F(" *TEST*"));
-  client.println(F("</h3>"));
-  client.println(F("</div>"));
+  out.println(F("<div class=\"page-wrap\">"));
+  out.println(F("<div class=\"title-wrap\">"));
+  out.print(F("<h3>Shahman Data Logger "));
+  out.print(APP_VERSION);
+  if (TEST_MODE) out.print(F(" *TEST*"));
+  out.println(F("</h3>"));
+  out.println(F("</div>"));
 
-  client.println(F("<div id=\"webpage\"></div>"));
+  out.println(F("<div id=\"webpage\"></div>"));
 
-  client.println(F("</div>"));
+  out.println(F("</div>"));
 
-  client.print((const __FlashStringHelper*)HTML_BOTTOM);
+  out.print((const __FlashStringHelper*)HTML_BOTTOM);
 }
 
 // -------------------------
@@ -592,11 +594,15 @@ void webServer() {
   client.setNoDelay(true);
   if (!client) return;
 
+
   char line[180];
   if (!readRequestLine(client, line, sizeof(line))) {
     client.stop();
     return;
   }
+
+  // Main Page Reference Structure
+  BufferedPrint out(client);
 
   const bool isGet = (strncmp(line, "GET ", 4) == 0);
   const char *path = isGet ? (line + 4) : nullptr;
@@ -632,7 +638,7 @@ void webServer() {
   }
 
   if (!isGet || (!isRoot && !isData && !isExport && !isCsv)) {
-    httpNotFound(client);
+    httpNotFound(out);
     client.stop();
     return;
   }
@@ -653,8 +659,8 @@ void webServer() {
     else snprintf(suffix, sizeof(suffix), "");  
     snprintf(fname, sizeof(fname), "logger%s_export_%s.csv", suffix, ts);
 
-    httpCsvAttachment(client, fname);
-    renderExportCsv(client);
+    httpCsvAttachment(out, fname);
+    renderExportCsv(out);
   } 
   
   // Export Data CSV File
@@ -674,16 +680,16 @@ void webServer() {
     else snprintf(suffix, sizeof(suffix), "");  
     snprintf(fname, sizeof(fname), "logger_data%s_%s.csv", suffix, ts);
 
-    httpCsvAttachment(client, fname);
-    renderExportLoggerDataCsv(client);
+    httpCsvAttachment(out, fname);
+    renderExportLoggerDataCsv(out);
   } 
 
   else { 
-    httpOkHtml(client);
-    if (isData) renderData(client, page);
-    else renderPageShell(client);
+    httpOkHtml(out);
+    if (isData) renderData(out, page);
+    else renderPageShell(out);
   }
 
-  //client.flush();
+  out.flush();
   client.stop();
 }

@@ -228,7 +228,7 @@ void processLoggerMode() {
   // Check if user wants to Reset Logger
   else if (loggerMode == MODE_CHECK_RESET) {
     if (modalEvent()) {
-      gotoInit();
+      resetLogger();
     }
     else if (shortPress()) {
       gotoPaused();

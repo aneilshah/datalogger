@@ -507,10 +507,8 @@ static void renderSessionChart(Print &out)
 // Entry Point
 //*****************************************************************************
 
-void renderLoggerCharts(WiFiClient &client)
+void renderLoggerCharts(Print &out)
 {
-  BufferedPrint out(client);
-
   renderLoggerSummary(out);
   renderLastHourChart(out);
   renderSessionChart(out);

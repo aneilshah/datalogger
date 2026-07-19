@@ -3,7 +3,7 @@
 #include <WiFi.h>
 
 // Main export entry point
-void renderExportCsv(WiFiClient &client);
-void renderExportLoggerDataCsv(WiFiClient &client);
+void renderExportCsv(Print &out);
+void renderExportLoggerDataCsv(Print &out);
 
 

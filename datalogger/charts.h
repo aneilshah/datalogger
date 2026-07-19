@@ -2,4 +2,4 @@
 
 #include <WiFi.h>
 
-void renderLoggerCharts(WiFiClient &client);
+void renderLoggerCharts(Print &out);

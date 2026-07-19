@@ -30,16 +30,16 @@ static void csvPrintQuoted(Print &out, const String &s) {
 }
 
 
-static void addTitle(WiFiClient &client, char* title) {
-  client.println();
-  client.println(title);
-  client.println();
+static void addTitle(Print &out, char* title) {
+  out.println();
+  out.println(title);
+  out.println();
 }
 
-static void addTitle(WiFiClient &client, const __FlashStringHelper* title) {
-  client.println();
-  client.println(title);
-  client.println();
+static void addTitle(Print &out, const __FlashStringHelper* title) {
+  out.println();
+  out.println(title);
+  out.println();
 }
 
 // -----------------------------------------------------------------------------
@@ -50,86 +50,86 @@ static void addTitle(WiFiClient &client, const __FlashStringHelper* title) {
 // -----------------------------------------------------------------------------
 // MAIN DATA EXPORT
 // -----------------------------------------------------------------------------
-static void renderExportMainMetrics(WiFiClient &client)
+static void renderExportMainMetrics(Print &out)
 {
-  client.println(F("[LOGGER METRICS]"));
+  out.println(F("[LOGGER METRICS]"));
 
   const auto &session = Logger.getSessionStatistics();
   const auto &ramHeader  = Logger.getRamHeader();
 
-  client.print(F("events,"));
-  client.println(session.count);
+  out.print(F("events,"));
+  out.println(session.count);
 
-  client.print(F("active_seconds,"));
-  client.println(session.total);
+  out.print(F("active_seconds,"));
+  out.println(session.total);
 
-  client.print(F("shortest_event_seconds,"));
-  client.println(session.shortest);
+  out.print(F("shortest_event_seconds,"));
+  out.println(session.shortest);
 
-  client.print(F("longest_event_seconds,"));
-  client.println(session.longest);
+  out.print(F("longest_event_seconds,"));
+  out.println(session.longest);
 
   if (session.count > 0)
   {
-    client.print(F("average_event_seconds,"));
-    client.println((float)session.total / (float)session.count, 2);
+    out.print(F("average_event_seconds,"));
+    out.println((float)session.total / (float)session.count, 2);
   }
 
-  client.print(F("hours_stored,"));
-  client.println(ramHeader.hoursStored);
+  out.print(F("hours_stored,"));
+  out.println(ramHeader.hoursStored);
 
-  client.print(F("samples_taken,"));
-  client.println(ramHeader.samplesTaken);
+  out.print(F("samples_taken,"));
+  out.println(ramHeader.samplesTaken);
 
-  client.print(F("events_detected,"));
-  client.println(Logger.hasEvents() ? F("1") : F("0"));
+  out.print(F("events_detected,"));
+  out.println(Logger.hasEvents() ? F("1") : F("0"));
 
-  client.print(F("session_start,"));
-  client.println(ramHeader.startTime);
+  out.print(F("session_start,"));
+  out.println(ramHeader.startTime);
 
-  client.print(F("session_stop,"));
-  client.println(ramHeader.stopTime);
+  out.print(F("session_stop,"));
+  out.println(ramHeader.stopTime);
 
-  client.print(F("timestamp,"));
-  client.println(getTimestamp());
+  out.print(F("timestamp,"));
+  out.println(getTimestamp());
 }
 
 // -----------------------------------------------------------------------------
 // Logger EXPORT
 // -----------------------------------------------------------------------------
-static void renderExportLoggerData(WiFiClient &client) {
-  addTitle(client, F("[LOGGER]"));
+static void renderExportLoggerData(Print &out) {
+  addTitle(out, F("[LOGGER]"));
 
 }
 
 // -----------------------------------------------------------------------------
 // SYSTEM INFO EXPORT
 // -----------------------------------------------------------------------------
-static void renderExportSystemInfo(WiFiClient &client) {
-  addTitle(client, F("[SYSTEM INFO]"));
+static void renderExportSystemInfo(Print &out) {
+  addTitle(out, F("[SYSTEM INFO]"));
 
-  client.print(F("wifi_status,"));
-  csvPrintQuoted(client, CONN_STATUS);
-  client.println();
+  out.print(F("wifi_status,"));
+  csvPrintQuoted(out, CONN_STATUS);
+  out.println();
 
-  client.print(F("wifi_err,"));
-  client.println(WIFI_ERR);
+  out.print(F("wifi_err,"));
+  out.println(WIFI_ERR);
 
-  client.print(F("loop_time,"));
-  client.println(LOOP_TIME);
+  out.print(F("loop_time,"));
+  out.println(LOOP_TIME);
 
-  client.print(F("adaptive_delay_ms,"));
-  client.println(ADAPTIVE_DELAY);
+  out.print(F("adaptive_delay_ms,"));
+  out.println(ADAPTIVE_DELAY);
 
-  client.print(F("timestamp,"));
-  client.println(getTimestamp());
+  out.print(F("timestamp,"));
+  out.println(getTimestamp());
 }
 
 // -----------------------------------------------------------------------------
 // Legger Data EXPORT
 // -----------------------------------------------------------------------------
-static void renderLoggerData(WiFiClient &client) {
-  addTitle(client, F("[LOGGER DATA]"));
+static void renderLoggerData(Print &out) {
+  addTitle(out, F("[LOGGER DATA]"));
 
   // TODO: Summary Here
 
@@ -138,107 +138,107 @@ static void renderLoggerData(WiFiClient &client) {
 // -----------------------------------------------------------------------------
 // CLOCK EXPORT
 // -----------------------------------------------------------------------------
-static void renderExportClockInfo(WiFiClient &client) {
-  addTitle(client, F("[CLOCK INFO]"));
+static void renderExportClockInfo(Print &out) {
+  addTitle(out, F("[CLOCK INFO]"));
 
   char dayKey[16];
   getCurrentDayKey(dayKey, sizeof(dayKey));
 
-  client.print(F("clock,"));
-  csvPrintQuoted(client, getClock());
-  client.println();
+  out.print(F("clock,"));
+  csvPrintQuoted(out, getClock());
+  out.println();
 
-  client.print(F("date,"));
-  csvPrintQuoted(client, getDate());
-  client.println();
+  out.print(F("date,"));
+  csvPrintQuoted(out, getDate());
+  out.println();
 
-  client.print(F("timestamp,"));
-  csvPrintQuoted(client, getTimestamp());
-  client.println();
+  out.print(F("timestamp,"));
+  csvPrintQuoted(out, getTimestamp());
+  out.println();
 
-  client.print(F("epoch_time,"));
-  client.println(getCurrentEpoch());
+  out.print(F("epoch_time,"));
+  out.println(getCurrentEpoch());
 
-  client.print(F("clock_valid,"));
-  client.println(validClock() ? F("1") : F("0"));
+  out.print(F("clock_valid,"));
+  out.println(validClock() ? F("1") : F("0"));
 
-  client.print(F("current_day_key,"));
-  csvPrintQuoted(client, dayKey);
-  client.println();
+  out.print(F("current_day_key,"));
+  csvPrintQuoted(out, dayKey);
+  out.println();
 
-  client.print(F("monitor_time,"));
-  csvPrintQuoted(client, getMonitorTime());
-  client.println();
+  out.print(F("monitor_time,"));
+  csvPrintQuoted(out, getMonitorTime());
+  out.println();
 
-  client.print(F("ms_since_boot,"));
-  client.println(msSinceBoot());
+  out.print(F("ms_since_boot,"));
+  out.println(msSinceBoot());
 
-  client.print(F("minutes_since_boot,"));
-  client.println(minutesSinceBoot());
+  out.print(F("minutes_since_boot,"));
+  out.println(minutesSinceBoot());
 
-  client.print(F("hours_since_boot,"));
-  client.println(hoursSinceBoot());
+  out.print(F("hours_since_boot,"));
+  out.println(hoursSinceBoot());
 
-  client.print(F("hour_int,"));
-  client.println(getHourInt());
+  out.print(F("hour_int,"));
+  out.println(getHourInt());
 
-  client.print(F("minute_int,"));
-  client.println(getMinInt());
+  out.print(F("minute_int,"));
+  out.println(getMinInt());
 
-  client.print(F("second_int,"));
-  client.println(getSecInt());
+  out.print(F("second_int,"));
+  out.println(getSecInt());
 
-  client.print(F("day_int,"));
-  client.println(getDayInt());
+  out.print(F("day_int,"));
+  out.println(getDayInt());
 
-  client.print(F("month_int,"));
-  client.println(getMonthInt());
+  out.print(F("month_int,"));
+  out.println(getMonthInt());
 
-  client.print(F("year_int,"));
-  client.println(getYearInt());
+  out.print(F("year_int,"));
+  out.println(getYearInt());
 
-  client.print(F("date_key_int,"));
-  client.println(getDateKeyInt());
+  out.print(F("date_key_int,"));
+  out.println(getDateKeyInt());
 }
 
 
 // -----------------------------------------------------------------------------
 // NVM EXPORT
 // -----------------------------------------------------------------------------
-static void renderExportNvmInfo(WiFiClient &client)
+static void renderExportNvmInfo(Print &out)
 {
-  addTitle(client, F("[NVM BOOT INFO]"));
+  addTitle(out, F("[NVM BOOT INFO]"));
 
-  client.print(F("nvm_boot_count,"));
-  client.println(nvmGetBootCount());
+  out.print(F("nvm_boot_count,"));
+  out.println(nvmGetBootCount());
 
   NvmBootState boot;
 
   if (!bootStateRead(boot))
   {
-    client.println(F("boot_state,Not Found"));
+    out.println(F("boot_state,Not Found"));
     return;
   }
 
-  client.print(F("session_active,"));
-  client.println(boot.sessionActive ? F("Yes") : F("No"));
+  out.print(F("session_active,"));
+  out.println(boot.sessionActive ? F("Yes") : F("No"));
 
-  client.print(F("session_paused,"));
-  client.println(boot.sessionPaused ? F("Yes") : F("No"));
+  out.print(F("session_paused,"));
+  out.println(boot.sessionPaused ? F("Yes") : F("No"));
 
-  client.print(F("hours_stored,"));
-  client.println(boot.hoursStored);
+  out.print(F("hours_stored,"));
+  out.println(boot.hoursStored);
 
-  client.print(F("last_save,"));
-  client.println(boot.saveTimestamp);
+  out.print(F("last_save,"));
+  out.println(boot.saveTimestamp);
 
-  client.println();
+  out.println();
 }
 
-static void renderExportRamLog(WiFiClient& client) {
-  addTitle(client, F("[RAM DEBUG LOG]"));
+static void renderExportRamLog(Print &out) {
+  addTitle(out, F("[RAM DEBUG LOG]"));
 
-  client.println(F("idx,timestamp,message"));
+  out.println(F("idx,timestamp,message"));
 
   int start = (gLogIndex - gLogCount + LOG_LINES) % LOG_LINES;
 
@@ -247,19 +247,17 @@ static void renderExportRamLog(WiFiClient& client) {
 
     if (gLogMsg[idx][0] == '\0') continue;
 
-    client.print(i);
-    client.print(F(","));
-    csvPrintQuoted(client, gLogTs[idx]);
-    client.print(F(","));
-    csvPrintQuoted(client, gLogMsg[idx]);
-    client.println();
+    out.print(i);
+    out.print(F(","));
+    csvPrintQuoted(out, gLogTs[idx]);
+    out.print(F(","));
+    csvPrintQuoted(out, gLogMsg[idx]);
+    out.println();
   }
 }
 
-void renderExportLoggerDataCsv(WiFiClient &client)
+void renderExportLoggerDataCsv(Print &out)
 {
-  BufferedPrint out(client);
-
   //*****************************************************************************
   // Session Summary
   //*****************************************************************************
@@ -393,25 +391,25 @@ void renderExportLoggerDataCsv(WiFiClient &client)
 // RENDER
 //------------------------------------------------------
 
-void renderExportCsv(WiFiClient &client) {
+void renderExportCsv(Print &out) {
   // HTTP headers are emitted by the caller.
-  // client.println(F("HTTP/1.1 200 OK"));
-  // client.println(F("Content-Type: text/csv"));
-  // client.println(F("Connection: close"));
-  // client.println();
+  // out.println(F("HTTP/1.1 200 OK"));
+  // out.println(F("Content-Type: text/csv"));
+  // out.println(F("Connection: close"));
+  // out.println();
 
-  client.print(F("# App Version,"));
-  client.println(APP_VERSION);
-  client.print(F("# Export Timestamp,"));
-  client.println(getTimestamp());
-  client.println();
+  out.print(F("# App Version,"));
+  out.println(APP_VERSION);
+  out.print(F("# Export Timestamp,"));
+  out.println(getTimestamp());
+  out.println();
 
-  renderExportMainMetrics(client);
-  renderExportLoggerData(client);
-  renderExportSystemInfo(client);
-  renderExportClockInfo(client);
-  renderExportNvmInfo(client);
-  renderExportLoggerData(client);
-  renderExportRamLog(client);
+  renderExportMainMetrics(out);
+  renderExportLoggerData(out);
+  renderExportSystemInfo(out);
+  renderExportClockInfo(out);
+  renderExportNvmInfo(out);
+  renderExportLoggerData(out);
+  renderExportRamLog(out);
 
 }
