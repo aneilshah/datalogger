@@ -121,6 +121,10 @@ void EventLogger::clearHour()
     return;
   }
 
+  // Initialize all minutes as "not yet occurred"
+  for (int i = 0; i < 60; i++)
+    currentHour.minute[i].flags = MINUTE_FLAG_NO_DATA;
+
   // Start the next Hour
   startHour();
 }
@@ -265,6 +269,9 @@ bool EventLogger::endMinuteBlock()
     ramHeader.flags |= SESSION_FLAG_PAUSED;
   }
 
+  // Minute is now complete. (Clear NO_DATA)
+  minuteStats.flags &= ~MINUTE_FLAG_NO_DATA;
+
   currentHour.minute[minuteIndex] = minuteStats;
   minuteIndex++;
 
@@ -292,13 +299,13 @@ bool EventLogger::endHour()
     currentHour.stopTime,
     getTimestamp(),
     sizeof(currentHour.stopTime) - 1);
-  ramHeader.hoursStored++;
+  ramHeader.currentHourIdx++;
 
   // Set partial flag if hour has less than 60 minutes
   if (minuteIndex < 60)
   {
-      currentHour.flags |= HOUR_FLAG_PARTIAL;
-      ramHeader.flags |= SESSION_FLAG_PARTIAL;
+    currentHour.flags |= HOUR_FLAG_PARTIAL;
+    ramHeader.flags |= SESSION_FLAG_PARTIAL;
   }
 
   return true;
@@ -375,3 +382,6 @@ void EventLogger::finishEvent()
   inEvent = false;
 }
 
+void EventLogger::incrementHoursStored() {
+  ramHeader.hoursStored++;
+}

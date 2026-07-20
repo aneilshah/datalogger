@@ -167,11 +167,15 @@ bool loggerDataFinishHour()
 
   // Save completed hour to NVM
   if (!loggerDataWriteHourBlock(
-    Logger.getRamHeader().hoursStored - 1,
+    Logger.getRamHeader().currentHourIdx - 1, // already incremented
     Logger.getHourRecord()))
   {
+    // For now keep hourStored in sync with timestamp, regardless of success
+    Logger.incrementHoursStored();  
     return false;
   }
+  else
+    Logger.incrementHoursStored();
 
   // Save session header into NVM
   loggerDataWriteNvmHeader(Logger.getRamHeader());
@@ -198,4 +202,22 @@ bool loggerDataFinishHour()
   Logger.startHour();
 
   return true;
+}
+
+bool checkpointNvm()
+{
+  bool ok = true;
+  
+  // Save Current Hour
+  Logger.incrementHoursStored();
+  ok &= loggerDataWriteHourBlock(
+    Logger.getRamHeader().currentHourIdx, 
+    Logger.getHourRecord()
+  );
+  
+  //  save session NVM
+  ok &= loggerDataWriteNvmHeader(Logger.getRamHeader());
+
+  Serial.printf("Checkpoint NVM - hour: %d status:%u\n", Logger.getRamHeader().currentHourIdx, ok);
+  return ok; 
 }

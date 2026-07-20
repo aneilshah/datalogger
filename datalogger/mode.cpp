@@ -32,7 +32,7 @@ const char* getMenuScreenTxt() {
   if (menuScreen == MenuScreen::RESET) return "RESET";
   if (menuScreen == MenuScreen::LOGGING) return "LOGGING";
   if (menuScreen == MenuScreen::PAUSED) return "PAUSED";
-  if (menuScreen == MenuScreen::STOPPED) return "STOPED";
+  if (menuScreen == MenuScreen::STOPPED) return "STOPPED";
   if (menuScreen == MenuScreen::CHECK_START) return "CHECK_START";
   if (menuScreen == MenuScreen::CHECK_PAUSE) return "CHECK_PAUSE";
   if (menuScreen == MenuScreen::CHECK_RESTART) return "CHECK_RESTART";
@@ -112,6 +112,7 @@ void gotoPaused() {
   oledMain();
   setLoggerMode(LoggerMode::PAUSED);
   setMenuScreen(MenuScreen::PAUSED);
+  checkpointNvm();
   loggerDataWriteNvmHeader(Logger.getRamHeader()); // NVM
 }
 
@@ -120,6 +121,7 @@ void gotoStopped() {
   oledMain();
   setLoggerMode(LoggerMode::STOPPED);
   setMenuScreen(MenuScreen::STOPPED);
+  checkpointNvm();
   Logger.stopSession();  
 }
 

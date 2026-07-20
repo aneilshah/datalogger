@@ -286,10 +286,15 @@ void ensureTimeHealthy() {
 
   if (!isTimezoneApplied()) {
     Serial.println("⚠️ Timezone not applied — fixing");
+    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
 
     setenv("TZ", TZ_INFO, 1);
     tzset();
-    configTime(0, 0, "pool.ntp.org", "time.nist.gov");
+
+    if (!isTimezoneApplied())
+      Serial.println("Timezone repair FAILED");
+    else
+      Serial.println("Timezone repaired");
   }
 }
 

@@ -28,3 +28,5 @@ bool loggerDataReadHourBlock(
   EventLogger::HourRecord &hourRecord);
 
 bool loggerDataFinishHour();
+
+bool checkpointNvm();

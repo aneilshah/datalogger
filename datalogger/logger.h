@@ -7,7 +7,8 @@ enum MinuteFlags : uint8_t
   MINUTE_FLAG_NONE     = 0x00,
   MINUTE_FLAG_PARTIAL  = 0x01,
   MINUTE_FLAG_REBOOT   = 0x02,
-  MINUTE_FLAG_PAUSED   = 0x04
+  MINUTE_FLAG_PAUSED   = 0x04,
+  MINUTE_FLAG_NO_DATA  = 0x08
 };
 
 enum HourFlags : uint8_t
@@ -44,6 +45,7 @@ static const LoggerFlagText minuteFlagTable[] =
   { MINUTE_FLAG_PARTIAL, "PARTIAL" },
   { MINUTE_FLAG_PAUSED,  "PAUSED"  },
   { MINUTE_FLAG_REBOOT,  "REBOOT"  },
+  { MINUTE_FLAG_NO_DATA, "NO_DATA" },
 };
 
 //*****************************************************************************
@@ -52,12 +54,15 @@ static const LoggerFlagText minuteFlagTable[] =
 static const LoggerFlagText hourFlagTable[] =
 {
   { HOUR_FLAG_PARTIAL, "PARTIAL" },
+  { HOUR_FLAG_PAUSED,  "PAUSED"  },
   { HOUR_FLAG_REBOOT,  "REBOOT"  },
 };
 
 static const LoggerFlagText sessionFlagTable[] =
 {
-  { SESSION_FLAG_REBOOT, "REBOOTED" },
+  { SESSION_FLAG_PARTIAL,  "PARTIAL"  },
+  { SESSION_FLAG_REBOOT,   "REBOOTED" },
+  { SESSION_FLAG_PAUSED,   "PAUSED"   },
   { SESSION_FLAG_RECOVERED,"RECOVERED"},
 };
 
@@ -118,6 +123,7 @@ public:
     char stopTime[LOGGER_TIMESTAMP_LENGTH] = {0};
 
     uint32_t samplesTaken = 0;
+    uint16_t currentHourIdx = 0;
     uint16_t hoursStored = 0;
     uint8_t flags = 0;
 
@@ -164,6 +170,7 @@ public:
   bool setRamHeader(const LogHeader& header);
   void setSessionFlag(uint16_t flag);
   void clearSessionFlag(uint16_t flag);
+  void incrementHoursStored();
   
 private:
 

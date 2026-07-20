@@ -131,7 +131,7 @@ static void renderExportSystemInfo(Print &out) {
 static void renderLoggerData(Print &out) {
   addTitle(out, F("[LOGGER DATA]"));
 
-  // TODO: Summary Here
+  // TODO: Summarize Data Here
 
 }
 

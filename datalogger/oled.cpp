@@ -101,7 +101,7 @@ void updateOLED() {
       strcpy(suffix, " T");
     }
     
-    snprintf(line0, sizeof(line0), "DATA LOG %s%S", APP_VERSION, suffix);
+    snprintf(line0, sizeof(line0), "DATA LOG %s%s", APP_VERSION, suffix);
     display.drawString(horOffset, vertOffsetMain, line0);
 
     // Line 1: Status
@@ -242,13 +242,13 @@ void updateOLED() {
 
     // Status Bar
     snprintf(line1, sizeof(line1), modalTitle);
-    display.drawString(horOffset, 10 + vertOffset, line1);
+    display.drawString(horOffset, 10 + vertOffsetMain, line1);
 
     snprintf(line3, sizeof(line3), "HOLD to Enter (%u)", countdown);
-    display.drawString(horOffset, 30 + vertOffset, line3);
+    display.drawString(horOffset, 30 + vertOffsetMain, line3);
 
     snprintf(line4, sizeof(line4), "Press to Cancel");
-    display.drawString(horOffset, 40 + vertOffset, line4);
+    display.drawString(horOffset, 40 + vertOffsetMain, line4);
     display.display();
 
     if (countdown == 0) {
