@@ -23,18 +23,45 @@ SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED)
 
 // OLED State
 static uint8_t oledMode = OLED_OFF;
-static uint8_t nextOledMode = OLED_MAIN;
-static uint16_t popupTimeout = 0;
-static char PopupText[32] = "";
-static char PopupDetails[64] = "";
-static uint32_t popupTimer = 0;
-static uint32_t mainTimer = 0;
+
+// Main Screen State
 static uint32_t mainTimeout = OLED_MODE_NO_TIMEOUT;
 static uint32_t oledModeTimer = 0;
+
+// Modal State
 static char modalTitle[32] = "";
 static bool oledModalEvent = false;
+static uint16_t countdown = 0;
+
+// Popup State
+static uint16_t popupTimeout = OLED_MODE_NO_TIMEOUT;
+static char PopupText[32] = "";
+static char PopupDetails[64] = "";
+static uint8_t nextOledMode = OLED_MAIN;
+
+// Screen Offsets
+static unsigned int horOffset = 0;
+static unsigned int vertOffset = 0;
+static unsigned int vertOffsetMain = 0;
+
+// Screen Data
+constexpr uint8_t OLED_MAX_LINE_LEN = 48;
+enum Line { LINE_0, LINE_1, LINE_2, LINE_3, LINE_4, LINE_5, LINE_COUNT};
+
+static int drawX;
+static int drawY;
+static constexpr uint8_t lineY[] = { 0, 10, 20, 30, 40, 50};
+static char lineBuffer[LINE_COUNT][OLED_MAX_LINE_LEN];
 
 #define MIN_MODE_CYCLE_TIME (5 * LOOPS_PER_SEC)
+
+// TODO:
+// Consider changing screenTimer to uint16_t instead of uint32_t.
+// Allow it to wrap (or reset) after ~10 hours (36000).
+// All OLED timeouts are expected to be much shorter, so rollover
+// will never affect normal operation while reducing memory usage.
+// Keep OLED_MODE_NO_TIMEOUT (0xFFFF) as the "no timeout" sentinel.
+
 
 //-------------------------------------------
 // HELPERS
@@ -56,6 +83,10 @@ void setOledMode(uint8_t mode) {
   oledModeTimer = 0;
 }
 
+uint8_t getOledMode() {
+  return oledMode;
+}
+
 void clearModalEvent() {
   oledModalEvent = false;
 }
@@ -70,246 +101,355 @@ void initDisplay() {
   VextON();
 }
 
-void updateOLED() {
-  static unsigned int offsetTimer = 0;
-  static unsigned int horOffset = 0;
-  static unsigned int vertOffset = 0;
-  static unsigned int vertOffsetMain = 0;
-
-  // Local scratch buffers
-  char line0[48];
-  char line1[48];
-  char line2[48];
-  char line3[48];
-  char line4[48];
-  char line5[48];
-
-  horOffset = (offsetTimer / (60 * LOOPS_PER_SEC)) % 10;  // Every 60 seconds, span = 10 pixels  
-
-  if (oledMode == OLED_MAIN) {
-    const auto &ramHeader  = Logger.getRamHeader();
-    const auto &session = Logger.getSessionStatistics();
-    const auto &hour    = Logger.getHourStatistics();
-
-    display.clear();
-    display.setTextAlignment(TEXT_ALIGN_LEFT);
-    display.setFont(ArialMT_Plain_10);
-
-    // Line 0: HEADER
-    char suffix[3] = "";
-    if (TEST_MODE) {
-      strcpy(suffix, " T");
-    }
-    
-    snprintf(line0, sizeof(line0), "DATA LOG %s%s", APP_VERSION, suffix);
-    display.drawString(horOffset, vertOffsetMain, line0);
-
-    // Line 1: Status
-    const LoggerMode mode = getLoggerMode();
-    const char* modeText = getLoggerModeTxt();
-    if (mode == LoggerMode::RESET)
-      snprintf(line1, sizeof(line1), "READY [NO DATA]");
-    else if (mode == LoggerMode::LOGGING || mode == LoggerMode::PAUSED || mode == LoggerMode::STOPPED )
-      snprintf(line1, sizeof(line1), "%s [%.1f Hr]", modeText, ramHeader.hoursStored);
-    else
-      snprintf(line1, sizeof(line1), "TBD MODE");
-
-    display.drawString(horOffset, 10 + vertOffsetMain, line1);
-    
-    // Line 2: Block / Session
-    snprintf(line2, sizeof(line2), "#Ev  Hr: %u  Tot: %u",
-      hour.count, session.count);
-    display.drawString(horOffset, 20 + vertOffsetMain, line2);
-
-
-    // Line 3: Last Event
-    const char* time = "---";
-    snprintf(line3, sizeof(line3), "Last Event: %s", time);
-    display.drawString(horOffset, 30 + vertOffsetMain, line3);
-
-
-    /////////////////////////////////////////
-    // Line 4: Revolving Line
-    /////////////////////////////////////////
-
-    // Act:2h18m H:8
-    // Avg:58s Max:14m
-    // Min:3s Hr:18m
-    // Samp:28452
-
-    const float TimePerStage = 2.0; // Seconds
-    const int Stages = 3;
-    const int TotalTime = LOOPS_PER_SEC * TimePerStage * Stages;
-    const int TimePerStageLoops = int(TimePerStage * LOOPS_PER_SEC);
-
-    if (LOOP_COUNT % TotalTime < TimePerStageLoops) {
-      // Avg
-      float avg = session.count ? (float)session.total / (float)session.count : 0.0f;
-      //snprintf(line4, sizeof(line4), "Avg: %.1f", avg);
-      const char* dns = getLocalIP(); 
-      snprintf(line4, sizeof(line4), "DNS: %s", dns);
-    }
-    else if (LOOP_COUNT % TotalTime < 2 * TimePerStageLoops) {
-      // Min / Max
-      snprintf(line4, sizeof(line4), "Min: %us   Max: %us", 
-        session.shortest, session.longest);
-    }
-    else {
-      // Samples
-      snprintf(line4, sizeof(line4), "Samples: %u", ramHeader.samplesTaken);
-
-    }
-
-    display.drawString(horOffset, 40 + vertOffsetMain, line4);
-
-    // Line 5: On Time / Clock
-    float hours = offsetTimer / 36000.0f;
-    if (hours < 24.0f) {
-      snprintf(line5, sizeof(line5), "UP:%.1fh | CLK:%s", hours, getClock());
-    } else {
-      float days = hours / 24.0f;
-      snprintf(line5, sizeof(line5), "UP:%.1fd | CLK:%s", days, getClock());
-    }
-    display.drawString(horOffset, 50 + vertOffsetMain, line5);
-
-    // write the buffer to the display
-    display.display();
-
-    // Update timers and change state as needed
-    if (mainTimer > 0) mainTimer--;
-    if (mainTimeout != OLED_MODE_NO_TIMEOUT && mainTimer == 0) {
-      setOledMode(OLED_MINIMIZED);  
-    }
-  }
-
-  else if (oledMode == OLED_MINIMIZED) {
-    display.clear();
-    display.setTextAlignment(TEXT_ALIGN_LEFT);
-    display.setFont(ArialMT_Plain_10);
-    
-    const unsigned int CYCLE_COUNT = 8;
-    unsigned int mode = (offsetTimer / MIN_MODE_CYCLE_TIME) % CYCLE_COUNT;
-
-    if (mode == 0) {
-      if (TEST_MODE) snprintf(line0, sizeof(line0), "*TEST MODE* %s", APP_VERSION);
-      else           snprintf(line0, sizeof(line0), "LOGGER APP %s", APP_VERSION);
-      display.drawString(horOffset, vertOffset, line0);
-    }
-    else if (mode == 1) {
-      snprintf(line2, sizeof(line2), "ON: %u%c [%u%c]",
-              (unsigned)(offsetTimer / LOOPS_PER_SEC), 's',
-              (unsigned)(offsetTimer / 864000), 'd');
-      display.drawString(horOffset, vertOffset, line2);
-    }
-    else if (mode == 2) {
-      snprintf(line2, sizeof(line2), "#Ev  Hr: %u  Tot: %u", 0, 0);
-      display.drawString(horOffset, vertOffset, line2);
-    }
-    else if (mode == 3) {
-      snprintf(line2, sizeof(line2), "CLOCK: %s", getClock());
-      display.drawString(horOffset, vertOffset, line2);
-    }
-    else if (mode == 4) {
-      snprintf(line2, sizeof(line2), "DATE: %s", getDate());
-      display.drawString(horOffset, vertOffset, line2);
-    }
-    else if (mode == 5) {
-      snprintf(line2, sizeof(line2), "YEAR: %s", getYearStr());
-      display.drawString(horOffset, vertOffset, line2);
-    }
-    else if (mode == 6) {
-      snprintf(line2, sizeof(line2), "Wifi: %s", CONN_STATUS);
-      display.drawString(horOffset, vertOffset, line2);
-    }
-    else {
-      display.drawString(horOffset, vertOffset, "Press TOP Button");
-    }
-
-    if (offsetTimer % (120 * LOOPS_PER_SEC) == 0) vertOffset = random(0, 50);
-
-    display.display();
-  }
-
-  else if (oledMode == OLED_MODAL) {
-    uint16_t countdown = 0;
-    
-    if (buttonHold() < OLED_HOLD_TIMEOUT) 
-      countdown = OLED_HOLD_TIMEOUT - buttonHold();
-
-    display.clear();
-    display.setTextAlignment(TEXT_ALIGN_LEFT);
-    display.setFont(ArialMT_Plain_10);
-
-    // Status Bar
-    snprintf(line1, sizeof(line1), modalTitle);
-    display.drawString(horOffset, 10 + vertOffsetMain, line1);
-
-    snprintf(line3, sizeof(line3), "HOLD to Enter (%u)", countdown);
-    display.drawString(horOffset, 30 + vertOffsetMain, line3);
-
-    snprintf(line4, sizeof(line4), "Press to Cancel");
-    display.drawString(horOffset, 40 + vertOffsetMain, line4);
-    display.display();
-
-    if (countdown == 0) {
-      if (!oledModalEvent)
-        Serial.println("MODAL EVENT");
-      oledModalEvent = true;
-    }
-  } 
-
-  else if (oledMode == OLED_POPUP) {
-    updatePopupScreen();
-  }
-
-  oledModeTimer++;    // resets with mode change
-  offsetTimer++;  // doesnt reset with modes
+static void setScreenOrigin(int x, int y)
+{
+  drawX = x;
+  drawY = y;
 }
 
-void displayPopupScreen(const char* text, const char* details, uint16_t timeout, uint8_t nextMode) {
+static void drawLine(Line line)
+{
+  display.drawString(drawX, drawY + lineY[line], lineBuffer[line]);
+}
+
+static void updateOLEDMode()
+{
+  switch (oledMode)
+  {
+    case OLED_MAIN:
+      if (mainTimeout != OLED_MODE_NO_TIMEOUT && getScreenTimer() >= mainTimeout)
+      {
+        setOledMode(OLED_MINIMIZED);
+      }
+      break;
+
+    case OLED_POPUP:
+      if (getScreenTimer() >= popupTimeout)
+      {
+        setOledMode(nextOledMode);
+      }
+      break;
+
+    case OLED_MODAL:
+      if (buttonHold() < OLED_HOLD_TIMEOUT)
+        countdown = OLED_HOLD_TIMEOUT - buttonHold();
+      else
+        countdown = 0;
+
+      if (countdown == 0) {
+        if (!oledModalEvent)
+          Serial.println("MODAL EVENT");
+        oledModalEvent = true;
+      }
+      break;
+
+    default:
+      break;
+  }
+}
+
+// Main Screen Helpers
+static void updateMainHeader(Line line)
+{
+  char suffix[3] = "";
+  if (TEST_MODE) { strcpy(suffix, " T"); }
+
+  snprintf(lineBuffer[line],
+    sizeof(lineBuffer[line]),
+    "DATA LOG %s%s",
+    APP_VERSION,
+    suffix);
+
+  drawLine(line);
+}
+
+static void updateMainStatus(Line line)
+{
+  const auto &ramHeader = Logger.getRamHeader();
+  const LoggerMode mode = getLoggerMode();
+  const char* modeText = getLoggerModeTxt();
+
+  if (mode == LoggerMode::RESET)
+    snprintf(lineBuffer[line], sizeof(lineBuffer[line]), "READY [NO DATA]");
+  else if (mode == LoggerMode::LOGGING || mode == LoggerMode::PAUSED || mode == LoggerMode::STOPPED)
+    snprintf(lineBuffer[line], sizeof(lineBuffer[line]),
+      "%s [%.1f Hr]", modeText, ramHeader.hoursStored);
+  else
+    snprintf(lineBuffer[line], sizeof(lineBuffer[line]), "TBD MODE");
+
+  drawLine(line);
+}
+
+static void updateMainCounts(Line line)
+{
+  const auto &session = Logger.getSessionStatistics();
+  const auto &hour    = Logger.getHourStatistics();
+
+  snprintf(lineBuffer[line], sizeof(lineBuffer[line]),
+    "#Ev  Hr: %u  Tot: %u", hour.count, session.count);
+
+  drawLine(line);
+}
+
+static void updateMainLastEvent(Line line)
+{
+  const char* time = "---";
+  snprintf(lineBuffer[line], sizeof(lineBuffer[line]), "Last Event: %s", time);
+  drawLine(line);
+}
+
+// Revolving Line
+static void updateMainInfo(Line line)
+{
+  /////////////////////////////////////////
+  // Revolving Line
+  /////////////////////////////////////////
+
+  // Act:2h18m H:8  |  Avg:58s Max:14m  |  Min:3s Hr:18m  |  Samp:28452
+  const auto &ramHeader = Logger.getRamHeader();
+  const auto &session   = Logger.getSessionStatistics();
+
+  const float TimePerStage = 2.0f;
+  const int Stages = 3;
+  const int TotalTime = LOOPS_PER_SEC * TimePerStage * Stages;
+  const int TimePerStageLoops = int(TimePerStage * LOOPS_PER_SEC);
+
+  if (LOOP_COUNT % TotalTime < TimePerStageLoops)
+  {
+    const char* dns = getLocalIP();
+    snprintf(lineBuffer[line], sizeof(lineBuffer[line]), "DNS: %s", dns);
+  }
+  else if (LOOP_COUNT % TotalTime < 2 * TimePerStageLoops)
+  {
+    snprintf(lineBuffer[line], sizeof(lineBuffer[line]),
+     "Min: %us   Max: %us", session.shortest, session.longest);
+  }
+  else
+  {
+    snprintf(lineBuffer[line], sizeof(lineBuffer[line]),
+      "Samples: %u", ramHeader.samplesTaken);
+  }
+
+  drawLine(line);
+}
+
+static void updateMainClock(Line line)
+{
+  float hours = LOOP_TIME / 36000.0f;
+  if (hours < 24.0f)
+  {
+    snprintf(lineBuffer[line], sizeof(lineBuffer[line]),
+      "UP:%.1fh | CLK:%s", hours, getClock());
+  }
+  else
+  {
+    float days = hours / 24.0f;
+    snprintf(lineBuffer[line], sizeof(lineBuffer[line]),
+      "UP:%.1fd | CLK:%s", days, getClock());
+  }
+
+  drawLine(line);
+}
+
+// Main Screen
+static void drawMain() {
+
+  // Config Display
+  setScreenOrigin(horOffset, vertOffsetMain);
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  display.setFont(ArialMT_Plain_10);
+
+  // Draw the Lines
+  updateMainHeader(LINE_0);       // Header
+  updateMainStatus(LINE_1);       // Status
+  updateMainCounts(LINE_2);       // Hour / Session Data
+  updateMainLastEvent(LINE_3);    // Last Event
+  updateMainInfo(LINE_4);         // Revolving Info Line
+  updateMainClock(LINE_5);        // On Time / Clock
+}
+
+static void drawMinimized()
+{
+  const unsigned int CYCLE_COUNT = 8;
+  unsigned int mode = (LOOP_TIME / MIN_MODE_CYCLE_TIME) % CYCLE_COUNT;
+
+  // Config Display
+  setScreenOrigin(horOffset, vertOffset);
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  display.setFont(ArialMT_Plain_10);
+
+  switch (mode)
+  {
+    case 0:
+      snprintf(lineBuffer[LINE_0], sizeof(lineBuffer[LINE_0]),
+        TEST_MODE ? "*TEST MODE* %s" : "LOGGER APP %s", APP_VERSION);
+      drawLine(LINE_0);
+      break;
+
+    case 1:
+      snprintf(lineBuffer[LINE_2], sizeof(lineBuffer[LINE_2]),
+        "ON: %us [%ud]",  (unsigned)(LOOP_TIME / LOOPS_PER_SEC),
+          (unsigned)(LOOP_TIME / 864000));
+      drawLine(LINE_2);
+      break;
+
+    case 2:
+      snprintf(lineBuffer[LINE_2], sizeof(lineBuffer[LINE_2]),
+      "#Ev  Hr: %u  Tot: %u", 0, 0);
+      drawLine(LINE_2);
+      break;
+
+    case 3:
+      snprintf(lineBuffer[LINE_2], sizeof(lineBuffer[LINE_2]),
+        "CLOCK: %s", getClock());
+      drawLine(LINE_2);
+      break;
+
+    case 4:
+      snprintf(lineBuffer[LINE_2], sizeof(lineBuffer[LINE_2]),
+        "DATE: %s", getDate());
+      drawLine(LINE_2);
+      break;
+
+    case 5:
+      snprintf(lineBuffer[LINE_2], sizeof(lineBuffer[LINE_2]),
+        "YEAR: %s", getYearStr());
+      drawLine(LINE_2);
+      break;
+
+    case 6:
+      snprintf(lineBuffer[LINE_2], sizeof(lineBuffer[LINE_2]),
+        "Wifi: %s", CONN_STATUS);
+      drawLine(LINE_2);
+      break;
+
+    default:
+      snprintf(lineBuffer[LINE_2], sizeof(lineBuffer[LINE_2]),
+        "Press TOP Button");
+      drawLine(LINE_2);
+      break;
+  }
+
+  if (LOOP_TIME % (120 * LOOPS_PER_SEC) == 0)
+    vertOffset = random(0, 50);
+}
+
+
+static void drawPopup() {
+  // Config Display
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  display.setFont(ArialMT_Plain_10);
+
+  // Draw Screen
+  display.setFont(ArialMT_Plain_16);
+  display.drawString(0, 0, PopupText);
+  display.setFont(ArialMT_Plain_10);
+  display.drawString(0, 16, PopupDetails);
+}
+
+static void drawModal()
+{
+  // Wait this long before showing the progress bar
+  constexpr uint16_t BAR_DELAY = LOOPS_PER_SEC / 2;   // 0.5 seconds
+
+  // Progress bar Geometry
+  constexpr int BAR_X = 10;
+  constexpr int BAR_Y = 38;
+  constexpr int BAR_W = 108;
+  constexpr int BAR_H = 10;
+
+  // Configure screen
+  setScreenOrigin(horOffset, vertOffsetMain);
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  display.setFont(ArialMT_Plain_10);
+
+  // Title
+  snprintf(lineBuffer[LINE_1], sizeof(lineBuffer[LINE_1]),
+    "%s", modalTitle);
+  drawLine(LINE_1);
+
+  uint16_t held = buttonHold();
+
+  // Idle / Short Press: show cancel instruction
+  if (held < BAR_DELAY)
+  {
+    snprintf(lineBuffer[LINE_4], sizeof(lineBuffer[LINE_4]),
+      "Short Press to Cancel");
+    drawLine(LINE_4);
+    return;
+  }
+
+  // Remove the initial delay from the progress calculation
+  held -= BAR_DELAY;
+
+  uint16_t maxHold = OLED_HOLD_TIMEOUT - BAR_DELAY;
+  if (held > maxHold)
+    held = maxHold;
+
+  // Draw Outline
+  display.drawRect(BAR_X, BAR_Y, BAR_W, BAR_H);
+
+  int fill = (held * (BAR_W - 2)) / OLED_HOLD_TIMEOUT;
+
+  if (fill > 0)
+  {
+    display.fillRect(BAR_X + 1, BAR_Y + 1, fill, BAR_H - 2);
+  }
+}
+
+void updateOLED() {
+  updateOLEDMode();
+
+  horOffset = (LOOP_TIME / (60 * LOOPS_PER_SEC)) % 10;  // Every 60 seconds, span = 10 pixels  
+
+  // Clear The Display
+  display.clear();
+
+  switch (getOledMode())
+  {
+    case OLED_MAIN:
+      drawMain();
+      break;
+
+    case OLED_MINIMIZED:
+      drawMinimized();
+      break;
+
+    case OLED_POPUP:
+      drawPopup();
+      break;
+
+    case OLED_MODAL:
+      drawModal();
+      break;
+  }
+
+  // Display the Screen
+  display.display();
+}
+
+void showPopup(const char* text, const char* details, uint16_t timeout, uint8_t nextMode) {
   strncpy(PopupText, text, sizeof(PopupText) - 1);
   PopupText[sizeof(PopupText) - 1] = '\0';
 
   strncpy(PopupDetails, details, sizeof(PopupDetails) - 1);
   PopupDetails[sizeof(PopupDetails) - 1] = '\0';
 
-  popupTimer = 0;
   popupTimeout = timeout;
   nextOledMode = nextMode;
   setOledMode(OLED_POPUP);
-  updatePopupScreen();
 }
 
-void updatePopupScreen() {
-  if (oledMode == OLED_POPUP) {
-    display.clear();
-    display.setTextAlignment(TEXT_ALIGN_LEFT);
-    display.setFont(ArialMT_Plain_16);
-    display.drawString(0, 0, PopupText);
-    display.setFont(ArialMT_Plain_10);
-    display.drawString(0, 16, PopupDetails);
-
-    // write the buffer to the display
-    display.display();
-
-    if (popupTimeout && (getModeTimer() > popupTimeout * LOOPS_PER_SEC)) {
-      setOledMode(nextOledMode);
-    }
-
-    popupTimer++;
-  }
-}
 
 void newPopupScreen(const char* text, const char* details, uint16_t timeout, uint8_t nextMode) {
   popupTimeout = timeout;
   nextOledMode = nextMode;
-  displayPopupScreen(text, details, timeout, nextMode);
-  updatePopupScreen();
+  showPopup(text, details, timeout, nextMode);
+  updateOLED();
 }
 
 void oledMain(uint32_t duration) {
   setOledMode(OLED_MAIN);
-  mainTimer = duration;
   mainTimeout = duration;
 }
 
@@ -337,9 +477,4 @@ void oledModal(const char* title) {
 
 void oledPauseLogger() {
   setOledMode(OLED_PAUSE_LOGGER);
-}
-
-
-uint8_t getOledMode() {
-  return oledMode;
 }

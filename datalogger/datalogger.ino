@@ -31,7 +31,7 @@
 #include "test_mode.h"
 
 // Version Info
-const char APP_VERSION[] PROGMEM = "V0.0A";
+const char APP_VERSION[] PROGMEM = "V0.1A";
 
 // System States
 const char* CONN_STATUS = "OFF";
@@ -205,7 +205,6 @@ void loop100ms() {
 
   // Update Outputs
   updateOLED();
-  //updatePopupScreen();
   setLed();
   //webServer();  REMOVE AFRER TESTING
 
@@ -441,3 +440,4 @@ void checkWifi() {
 
 // Version History
 // 0.0 Jul-09-2026 Initial Code
+// 0.1 Jul-21-2026 Fully Refactored and 95% Functional

@@ -209,7 +209,6 @@ bool checkpointNvm()
   bool ok = true;
   
   // Save Current Hour
-  Logger.incrementHoursStored();
   ok &= loggerDataWriteHourBlock(
     Logger.getRamHeader().currentHourIdx, 
     Logger.getHourRecord()
