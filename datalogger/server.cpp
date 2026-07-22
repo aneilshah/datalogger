@@ -423,7 +423,7 @@ static void renderLoggerTable(Print &out)
   // Current Hour
   //------------------------------------------------
 
-  printRow(out, F("<b>Current Hour</b>"), F(""));
+  printRow(out, F("<b>== CURRENT HOUR STATS ==</b>"), F(""));
   printRow(out, F("Events"), String(hour.count));
   printRow(out, F("Active Time"), String(hour.total) + " sec");
 
@@ -444,7 +444,7 @@ static void renderLoggerTable(Print &out)
   // Session
   //------------------------------------------------
 
-  printRow(out, F("<b>Session</b>"), F(""));
+  printRow(out, F("<b>== SESSION STATS ==</b>"), F(""));
   printRow(out, F("Hours Stored"), String(ramHeader.hoursStored));
   printRow(out, F("Events"), String(session.count));
 

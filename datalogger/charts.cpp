@@ -135,7 +135,7 @@ static void renderLastHourChart(Print &out)
   out.println(
     F("<div class=\"chart-wrap\">"
       "<div class=\"chart-title\">"
-      "Last Hour"
+      "Last Hour Event History"
       "</div>"));
 
   //---------------------------------------------------------
@@ -295,7 +295,7 @@ static void renderSessionChart(Print &out)
   out.println(
     F("<div class=\"chart-wrap\">"
       "<div class=\"chart-title\">"
-      "Full Session"
+      "Full Session Event History"
       "</div>"));
 
   //---------------------------------------------------------
@@ -509,7 +509,7 @@ static void renderSessionChart(Print &out)
 
 void renderLoggerCharts(Print &out)
 {
-  renderLoggerSummary(out);
+  //renderLoggerSummary(out);
   renderLastHourChart(out);
   renderSessionChart(out);
 }
