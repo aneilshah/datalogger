@@ -108,6 +108,14 @@ void gotoLogging() {
   setBootLoggerMode(LoggerMode::LOGGING);
 }
 
+void gotoLoggingOled() {
+  oledLogging();
+  resumeHalfPowerMode();
+  setMenuScreen(MenuScreen::LOGGING_OLED);
+  checkpointNvm();
+  loggerDataWriteNvmHeader(Logger.getRamHeader()); // NVM
+}
+
 void gotoPaused() {
   resumeFullPowerMode();
   oledMain();
@@ -152,7 +160,6 @@ void gotoCheckStop() {
 }
 
 void gotoCheckPause() {
-  resumeHalfPowerMode();
   oledModal("PAUSE LOGGING?");
   setMenuScreen(MenuScreen::CHECK_PAUSE);
 }
@@ -246,7 +253,10 @@ static void checkMainTimeout() {
       return;
 
     case OLED_MINIMIZED:
-      // nothing to do yet
+      if (shortPress()) {
+        screenTimer = 0;
+        oledMain();
+      }
       return;
     
     default:
@@ -270,11 +280,20 @@ void processLoggerMode() {
       checkMainTimeout();
   }
 
-  // Logging Mode
+  // Logging Mode (Lowe Power)
   else if (menuScreen == MenuScreen::LOGGING) {
+    if (shortPress()) {
+      gotoLoggingOled();
+    }
+  }
+
+  // Logging Mode (LED ON)
+  else if (menuScreen == MenuScreen::LOGGING_OLED) {
     if (shortPress()) {
       gotoCheckPause();
     }
+    else if (checkScreenTimeout(30))
+      gotoLogging();
   }
 
   // Paused, has data

@@ -17,6 +17,7 @@ enum class MenuScreen : uint8_t
 {
   RESET,
   LOGGING,
+  LOGGING_OLED,
   PAUSED,
   STOPPED,
   CHECK_START,

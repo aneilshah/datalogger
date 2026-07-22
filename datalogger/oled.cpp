@@ -369,6 +369,21 @@ static void drawModal()
   }
 }
 
+static void drawOledLogging() {
+  // Config Display
+  setScreenOrigin(horOffset, vertOffsetMain);
+  display.setTextAlignment(TEXT_ALIGN_LEFT);
+  display.setFont(ArialMT_Plain_10);
+
+  // Draw the Lines
+  //updateMainHeader(LINE_0);       // Header
+  updateMainStatus(LINE_1);       // Status
+  updateMainCounts(LINE_2);       // Hour / Session Data
+  updateMainLastEvent(LINE_3);    // Last Event
+  //updateMainInfo(LINE_4);         // Revolving Info Line
+  updateMainClock(LINE_5);        // On Time / Clock
+}
+
 void updateOLED() {
   checkModalEvent();
 
@@ -393,6 +408,10 @@ void updateOLED() {
 
     case OLED_MODAL:
       drawModal();
+      break;
+
+    case OLED_LOGGING:
+      drawOledLogging();
       break;
   }
 
@@ -442,6 +461,6 @@ void oledModal(const char* title) {
   setOledMode(OLED_MODAL);
 }
 
-void oledPauseLogger() {
-  setOledMode(OLED_PAUSE_LOGGER);
+void oledLogging() {
+  setOledMode(OLED_LOGGING);
 }
