@@ -24,20 +24,14 @@ SSD1306Wire display(0x3c, 500000, SDA_OLED, SCL_OLED, GEOMETRY_128_64, RST_OLED)
 // OLED State
 static uint8_t oledMode = OLED_OFF;
 
-// Main Screen State
-static uint32_t mainTimeout = OLED_MODE_NO_TIMEOUT;
-static uint32_t oledModeTimer = 0;
-
 // Modal State
 static char modalTitle[32] = "";
 static bool oledModalEvent = false;
 static uint16_t countdown = 0;
 
 // Popup State
-static uint16_t popupTimeout = OLED_MODE_NO_TIMEOUT;
 static char PopupText[32] = "";
 static char PopupDetails[64] = "";
-static uint8_t nextOledMode = OLED_MAIN;
 
 // Screen Offsets
 static unsigned int horOffset = 0;
@@ -54,13 +48,6 @@ static constexpr uint8_t lineY[] = { 0, 10, 20, 30, 40, 50};
 static char lineBuffer[LINE_COUNT][OLED_MAX_LINE_LEN];
 
 #define MIN_MODE_CYCLE_TIME (5 * LOOPS_PER_SEC)
-
-// TODO:
-// Consider changing screenTimer to uint16_t instead of uint32_t.
-// Allow it to wrap (or reset) after ~10 hours (36000).
-// All OLED timeouts are expected to be much shorter, so rollover
-// will never affect normal operation while reducing memory usage.
-// Keep OLED_MODE_NO_TIMEOUT (0xFFFF) as the "no timeout" sentinel.
 
 
 //-------------------------------------------
@@ -80,7 +67,6 @@ void VextOFF(void)  //Vext default OFF
 
 void setOledMode(uint8_t mode) {
   oledMode = mode;
-  oledModeTimer = 0;
 }
 
 uint8_t getOledMode() {
@@ -112,24 +98,10 @@ static void drawLine(Line line)
   display.drawString(drawX, drawY + lineY[line], lineBuffer[line]);
 }
 
-static void updateOLEDMode()
+static void checkModalEvent()
 {
   switch (oledMode)
   {
-    case OLED_MAIN:
-      if (mainTimeout != OLED_MODE_NO_TIMEOUT && getScreenTimer() >= mainTimeout)
-      {
-        setOledMode(OLED_MINIMIZED);
-      }
-      break;
-
-    case OLED_POPUP:
-      if (getScreenTimer() >= popupTimeout)
-      {
-        setOledMode(nextOledMode);
-      }
-      break;
-
     case OLED_MODAL:
       if (buttonHold() < OLED_HOLD_TIMEOUT)
         countdown = OLED_HOLD_TIMEOUT - buttonHold();
@@ -389,7 +361,7 @@ static void drawModal()
   // Draw Outline
   display.drawRect(BAR_X, BAR_Y, BAR_W, BAR_H);
 
-  int fill = (held * (BAR_W - 2)) / OLED_HOLD_TIMEOUT;
+  int fill = (held * (BAR_W - 2)) / maxHold;
 
   if (fill > 0)
   {
@@ -398,7 +370,7 @@ static void drawModal()
 }
 
 void updateOLED() {
-  updateOLEDMode();
+  checkModalEvent();
 
   horOffset = (LOOP_TIME / (60 * LOOPS_PER_SEC)) % 10;  // Every 60 seconds, span = 10 pixels  
 
@@ -428,29 +400,24 @@ void updateOLED() {
   display.display();
 }
 
-void showPopup(const char* text, const char* details, uint16_t timeout, uint8_t nextMode) {
+void showPopup(const char* text, const char* details) {
   strncpy(PopupText, text, sizeof(PopupText) - 1);
   PopupText[sizeof(PopupText) - 1] = '\0';
 
   strncpy(PopupDetails, details, sizeof(PopupDetails) - 1);
   PopupDetails[sizeof(PopupDetails) - 1] = '\0';
 
-  popupTimeout = timeout;
-  nextOledMode = nextMode;
   setOledMode(OLED_POPUP);
 }
 
 
-void newPopupScreen(const char* text, const char* details, uint16_t timeout, uint8_t nextMode) {
-  popupTimeout = timeout;
-  nextOledMode = nextMode;
-  showPopup(text, details, timeout, nextMode);
+void newPopupScreen(const char* text, const char* details) {
+  showPopup(text, details);
   updateOLED();
 }
 
-void oledMain(uint32_t duration) {
+void oledMain() {
   setOledMode(OLED_MAIN);
-  mainTimeout = duration;
 }
 
 void oledMinimized() {

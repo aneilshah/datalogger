@@ -389,7 +389,7 @@ void connectWifi() {
     Serial.println("WiFi connect FAILED");
   }
 
-  oledMain(MAIN_TIMEOUT_SEC);
+  oledMain();
   ledOff();
 }
 

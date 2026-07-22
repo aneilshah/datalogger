@@ -10,6 +10,7 @@
 #include "ntp.h"
 #include "nvm.h"
 
+#define POPUP_TIMEOUT_SEC 15 
 
 // File Data
 static LoggerMode loggerMode = LoggerMode::RESET;
@@ -234,6 +235,30 @@ bool initLogger()
   return true;
 }
 
+static bool checkScreenTimeout(uint16_t timeoutSec) {
+  return (screenTimer >= timeoutSec * LOOPS_PER_SEC);
+}
+
+static void checkMainTimeout() {
+  switch (getOledMode()) {
+    case OLED_MAIN:
+      if (checkScreenTimeout(300)) oledMinimized();
+      return;
+
+    case OLED_MINIMIZED:
+      // nothing to do yet
+      return;
+    
+    default:
+      return;
+  }
+}
+
+static void checkPopupTimeout(uint16_t timeoutSec, void (*gotoFunc)(void)) {
+  if (checkScreenTimeout(timeoutSec))
+    gotoFunc();
+}
+
 void processLoggerMode() {
 
   // Init Mode, full power not running
@@ -241,6 +266,8 @@ void processLoggerMode() {
     if (shortPress()) {
       gotoCheckStart();
     }
+    else
+      checkMainTimeout();
   }
 
   // Logging Mode
@@ -255,6 +282,8 @@ void processLoggerMode() {
     if (shortPress()) {
       gotoCheckRestart();
     }
+    else
+      checkMainTimeout();
   }
 
   // Stopped, has data
@@ -262,9 +291,11 @@ void processLoggerMode() {
     if (shortPress()) {
       gotoCheckReset();
     }
+    else
+      checkMainTimeout();
   }
 
-  // Checking to start logging from init
+  // Checking to start logging (from Reset/Init)
   else if (menuScreen == MenuScreen::CHECK_START) {
     if (modalEvent()) {
       gotoLogging();
@@ -273,9 +304,10 @@ void processLoggerMode() {
     else if (shortPress()) {
       gotoInit();
     }
+    else checkPopupTimeout(POPUP_TIMEOUT_SEC, gotoInit);
   }
 
-  // Check if user wants to Reset Logger
+  // Check if user wants to Reset Logger (from Stopped)
   else if (menuScreen == MenuScreen::CHECK_RESET) {
     if (modalEvent()) {
       resetLogger();
@@ -283,9 +315,10 @@ void processLoggerMode() {
     else if (shortPress()) {
       gotoCheckResetAndStart();
     }
+    else checkPopupTimeout(POPUP_TIMEOUT_SEC, gotoStopped);
   }
 
-  // Check if user wants to Reset Logger and Restart
+  // Check if user wants to Reset Logger and Restart (from Stopped)
   else if (menuScreen == MenuScreen::CHECK_RESET_AND_START) {
     if (modalEvent()) {
       resetLogger();
@@ -295,6 +328,7 @@ void processLoggerMode() {
     else if (shortPress()) {
       gotoStopped();
     }
+    else checkPopupTimeout(POPUP_TIMEOUT_SEC, gotoStopped);
   }
 
   // Check if user wants to Pause Logging
@@ -306,6 +340,7 @@ void processLoggerMode() {
       gotoLogging();
       loggerDataWriteNvmHeader(Logger.getRamHeader()); // NVM
     }
+    else checkPopupTimeout(POPUP_TIMEOUT_SEC, gotoPaused);
   }
 
   // Check if user wants to Restart from Paused state
@@ -317,6 +352,7 @@ void processLoggerMode() {
     else if (shortPress()) {
       gotoCheckStop();
     }
+    else checkPopupTimeout(POPUP_TIMEOUT_SEC, gotoPaused);
   }
 
   // Check if user wants to Restart from Paused state
@@ -327,6 +363,7 @@ void processLoggerMode() {
     else if (shortPress()) {
       gotoPaused();
     }
+    else checkPopupTimeout(POPUP_TIMEOUT_SEC, gotoPaused);
   }
 
   // Default to Init Mode (Reset), should not get here

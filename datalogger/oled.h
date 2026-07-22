@@ -16,9 +16,9 @@
 
 void initDisplay();
 void updateOLED();
-void showPopup(const char* text, const char* details, uint16_t timeout = 0xFFFF, uint8_t nextMode = OLED_MAIN);
-void newPopupScreen(const char* text, const char* details, uint16_t timeout = 0xFFFF, uint8_t nextMode = OLED_MAIN);
-void oledMain(uint32_t duration = MAIN_TIMEOUT_SEC);
+void showPopup(const char* text, const char* details);
+void newPopupScreen(const char* text, const char* details);
+void oledMain();
 void oledMinimized();
 void oledBlank();
 void oledPauseLogger();

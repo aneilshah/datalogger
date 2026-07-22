@@ -141,7 +141,7 @@ void setup() {
 
   // NTP Time Server
   setupNTP();
-  oledMain(MAIN_TIMEOUT_SEC);
+  oledMain();
 
   // Setup NVM Boot Restore  (must be after NTP)
   initNvmBootRestore();
@@ -162,7 +162,7 @@ void setup() {
   initOTA(TEST_MODE ? "logger-test" : "logger-prod");
 
   // Setup done, go to main screen
-  oledMain(MAIN_TIMEOUT_SEC);
+  oledMain();
 }
 
 void loop() {
