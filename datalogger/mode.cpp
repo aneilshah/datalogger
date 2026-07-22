@@ -105,7 +105,6 @@ void gotoLogging() {
   lowPowerModeInit();
   setLoggerMode(LoggerMode::LOGGING);
   setMenuScreen(MenuScreen::LOGGING);
-  setBootLoggerMode(LoggerMode::LOGGING);
 }
 
 void gotoLoggingOled() {
@@ -113,7 +112,6 @@ void gotoLoggingOled() {
   resumeHalfPowerMode();
   setMenuScreen(MenuScreen::LOGGING_OLED);
   checkpointNvm();
-  loggerDataWriteNvmHeader(Logger.getRamHeader()); // NVM
 }
 
 void gotoPaused() {
@@ -122,7 +120,6 @@ void gotoPaused() {
   setLoggerMode(LoggerMode::PAUSED);
   setMenuScreen(MenuScreen::PAUSED);
   checkpointNvm();
-  loggerDataWriteNvmHeader(Logger.getRamHeader()); // NVM
 }
 
 void gotoStopped() {
@@ -160,8 +157,8 @@ void gotoCheckStop() {
 }
 
 void gotoCheckPause() {
-  oledModal("PAUSE LOGGING?");
   setMenuScreen(MenuScreen::CHECK_PAUSE);
+  oledModal("PAUSE LOGGING?");
 }
 
 bool initLogger()
@@ -170,7 +167,8 @@ bool initLogger()
 
   Serial.println("Initializing Logger...");
 
-  // Read boot state
+  // Verify boot state remains writable after recovery.
+  // Future recovery flags may also be persisted here.
   if (!bootStateRead(boot))
   {
     Serial.println("No valid boot state. Resetting logger.");
@@ -280,7 +278,7 @@ void processLoggerMode() {
       checkMainTimeout();
   }
 
-  // Logging Mode (Lowe Power)
+  // Logging Mode (Low Power)
   else if (menuScreen == MenuScreen::LOGGING) {
     if (shortPress()) {
       gotoLoggingOled();

@@ -178,7 +178,8 @@ bool loggerDataFinishHour()
     Logger.incrementHoursStored();
 
   // Save session header into NVM
-  loggerDataWriteNvmHeader(Logger.getRamHeader());
+  ok = true;
+  ok & = loggerDataWriteNvmHeader(Logger.getRamHeader());
 
   // Update boot state
   NvmBootState boot;
@@ -194,14 +195,14 @@ bool loggerDataFinishHour()
 
     boot.saveTimestamp[sizeof(boot.saveTimestamp) - 1] = '\0';
 
-    bootStateWrite(boot);
+    ok &= bootStateWrite(boot);
   }
 
   // Prepare next hour
   Logger.clearHour();
   Logger.startHour();
 
-  return true;
+  return ok;
 }
 
 bool checkpointNvm()
